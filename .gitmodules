@@ -1,0 +1,3 @@
+[submodule "thirdparties/DrEureka"]
+	path = thirdparties/DrEureka
+	url = https://github.com/eureka-research/DrEureka
