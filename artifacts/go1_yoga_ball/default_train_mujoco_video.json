@@ -1,0 +1,635 @@
+{
+  "camera": "free camera following midpoint of robot base and ball",
+  "file_size_bytes": 6531714,
+  "first_markers": [
+    {
+      "released": false,
+      "sim_time_s": 0.08,
+      "violations": [
+        {
+          "index": 8,
+          "joint": "RR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.07959296699999996,
+          "q": -0.836705033
+        },
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.062048435999999985,
+          "q": -0.854249564
+        }
+      ]
+    },
+    {
+      "released": false,
+      "sim_time_s": 0.12,
+      "violations": [
+        {
+          "index": 8,
+          "joint": "RR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.04897341199999994,
+          "q": -0.867324588
+        },
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.047018399999999905,
+          "q": -0.8692796
+        }
+      ]
+    },
+    {
+      "released": false,
+      "sim_time_s": 0.16,
+      "violations": [
+        {
+          "index": 8,
+          "joint": "RR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.01608531999999996,
+          "q": -0.90021268
+        },
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.015689969999999942,
+          "q": -0.90060803
+        }
+      ]
+    },
+    {
+      "released": false,
+      "sim_time_s": 0.2,
+      "violations": [
+        {
+          "index": 2,
+          "joint": "FR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.04986202899999992,
+          "q": -0.866435971
+        },
+        {
+          "index": 5,
+          "joint": "FL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.05474264799999995,
+          "q": -0.861555352
+        },
+        {
+          "index": 8,
+          "joint": "RR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.007107896999999919,
+          "q": -0.909190103
+        },
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.007349223999999932,
+          "q": -0.908948776
+        }
+      ]
+    },
+    {
+      "released": false,
+      "sim_time_s": 0.24,
+      "violations": [
+        {
+          "index": 2,
+          "joint": "FR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0161950569999999,
+          "q": -0.900102943
+        },
+        {
+          "index": 5,
+          "joint": "FL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.018510408999999894,
+          "q": -0.897787591
+        },
+        {
+          "index": 8,
+          "joint": "RR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0045337159999999654,
+          "q": -0.911764284
+        },
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.004890202999999982,
+          "q": -0.911407797
+        }
+      ]
+    },
+    {
+      "released": false,
+      "sim_time_s": 0.28,
+      "violations": [
+        {
+          "index": 2,
+          "joint": "FR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.005732258999999962,
+          "q": -0.910565741
+        },
+        {
+          "index": 5,
+          "joint": "FL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.006197383999999917,
+          "q": -0.910100616
+        },
+        {
+          "index": 8,
+          "joint": "RR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.002471369000000001,
+          "q": -0.913826631
+        },
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.004484039999999911,
+          "q": -0.91181396
+        }
+      ]
+    },
+    {
+      "released": false,
+      "sim_time_s": 0.32,
+      "violations": [
+        {
+          "index": 2,
+          "joint": "FR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.003404490999999954,
+          "q": -0.912893509
+        },
+        {
+          "index": 5,
+          "joint": "FL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.003368348999999937,
+          "q": -0.912929651
+        },
+        {
+          "index": 8,
+          "joint": "RR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0023726079999999428,
+          "q": -0.913925392
+        },
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.005609764999999989,
+          "q": -0.910688235
+        }
+      ]
+    },
+    {
+      "released": false,
+      "sim_time_s": 0.36,
+      "violations": [
+        {
+          "index": 2,
+          "joint": "FR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0029424799999999696,
+          "q": -0.91335552
+        },
+        {
+          "index": 5,
+          "joint": "FL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.002786944999999985,
+          "q": -0.913511055
+        },
+        {
+          "index": 8,
+          "joint": "RR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.002918893999999894,
+          "q": -0.913379106
+        },
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.005652989999999969,
+          "q": -0.91064501
+        }
+      ]
+    },
+    {
+      "released": false,
+      "sim_time_s": 0.4,
+      "violations": [
+        {
+          "index": 2,
+          "joint": "FR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.002874014999999952,
+          "q": -0.913423985
+        },
+        {
+          "index": 5,
+          "joint": "FL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0026319969999999415,
+          "q": -0.913666003
+        },
+        {
+          "index": 8,
+          "joint": "RR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0031771269999999463,
+          "q": -0.913120873
+        },
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.005539187000000001,
+          "q": -0.910758813
+        }
+      ]
+    },
+    {
+      "released": false,
+      "sim_time_s": 0.44,
+      "violations": [
+        {
+          "index": 2,
+          "joint": "FR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.002961960999999902,
+          "q": -0.913336039
+        },
+        {
+          "index": 5,
+          "joint": "FL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0026109219999999045,
+          "q": -0.913687078
+        },
+        {
+          "index": 8,
+          "joint": "RR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.003211827999999972,
+          "q": -0.913086172
+        },
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.00558086999999996,
+          "q": -0.91071713
+        }
+      ]
+    },
+    {
+      "released": false,
+      "sim_time_s": 0.48,
+      "violations": [
+        {
+          "index": 2,
+          "joint": "FR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0031133719999999476,
+          "q": -0.913184628
+        },
+        {
+          "index": 5,
+          "joint": "FL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0026402099999999207,
+          "q": -0.91365779
+        },
+        {
+          "index": 8,
+          "joint": "RR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.003022058999999966,
+          "q": -0.913275941
+        },
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0058095089999999905,
+          "q": -0.910488491
+        }
+      ]
+    },
+    {
+      "released": false,
+      "sim_time_s": 0.52,
+      "violations": [
+        {
+          "index": 2,
+          "joint": "FR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0031810149999998982,
+          "q": -0.913116985
+        },
+        {
+          "index": 5,
+          "joint": "FL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.002676005999999953,
+          "q": -0.913621994
+        },
+        {
+          "index": 8,
+          "joint": "RR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.003082904999999969,
+          "q": -0.913215095
+        },
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.005638149999999897,
+          "q": -0.91065985
+        }
+      ]
+    },
+    {
+      "released": false,
+      "sim_time_s": 0.56,
+      "violations": [
+        {
+          "index": 2,
+          "joint": "FR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0033507369999999925,
+          "q": -0.912947263
+        },
+        {
+          "index": 5,
+          "joint": "FL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0027034929999999457,
+          "q": -0.913594507
+        },
+        {
+          "index": 8,
+          "joint": "RR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0030611009999998995,
+          "q": -0.913236899
+        },
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.005599951999999964,
+          "q": -0.910698048
+        }
+      ]
+    },
+    {
+      "released": false,
+      "sim_time_s": 0.6,
+      "violations": [
+        {
+          "index": 2,
+          "joint": "FR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0035543169999999735,
+          "q": -0.912743683
+        },
+        {
+          "index": 5,
+          "joint": "FL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.002748110999999942,
+          "q": -0.913549889
+        },
+        {
+          "index": 8,
+          "joint": "RR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.003012914999999894,
+          "q": -0.913285085
+        },
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.005621512999999911,
+          "q": -0.910676487
+        }
+      ]
+    },
+    {
+      "released": false,
+      "sim_time_s": 0.64,
+      "violations": [
+        {
+          "index": 2,
+          "joint": "FR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0037206149999999827,
+          "q": -0.912577385
+        },
+        {
+          "index": 5,
+          "joint": "FL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0027942989999999446,
+          "q": -0.913503701
+        },
+        {
+          "index": 8,
+          "joint": "RR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.003070782999999966,
+          "q": -0.913227217
+        },
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.005656058999999991,
+          "q": -0.910641941
+        }
+      ]
+    },
+    {
+      "released": false,
+      "sim_time_s": 0.68,
+      "violations": [
+        {
+          "index": 2,
+          "joint": "FR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0038738529999999827,
+          "q": -0.912424147
+        },
+        {
+          "index": 5,
+          "joint": "FL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.002836509999999959,
+          "q": -0.91346149
+        },
+        {
+          "index": 8,
+          "joint": "RR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.0028690759999999704,
+          "q": -0.913428924
+        },
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.005692584999999917,
+          "q": -0.910605415
+        }
+      ]
+    },
+    {
+      "released": false,
+      "sim_time_s": 0.76,
+      "violations": [
+        {
+          "index": 2,
+          "joint": "FR_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.07118891799999993,
+          "q": -0.845109082
+        }
+      ]
+    },
+    {
+      "released": true,
+      "sim_time_s": 1.36,
+      "violations": [
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.10237010899999976,
+          "q": -2.798900109
+        }
+      ]
+    },
+    {
+      "released": true,
+      "sim_time_s": 1.68,
+      "violations": [
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.05249528799999981,
+          "q": -2.749025288
+        }
+      ]
+    },
+    {
+      "released": true,
+      "sim_time_s": 3.44,
+      "violations": [
+        {
+          "index": 11,
+          "joint": "RL_calf_joint",
+          "limit_high": -0.916298,
+          "limit_low": -2.69653,
+          "magnitude_rad": 0.02213130899999971,
+          "q": -2.718661309
+        }
+      ]
+    }
+  ],
+  "fps": 25,
+  "frame_variance_max": 5420.711573147045,
+  "frame_variance_min": 3342.0666874272356,
+  "frames_written": 551,
+  "joint_limit_marking": "red markers/border for released violations; orange markers for supported-startup violations",
+  "marked_frames": 30,
+  "ok": true,
+  "released_marked_frames": 13,
+  "rendered_from_raw_replay": true,
+  "replay": "logs/go1_yoga_ball/default_train/mujoco_sim2sim/replay.csv",
+  "scene": "artifacts/go1_yoga_ball/build/go1_yoga_ball_scene.xml",
+  "source_rows": 1101,
+  "video": "artifacts/go1_yoga_ball/videos/default_train_mujoco.mp4"
+}

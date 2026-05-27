@@ -1,0 +1,180 @@
+{
+  "differences": {
+    "multi_gpu": {
+      "default_train": false,
+      "pretrained": true
+    }
+  },
+  "runs": {
+    "default_train": "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-25/train/235148.012034",
+    "pretrained": "thirdparties/DrEureka/globe_walking/runs/globe_walking/dr_eureka_best"
+  },
+  "values": {
+    "default_train": {
+      "control.action_scale": 0.25,
+      "control.decimation": 4,
+      "domain_rand.ball_compliance_range": [
+        0.0,
+        1.0
+      ],
+      "domain_rand.ball_drag_range": [
+        0.1,
+        0.5
+      ],
+      "domain_rand.ball_friction_range": [
+        0.5,
+        2.5
+      ],
+      "domain_rand.ball_mass_range": [
+        1.0,
+        3.0
+      ],
+      "domain_rand.ball_push_vel_range": [
+        0.1,
+        0.4
+      ],
+      "domain_rand.ball_radius_range": [
+        0.35,
+        0.45
+      ],
+      "domain_rand.ball_restitution_range": [
+        0.4,
+        0.9
+      ],
+      "domain_rand.gravity_range": [
+        -0.1,
+        0.1
+      ],
+      "domain_rand.randomize": true,
+      "domain_rand.robot_com_displacement_range": [
+        -0.05,
+        0.05
+      ],
+      "domain_rand.robot_friction_range": [
+        0.1,
+        1.0
+      ],
+      "domain_rand.robot_motor_offset_range": [
+        -0.005,
+        0.05
+      ],
+      "domain_rand.robot_motor_strength_range": [
+        0.95,
+        1.05
+      ],
+      "domain_rand.robot_payload_mass_range": [
+        0.0,
+        3.0
+      ],
+      "domain_rand.robot_push_vel_range": [
+        0.1,
+        0.4
+      ],
+      "domain_rand.robot_restitution_range": [
+        0.2,
+        0.8
+      ],
+      "domain_rand.terrain_ground_friction_range": [
+        0.2,
+        0.8
+      ],
+      "domain_rand.terrain_ground_restitution_range": [
+        0.0,
+        0.5
+      ],
+      "domain_rand.terrain_tile_roughness_range": [
+        0.02,
+        0.08
+      ],
+      "env.num_envs": 4096,
+      "env.num_observation_history": 15,
+      "env.num_observations": 56,
+      "multi_gpu": false,
+      "rewards.reward_container_name": "EurekaReward",
+      "sim.dt": 0.005
+    },
+    "pretrained": {
+      "control.action_scale": 0.25,
+      "control.decimation": 4,
+      "domain_rand.ball_compliance_range": [
+        0.0,
+        1.0
+      ],
+      "domain_rand.ball_drag_range": [
+        0.1,
+        0.5
+      ],
+      "domain_rand.ball_friction_range": [
+        0.5,
+        2.5
+      ],
+      "domain_rand.ball_mass_range": [
+        1.0,
+        3.0
+      ],
+      "domain_rand.ball_push_vel_range": [
+        0.1,
+        0.4
+      ],
+      "domain_rand.ball_radius_range": [
+        0.35,
+        0.45
+      ],
+      "domain_rand.ball_restitution_range": [
+        0.4,
+        0.9
+      ],
+      "domain_rand.gravity_range": [
+        -0.1,
+        0.1
+      ],
+      "domain_rand.randomize": true,
+      "domain_rand.robot_com_displacement_range": [
+        -0.05,
+        0.05
+      ],
+      "domain_rand.robot_friction_range": [
+        0.1,
+        1.0
+      ],
+      "domain_rand.robot_motor_offset_range": [
+        -0.005,
+        0.05
+      ],
+      "domain_rand.robot_motor_strength_range": [
+        0.95,
+        1.05
+      ],
+      "domain_rand.robot_payload_mass_range": [
+        0.0,
+        3.0
+      ],
+      "domain_rand.robot_push_vel_range": [
+        0.1,
+        0.4
+      ],
+      "domain_rand.robot_restitution_range": [
+        0.2,
+        0.8
+      ],
+      "domain_rand.terrain_ground_friction_range": [
+        0.2,
+        0.8
+      ],
+      "domain_rand.terrain_ground_restitution_range": [
+        0.0,
+        0.5
+      ],
+      "domain_rand.terrain_tile_roughness_range": [
+        0.02,
+        0.08
+      ],
+      "env.num_envs": 4096,
+      "env.num_observation_history": 15,
+      "env.num_observations": 56,
+      "multi_gpu": true,
+      "rewards.reward_container_name": "EurekaReward",
+      "sim.dt": 0.005
+    }
+  }
+}

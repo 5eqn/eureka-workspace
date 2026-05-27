@@ -1,3 +1,9 @@
 [submodule "thirdparties/DrEureka"]
 	path = thirdparties/DrEureka
 	url = https://github.com/eureka-research/DrEureka
+[submodule "thirdparties/wbc-workspace"]
+	path = thirdparties/wbc-workspace
+	url = https://github.com/5eqn/wbc-workspace
+[submodule "thirdparties/MJLab"]
+	path = thirdparties/MJLab
+	url = https://github.com/mujocolab/mjlab.git

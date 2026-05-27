@@ -1,0 +1,24 @@
+{
+  "action_dim": 12,
+  "actor_observation_shape": [
+    1,
+    57
+  ],
+  "device": "cuda:0",
+  "env_step_dt_s": 0.02,
+  "final_base_minus_ball_z": 0.5565318167209625,
+  "initial_base_minus_ball_z": 0.5044856667518616,
+  "min_base_minus_ball_z": 0.5044856667518616,
+  "note": "This proves a root-owned MJLab yoga-ball task can register, construct, reset Go1 on a dynamic ball, and step. It is not trained-policy equivalence evidence.",
+  "num_envs": 1,
+  "ok": true,
+  "raw_log": "logs/go1_yoga_ball/mjlab_train/default_playback/mjlab_yoga_ball_task_smoke.csv",
+  "sim_elapsed_s": 1.0,
+  "sim_wall_ratio": 2.442687420506697,
+  "stage": "step",
+  "steps": 50,
+  "task": "Mjlab-Go1-YogaBall-PortSmoke",
+  "terminated_steps": 0,
+  "truncated_steps": 0,
+  "wall_elapsed_s": 0.40938516799360514
+}

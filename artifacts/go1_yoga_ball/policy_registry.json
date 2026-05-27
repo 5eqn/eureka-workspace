@@ -1,0 +1,272 @@
+{
+  "policies": [
+    {
+      "cfg_summary": {
+        "control_action_scale": 0.25,
+        "control_decimation": 4,
+        "domain_rand": {
+          "ball_compliance_range": [
+            0.0,
+            1.0
+          ],
+          "ball_drag_range": [
+            0.1,
+            0.5
+          ],
+          "ball_friction_range": [
+            0.5,
+            2.5
+          ],
+          "ball_inertia_multiplier_range": [
+            1.6666666666666667,
+            1.6666666666666667
+          ],
+          "ball_mass_range": [
+            1.0,
+            3.0
+          ],
+          "ball_push_vel_range": [
+            0.1,
+            0.4
+          ],
+          "ball_radius_range": [
+            0.35,
+            0.45
+          ],
+          "ball_restitution_range": [
+            0.4,
+            0.9
+          ],
+          "ball_spring_coefficient_range": [
+            0.0,
+            0.0
+          ],
+          "gravity_range": [
+            -0.1,
+            0.1
+          ],
+          "lag_timesteps_range": [
+            6,
+            6
+          ],
+          "push_ball_interval_s": 10,
+          "push_robot_interval_s": 15,
+          "randomize": true,
+          "robot_Kd_factor_range": [
+            1.0,
+            1.0
+          ],
+          "robot_Kp_factor_range": [
+            1.0,
+            1.0
+          ],
+          "robot_com_displacement_range": [
+            -0.05,
+            0.05
+          ],
+          "robot_friction_range": [
+            0.1,
+            1.0
+          ],
+          "robot_motor_offset_range": [
+            -0.005,
+            0.05
+          ],
+          "robot_motor_strength_range": [
+            0.95,
+            1.05
+          ],
+          "robot_payload_mass_range": [
+            0.0,
+            3.0
+          ],
+          "robot_push_vel_range": [
+            0.1,
+            0.4
+          ],
+          "robot_restitution_range": [
+            0.2,
+            0.8
+          ],
+          "terrain_ground_friction_range": [
+            0.2,
+            0.8
+          ],
+          "terrain_ground_restitution_range": [
+            0.0,
+            0.5
+          ],
+          "terrain_tile_roughness_range": [
+            0.02,
+            0.08
+          ]
+        },
+        "env_num_actions": 12,
+        "env_num_envs": 4096,
+        "env_num_observation_history": 15,
+        "env_num_observations": 56,
+        "sim_dt": 0.005
+      },
+      "deployment_runner": "thirdparties/DrEureka/globe_walking/go1_gym_deploy/scripts/deploy_policy.py",
+      "expected_policy_files": [
+        "thirdparties/DrEureka/globe_walking/runs/globe_walking/dr_eureka_best/checkpoints/body_latest.jit",
+        "thirdparties/DrEureka/globe_walking/runs/globe_walking/dr_eureka_best/checkpoints/adaptation_module_latest.jit"
+      ],
+      "name": "dr_eureka_best_pretrained",
+      "path_exists": {
+        "actor_critic": true,
+        "adaptation_module": true,
+        "body": true,
+        "metrics": true,
+        "outputs": true,
+        "parameters": true,
+        "run_dir": true
+      },
+      "paths": {
+        "actor_critic": "thirdparties/DrEureka/globe_walking/runs/globe_walking/dr_eureka_best/checkpoints/ac_weights_last.pt",
+        "adaptation_module": "thirdparties/DrEureka/globe_walking/runs/globe_walking/dr_eureka_best/checkpoints/adaptation_module_latest.jit",
+        "body": "thirdparties/DrEureka/globe_walking/runs/globe_walking/dr_eureka_best/checkpoints/body_latest.jit",
+        "metrics": "thirdparties/DrEureka/globe_walking/runs/globe_walking/dr_eureka_best/metrics.pkl",
+        "outputs": "thirdparties/DrEureka/globe_walking/runs/globe_walking/dr_eureka_best/outputs.log",
+        "parameters": "thirdparties/DrEureka/globe_walking/runs/globe_walking/dr_eureka_best/parameters.pkl",
+        "run_dir": "thirdparties/DrEureka/globe_walking/runs/globe_walking/dr_eureka_best"
+      },
+      "phase": "pretrained",
+      "source": "thirdparties/DrEureka globe_walking checked-in run"
+    },
+    {
+      "cfg_summary": {
+        "control_action_scale": 0.25,
+        "control_decimation": 4,
+        "domain_rand": {
+          "ball_compliance_range": [
+            0.0,
+            1.0
+          ],
+          "ball_drag_range": [
+            0.1,
+            0.5
+          ],
+          "ball_friction_range": [
+            0.5,
+            2.5
+          ],
+          "ball_inertia_multiplier_range": [
+            1.6666666666666667,
+            1.6666666666666667
+          ],
+          "ball_mass_range": [
+            1.0,
+            3.0
+          ],
+          "ball_push_vel_range": [
+            0.1,
+            0.4
+          ],
+          "ball_radius_range": [
+            0.35,
+            0.45
+          ],
+          "ball_restitution_range": [
+            0.4,
+            0.9
+          ],
+          "ball_spring_coefficient_range": [
+            0.0,
+            0.0
+          ],
+          "gravity_range": [
+            -0.1,
+            0.1
+          ],
+          "lag_timesteps_range": [
+            6,
+            6
+          ],
+          "push_ball_interval_s": 10,
+          "push_robot_interval_s": 15,
+          "randomize": true,
+          "robot_Kd_factor_range": [
+            1.0,
+            1.0
+          ],
+          "robot_Kp_factor_range": [
+            1.0,
+            1.0
+          ],
+          "robot_com_displacement_range": [
+            -0.05,
+            0.05
+          ],
+          "robot_friction_range": [
+            0.1,
+            1.0
+          ],
+          "robot_motor_offset_range": [
+            -0.005,
+            0.05
+          ],
+          "robot_motor_strength_range": [
+            0.95,
+            1.05
+          ],
+          "robot_payload_mass_range": [
+            0.0,
+            3.0
+          ],
+          "robot_push_vel_range": [
+            0.1,
+            0.4
+          ],
+          "robot_restitution_range": [
+            0.2,
+            0.8
+          ],
+          "terrain_ground_friction_range": [
+            0.2,
+            0.8
+          ],
+          "terrain_ground_restitution_range": [
+            0.0,
+            0.5
+          ],
+          "terrain_tile_roughness_range": [
+            0.02,
+            0.08
+          ]
+        },
+        "env_num_actions": 12,
+        "env_num_envs": 4096,
+        "env_num_observation_history": 15,
+        "env_num_observations": 56,
+        "sim_dt": 0.005
+      },
+      "deployment_runner": "thirdparties/DrEureka/globe_walking/go1_gym_deploy/scripts/deploy_policy.py",
+      "expected_policy_files": [
+        "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-25/train/235148.012034/checkpoints/body_latest.jit",
+        "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-25/train/235148.012034/checkpoints/adaptation_module_latest.jit"
+      ],
+      "name": "dr_eureka_default_train_latest",
+      "path_exists": {
+        "actor_critic": true,
+        "adaptation_module": true,
+        "body": true,
+        "metrics": true,
+        "outputs": true,
+        "parameters": true,
+        "run_dir": true
+      },
+      "paths": {
+        "actor_critic": "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-25/train/235148.012034/checkpoints/ac_weights_last.pt",
+        "adaptation_module": "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-25/train/235148.012034/checkpoints/adaptation_module_latest.jit",
+        "body": "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-25/train/235148.012034/checkpoints/body_latest.jit",
+        "metrics": "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-25/train/235148.012034/metrics.pkl",
+        "outputs": "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-25/train/235148.012034/outputs.log",
+        "parameters": "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-25/train/235148.012034/parameters.pkl",
+        "run_dir": "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-25/train/235148.012034"
+      },
+      "phase": "default_train",
+      "source": "fresh DrEureka default Isaac Gym training run selected by root orchestration"
+    }
+  ]
+}

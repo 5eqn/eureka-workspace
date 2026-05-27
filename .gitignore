@@ -1,0 +1,27 @@
+# Python/runtime byproducts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Local environment files
+.env
+.venv/
+venv/
+
+# Runtime logs and generated raw traces
+/logs/
+
+# Heavy fetched dependencies and vendor packages that are not git submodules
+/thirdparties/IsaacGym/
+/thirdparties/isaacgym/
+/thirdparties/IsaacGym_Preview_4_Package.tar.gz
+
+# Generated simulator assets and rendered media
+/artifacts/go1_yoga_ball/build/
+/artifacts/go1_yoga_ball/videos/
+*.mp4
+
+# Local Docker/build cache material
+.docker/
+docker-build/

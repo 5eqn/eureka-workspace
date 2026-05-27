@@ -1,0 +1,15 @@
+{
+  "checkpoints": [
+    "logs/go1_yoga_ball/mjlab_train/train/rsl_rl/go1_yoga_ball_port_smoke/2026-05-25_10-57-55_train_smoke/model_0.pt"
+  ],
+  "iterations": 1,
+  "log_root": "logs/go1_yoga_ball/mjlab_train/train/rsl_rl",
+  "note": "This is a minimal MJLab/RSL-RL training-stack smoke for the root-owned yoga-ball task. It is not an equivalent policy.",
+  "num_envs": 8,
+  "num_steps_per_env": 4,
+  "ok": true,
+  "params_dir": "logs/go1_yoga_ball/mjlab_train/train/rsl_rl/go1_yoga_ball_port_smoke/2026-05-25_10-57-55_train_smoke/params",
+  "selected_run": "logs/go1_yoga_ball/mjlab_train/train/rsl_rl/go1_yoga_ball_port_smoke/2026-05-25_10-57-55_train_smoke",
+  "stage": "train",
+  "task": "Mjlab-Go1-YogaBall-PortSmoke"
+}

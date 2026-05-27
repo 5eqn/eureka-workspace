@@ -1,0 +1,13 @@
+{
+  "default_playback_complete": false,
+  "mjlab_dependency_present": true,
+  "mjlab_docker_image_present": true,
+  "mujoco_sim2sim_complete": false,
+  "ok": false,
+  "runtime_smoke_ok": true,
+  "status": "task_port_smoke_only",
+  "task_port_complete": false,
+  "task_port_smoke_ok": true,
+  "training_complete": false,
+  "training_smoke_ok": true
+}

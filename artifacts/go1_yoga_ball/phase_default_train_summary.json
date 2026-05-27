@@ -1,0 +1,10 @@
+{
+  "config_difference_count": 1,
+  "default_train_run_selected": "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-25/train/235148.012034",
+  "isaacgym_playback_ok": true,
+  "mujoco_smoke_ok": false,
+  "mujoco_target_duration_ok": false,
+  "ok": false,
+  "release_window_s": 21.07,
+  "status": "not_equivalent_yet"
+}
