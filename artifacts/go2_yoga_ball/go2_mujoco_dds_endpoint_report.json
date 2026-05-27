@@ -93,7 +93,7 @@
       "text": "`unitree_mujoco` is a simulator developed based on `Unitree sdk2` and `mujoco`. Users can easily integrate the control programs developed with `Unitree_sdk2`, `unitree_ros2`, and `unitree_sdk2_python` into this simulator, enabling a seamless transition from simulation to physical development. The repository includes two versions of the simulator implemented in C++ and Python, with a structure as follows:\n![](./doc/func.png)\n\n## Directory Structure\n- `simulate`: Simulator implemented based on unitree_sdk2 and mujoco (C++, recommended)\n- `simulate_python`: Simulator implemented based on unitree_sdk2_python and mujoco (Python)\n- `unitree_robots`: MJCF description files for robots supported by unitree_sdk2"
     }
   },
-  "generated_at_unix": 1779853551.8167377,
+  "generated_at_unix": 1779856197.7491004,
   "lcm_mentions_in_endpoint_sources": [],
   "ok": true,
   "unitree_mujoco_commit": "c598f103acb87a5fd3de7c9037f4dab6aa7f232b"

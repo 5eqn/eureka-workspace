@@ -14,7 +14,7 @@ Allowing ninja to set a default number of workers... (overridable by setting the
 [2/2] c++ gymtorch.o -shared -L/opt/conda/lib/python3.7/site-packages/torch/lib -lc10 -ltorch_cpu -ltorch -ltorch_python -o gymtorch.so
 Loading extension module gymtorch...
 creating new logging client...✓ created a new logging client
-Dashboard: http://app.dash.ml/globe_walking/2026-05-27/train/034559.754542
+Dashboard: http://app.dash.ml/globe_walking/2026-05-27/train/043005.243837
 Log_directory: /workspace/eureka-workspace/thirdparties/DrEureka/globe_walking/runs
 ══════════════════════════════════════════
       AC_Args       

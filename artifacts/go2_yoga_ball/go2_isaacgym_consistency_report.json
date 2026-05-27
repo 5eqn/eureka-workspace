@@ -264,7 +264,7 @@
       "text": "        // lowcmd\n        {\n            std::lock_guard<std::mutex> lock(lowcmd->mutex_);\n            for(int i(0); i<num_motor_; i++) {\n                auto & m = lowcmd->msg_.motor_cmd()[i];\n                mj_data_->ctrl[i] = m.tau() +\n                                    m.kp() * (m.q() - mj_data_->sensordata[i]) +\n                                    m.kd() * (m.dq() - mj_data_->sensordata[i + num_motor_]);\n            }"
     }
   },
-  "generated_at_unix": 1779853551.899141,
+  "generated_at_unix": 1779856197.834246,
   "go2_actuator_net_candidates": [],
   "isaacgym_urdf": {
     "joints": {

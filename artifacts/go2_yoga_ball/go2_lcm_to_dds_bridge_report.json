@@ -108,7 +108,7 @@
       "text": "        self.imu_subscription = self.lc.subscribe(\"state_estimator_data\", self._imu_cb)\n        self.legdata_state_subscription = self.lc.subscribe(\"leg_control_data\", self._legdata_cb)\n        self.rc_command_subscription = self.lc.subscribe(\"rc_command\", self._rc_command_cb)"
     }
   },
-  "generated_at_unix": 1779853551.856894,
+  "generated_at_unix": 1779856197.789314,
   "missing_required_tokens": [],
   "ok": true,
   "unitree_motor_order": [

@@ -736,6 +736,7 @@ def record_train_1_8_launch(args: Any) -> dict[str, Any]:
         "iterations": args.iterations,
         "num_envs": args.num_envs,
         "domain_rand_profile": args.domain_rand_profile,
+        "physx_profile": getattr(args, "physx_profile", None),
         "save_interval": args.save_interval,
         "log": rel(LOG_ROOT / "train_1_8_budget" / "train.log"),
         "claim": "This marker records the single allowed 1/8-budget Go2 Isaac Gym launch for this goal.",
@@ -1028,6 +1029,7 @@ def main() -> int:
     parser.add_argument("--iterations", type=int, default=20000)
     parser.add_argument("--num-envs", type=int, default=4096)
     parser.add_argument("--domain-rand-profile", default="pretrained")
+    parser.add_argument("--physx-profile", default=None)
     parser.add_argument("--save-interval", type=int, default=1000)
     parser.add_argument("--duration-s", type=int, default=300)
     parser.add_argument("--interval-s", type=int, default=30)

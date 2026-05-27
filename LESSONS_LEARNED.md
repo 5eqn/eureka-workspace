@@ -48,3 +48,29 @@ Training artifacts from the runnable command:
 - Policy/checkpoint files inside the selected run: `checkpoints/ac_weights_last.pt`, `checkpoints/body_latest.jit`, and `checkpoints/adaptation_module_latest.jit`.
 - Saved run metadata inside the selected run: `parameters.pkl`, `metrics.pkl`, `outputs.log`, and any videos/checkpoints DrEureka emits according to the configured save intervals.
 - Root orchestration selection artifacts after the command finishes: `artifacts/go1_yoga_ball/default_train_selected_run.txt`, `artifacts/go1_yoga_ball/default_train_run.json`, and updated `artifacts/go1_yoga_ball/policy_registry.json`.
+
+## Go2 Isaac Gym 4096-Env Segfault Was PhysX Buffer Profile
+
+- Symptom: Go2 `--dr-config off --num-envs 4096` exited `139` before the first PPO iteration, while Go1 training and smaller Go2 smoke runs succeeded.
+- Reproduction sweep: Go2 completed one iteration at `512`, `1024`, and `2048` envs with `physx_mini`; the same command at `4096` envs segfaulted before iteration logging.
+- Fix: run high-env Go2 training with the `physx_full` profile (`max_gpu_contact_pairs=16777216`, `default_buffer_size_multiplier=64`) instead of `physx_mini` (`8388608`, `5`).
+- Validation: `4096` Go2 envs completed one iteration with `--physx-profile full`, logging total reward and saving iteration `0`.
+
+Relevant logs:
+
+- `logs/go2_yoga_ball/debug_segfault/env_4096/train.log` and `status.txt`: failing `physx_mini` case, `status=139`.
+- `logs/go2_yoga_ball/debug_segfault/env_4096_physx_full/train.log` and `status.txt`: passing `physx_full` case, `status=0`.
+
+Runnable validation command:
+
+```bash
+cd /home/seqn/eureka-workspace
+docker run --rm --gpus all \
+  -e WANDB_MODE=disabled \
+  -e PYTHONPATH=/workspace/eureka-workspace/thirdparties/DrEureka:/workspace/eureka-workspace/thirdparties/DrEureka/globe_walking:/workspace/eureka-workspace/thirdparties/DrEureka/forward_locomotion \
+  -e GO2_DESCRIPTION_URDF=/workspace/eureka-workspace/artifacts/go2_yoga_ball/build/go2_description_isaacgym.urdf \
+  -v /home/seqn/eureka-workspace:/workspace/eureka-workspace \
+  -w /workspace/eureka-workspace/thirdparties/DrEureka \
+  eureka-isaacgym \
+  bash -lc 'python globe_walking/scripts/train.py --robot go2 --dr-config off --reward-config eureka --iterations 1 --num-envs 4096 --no-video --no-wandb --domain-rand-profile pretrained --physx-profile full --save-interval 1000'
+```

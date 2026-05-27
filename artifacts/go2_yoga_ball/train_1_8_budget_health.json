@@ -1,17 +1,17 @@
 {
-  "actual_monitor_duration_s": 0.064,
+  "actual_monitor_duration_s": 31.13,
   "container_end": {
     "exit_code": 139,
-    "finished_at": "2026-05-27T03:46:14.491901944Z",
-    "id": "7ce1c1f64cc471fce043b09dd983cf1a1efbaf9cc0815128c830a8d0895ff9a9",
-    "name": "eureka-go2-train-1-8-20260527-114551",
+    "finished_at": "2026-05-27T04:30:19.769122625Z",
+    "id": "32c9e4edf186534f9ef64cbb33d08f855e832689c83fb4c089895f93eaf6ea87",
+    "name": "eureka-go2-train-1-8-20260527-122957",
     "ok": true,
     "running": false,
-    "started_at": "2026-05-27T03:45:52.089872182Z",
+    "started_at": "2026-05-27T04:29:58.015526504Z",
     "status": "exited"
   },
-  "container_id": "7ce1c1f64cc471fce043b09dd983cf1a1efbaf9cc0815128c830a8d0895ff9a9",
-  "container_runtime_s": 22.402,
+  "container_id": "32c9e4edf186534f9ef64cbb33d08f855e832689c83fb4c089895f93eaf6ea87",
+  "container_runtime_s": 21.754,
   "docker_logs_tail": {
     "contains_segfault": true,
     "ok": true,
@@ -23,8 +23,8 @@
     "note": "The launch used the requested 20000 iterations and 4096 envs; the RunnerArgs.max_iterations banner is static config, while train.py passes --iterations into runner.learn.",
     "reason": "container did not remain running for the requested monitor duration"
   },
-  "generated_at_unix": 1779853709.956366,
-  "log_advanced": false,
+  "generated_at_unix": 1779856229.395183,
+  "log_advanced": true,
   "log_end": {
     "completed_exception": true,
     "contains_nan": false,
@@ -46,28 +46,78 @@
     "contains_segfault": false,
     "effective_iterations_from_launch": 20000,
     "exists": true,
-    "iterations_logged": [
-      1500
-    ],
-    "last_iteration": 1500,
+    "iterations_logged": [],
+    "last_iteration": null,
     "last_timesteps": null,
     "last_total_reward": null,
     "path": "logs/go2_yoga_ball/train_1_8_budget/train.log",
-    "size_bytes": 22091
+    "size_bytes": 0
   },
-  "monitor_duration_s": 1,
+  "monitor_duration_s": 300,
   "no_nan_or_error_text": true,
   "ok": false,
   "samples": [
     {
       "container": {
+        "exit_code": 0,
+        "finished_at": "0001-01-01T00:00:00Z",
+        "id": "32c9e4edf186534f9ef64cbb33d08f855e832689c83fb4c089895f93eaf6ea87",
+        "name": "eureka-go2-train-1-8-20260527-122957",
+        "ok": true,
+        "running": true,
+        "started_at": "2026-05-27T04:29:58.015526504Z",
+        "status": "running"
+      },
+      "docker_stats": {
+        "ok": true,
+        "raw": {
+          "BlockIO": "0B / 106kB",
+          "CPUPerc": "235.57%",
+          "Container": "32c9e4edf186534f9ef64cbb33d08f855e832689c83fb4c089895f93eaf6ea87",
+          "ID": "32c9e4edf186",
+          "MemPerc": "1.81%",
+          "MemUsage": "285.7MiB / 15.43GiB",
+          "Name": "eureka-go2-train-1-8-20260527-122957",
+          "NetIO": "526B / 84B",
+          "PIDs": "8"
+        }
+      },
+      "log": {
+        "completed_exception": true,
+        "contains_nan": false,
+        "contains_segfault": false,
+        "effective_iterations_from_launch": 20000,
+        "exists": true,
+        "iterations_logged": [],
+        "last_iteration": null,
+        "last_timesteps": null,
+        "last_total_reward": null,
+        "path": "logs/go2_yoga_ball/train_1_8_budget/train.log",
+        "size_bytes": 0
+      },
+      "nvidia_smi": {
+        "gpus": [
+          {
+            "index": "0",
+            "memory_total_mib": "24576",
+            "memory_used_mib": "168",
+            "name": "NVIDIA GeForce RTX 3090",
+            "utilization_gpu_percent": "0"
+          }
+        ],
+        "ok": true
+      },
+      "t_since_start_s": 0.01
+    },
+    {
+      "container": {
         "exit_code": 139,
-        "finished_at": "2026-05-27T03:46:14.491901944Z",
-        "id": "7ce1c1f64cc471fce043b09dd983cf1a1efbaf9cc0815128c830a8d0895ff9a9",
-        "name": "eureka-go2-train-1-8-20260527-114551",
+        "finished_at": "2026-05-27T04:30:19.769122625Z",
+        "id": "32c9e4edf186534f9ef64cbb33d08f855e832689c83fb4c089895f93eaf6ea87",
+        "name": "eureka-go2-train-1-8-20260527-122957",
         "ok": true,
         "running": false,
-        "started_at": "2026-05-27T03:45:52.089872182Z",
+        "started_at": "2026-05-27T04:29:58.015526504Z",
         "status": "exited"
       },
       "docker_stats": {
@@ -75,11 +125,11 @@
         "raw": {
           "BlockIO": "0B / 0B",
           "CPUPerc": "0.00%",
-          "Container": "7ce1c1f64cc471fce043b09dd983cf1a1efbaf9cc0815128c830a8d0895ff9a9",
-          "ID": "7ce1c1f64cc4",
+          "Container": "32c9e4edf186534f9ef64cbb33d08f855e832689c83fb4c089895f93eaf6ea87",
+          "ID": "32c9e4edf186",
           "MemPerc": "0.00%",
           "MemUsage": "0B / 0B",
-          "Name": "eureka-go2-train-1-8-20260527-114551",
+          "Name": "eureka-go2-train-1-8-20260527-122957",
           "NetIO": "0B / 0B",
           "PIDs": "0"
         }
@@ -111,9 +161,9 @@
         ],
         "ok": true
       },
-      "t_since_start_s": 0.012
+      "t_since_start_s": 31.074
     }
   ],
-  "selected_run": "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-27/train/034559.754542",
+  "selected_run": "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-27/train/043005.243837",
   "selected_run_file": "artifacts/go2_yoga_ball/train_1_8_budget_selected_run.txt"
 }
