@@ -1,17 +1,17 @@
 {
-  "cmd_count": 1064,
+  "cmd_count": 362,
   "final_gate_reason": "5s transport/release smoke only; final gate still requires >=20s target run, repeated starts, video, and stronger policy/sim timing alignment.",
   "joint_limit_summary_released": {
     "criterion": "pass if zero violations, or violation_frames / joint_frames < 0.001 and no joint violation persists longer than 0.1s",
     "first_violations": [],
-    "joint_frames": 12660,
+    "joint_frames": 4200,
     "max_contiguous_duration_s": 0.0,
     "max_contiguous_frames": 0,
     "max_magnitude_rad": 0.0,
     "passes_numerical_margin_rule": true,
     "per_joint_counts": {},
     "per_joint_max_magnitude_rad": {},
-    "samples": 1055,
+    "samples": 350,
     "violation_fraction": 0.0,
     "violation_frames": 0
   },
@@ -99,16 +99,16 @@
         "sim_time_s": 0.16
       }
     ],
-    "joint_frames": 13212,
-    "max_contiguous_duration_s": 0.6,
-    "max_contiguous_frames": 30,
+    "joint_frames": 4812,
+    "max_contiguous_duration_s": 0.7000000000000001,
+    "max_contiguous_frames": 35,
     "max_magnitude_rad": 0.07959296699999996,
     "passes_numerical_margin_rule": false,
     "per_joint_counts": {
-      "FL_calf_joint": 25,
-      "FR_calf_joint": 25,
-      "RL_calf_joint": 30,
-      "RR_calf_joint": 29
+      "FL_calf_joint": 29,
+      "FR_calf_joint": 29,
+      "RL_calf_joint": 34,
+      "RR_calf_joint": 35
     },
     "per_joint_max_magnitude_rad": {
       "FL_calf_joint": 0.05474264799999995,
@@ -116,29 +116,29 @@
       "RL_calf_joint": 0.07259893299999998,
       "RR_calf_joint": 0.07959296699999996
     },
-    "samples": 1101,
-    "violation_fraction": 0.008250075688767787,
-    "violation_frames": 109
+    "samples": 401,
+    "violation_fraction": 0.026392352452202825,
+    "violation_frames": 127
   },
   "joint_limit_violation_frames_released": 0,
-  "joint_limit_violation_frames_total": 109,
+  "joint_limit_violation_frames_total": 127,
   "missing_events": [],
   "ok_final_gate": false,
   "ok_smoke": true,
-  "ok_target_duration": true,
+  "ok_target_duration": false,
   "policy_inference_latency_s": {
-    "max": 0.02374217,
-    "mean": 0.00015047156855575868,
-    "p95": 0.000192076
+    "max": 0.026281944,
+    "mean": 0.0001979247607052897,
+    "p95": 0.000201095
   },
   "policy_loop_period_s": {
-    "max": 0.021678654,
-    "mean": 0.020088254173833486,
-    "p95": 0.020233931
+    "max": 0.020491388,
+    "mean": 0.020072415335858587,
+    "p95": 0.020236331
   },
-  "policy_time_elapsed_s": 21.86,
-  "policy_time_wall_ratio": 0.9934046294291713,
-  "policy_wall_elapsed_s": 22.005132,
+  "policy_time_elapsed_s": 7.92,
+  "policy_time_wall_ratio": 0.9876344919374982,
+  "policy_wall_elapsed_s": 8.019161,
   "raw_logs": {
     "events": "logs/go1_yoga_ball/pretrained/mujoco_sim2sim/sequence_events.csv",
     "policy_timing": "logs/go1_yoga_ball/pretrained/mujoco_sim2sim/policy_timing.csv",
@@ -146,22 +146,22 @@
     "sim_bridge_summary": "logs/go1_yoga_ball/pretrained/mujoco_sim2sim/sim_bridge_summary.json",
     "simulator_status": "logs/go1_yoga_ball/pretrained/mujoco_sim2sim/simulator_status.csv"
   },
-  "release_window_s": 21.09,
+  "release_window_s": 6.992,
   "released_base_height": {
     "below_threshold_fraction": 0.0,
     "below_threshold_samples": 0,
-    "min": 0.903498407,
+    "min": 0.904690255,
     "ok": true,
-    "samples": 1055,
+    "samples": 350,
     "threshold": 0.9
   },
-  "sim_elapsed_over_policy_wall_elapsed": 0.999766781676142,
-  "sim_elapsed_s": 21.999999999998685,
-  "sim_wall_ratio": 0.9999848525058365,
+  "sim_elapsed_over_policy_wall_elapsed": 0.9976105979165826,
+  "sim_elapsed_s": 7.999999999999341,
+  "sim_wall_ratio": 0.9999707712370512,
   "timing_gates": {
     "policy_time_wall_ratio_ok": true,
     "sim_wall_ratio_ok": true,
     "tolerance": 0.05
   },
-  "wall_elapsed_s": 22.000333249918185
+  "wall_elapsed_s": 8.000233836937696
 }

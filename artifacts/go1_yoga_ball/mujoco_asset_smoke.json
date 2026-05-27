@@ -1,14 +1,16 @@
 {
   "ball_urdf": "thirdparties/DrEureka/globe_walking/resources/objects/ball.urdf",
   "ball_urdf_exists": true,
-  "nbody": 14,
-  "njnt": 13,
-  "nq": 19,
+  "nbody": 15,
+  "njnt": 14,
+  "nq": 26,
   "nu": 12,
-  "nv": 18,
+  "nv": 24,
   "ok": true,
-  "sanitized_sha256": "69839303d93bdd8d479785233260c8fb09657c4766be9f046ddcc703fb3ac800",
+  "sanitized_sha256": "36c2e10947b3b9b596a3b949809ba09df2090465d11172d70ea4878e0870adbd",
   "sanitized_xml": "artifacts/go1_yoga_ball/build/go1_sanitized.xml",
+  "scene_sha256": "94d56faec62367c1a4a3d75fc85eefb0fbd4fd2be52bb7ee92a3789ed8d35aaf",
+  "scene_xml": "artifacts/go1_yoga_ball/build/go1_yoga_ball_scene.xml",
   "source_sha256": "ae2e33caca958e7e60a7bfce004e4d70a9200005a7faf56969ecf8e52b478687",
   "source_xml": "thirdparties/DrEureka/globe_walking/resources/robots/go1/xml/go1.xml"
 }

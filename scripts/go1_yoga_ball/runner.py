@@ -425,6 +425,7 @@ def sanitized_go1_xml() -> Path:
 def smoke_mujoco_assets() -> dict[str, Any]:
     ensure_tree()
     xml = sanitized_go1_xml()
+    scene = yoga_ball_scene_xml()
     try:
         import mujoco  # type: ignore
         import lcm  # noqa: F401
@@ -438,16 +439,18 @@ def smoke_mujoco_assets() -> dict[str, Any]:
         return result
 
     try:
-        model = mujoco.MjModel.from_xml_path(str(xml))
+        model = mujoco.MjModel.from_xml_path(str(scene))
     except Exception as exc:  # noqa: BLE001
         result = {
             "ok": False,
             "error": repr(exc),
-            "context": f"load {rel(xml)}",
+            "context": f"load {rel(scene)}",
             "source_xml": rel(GO1_XML),
             "sanitized_xml": rel(xml),
+            "scene_xml": rel(scene),
             "source_sha256": sha256(GO1_XML),
             "sanitized_sha256": sha256(xml),
+            "scene_sha256": sha256(scene),
         }
         write_json(ARTIFACT_ROOT / "mujoco_asset_smoke.json", result)
         return result
@@ -456,8 +459,10 @@ def smoke_mujoco_assets() -> dict[str, Any]:
         "ok": True,
         "source_xml": rel(GO1_XML),
         "sanitized_xml": rel(xml),
+        "scene_xml": rel(scene),
         "source_sha256": sha256(GO1_XML),
         "sanitized_sha256": sha256(xml),
+        "scene_sha256": sha256(scene),
         "ball_urdf": rel(BALL_URDF),
         "ball_urdf_exists": BALL_URDF.exists(),
         "nq": int(model.nq),

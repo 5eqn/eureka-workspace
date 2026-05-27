@@ -2,7 +2,7 @@
   "active_policy_smoke": {
     "events": "logs/go1_yoga_ball/pretrained/mujoco_sim2sim/sequence_events.csv",
     "ok": true,
-    "release_window_s": 21.09
+    "release_window_s": 6.992
   },
   "ball_radius": 0.45,
   "control_removal_after_stable_release": {
