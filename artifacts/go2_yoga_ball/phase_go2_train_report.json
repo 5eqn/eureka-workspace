@@ -1,0 +1,34 @@
+{
+  "ok": true,
+  "run": {
+    "new_runs": [
+      "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-27/train/034503.132326"
+    ],
+    "ok": true,
+    "selected_run": "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-27/train/034503.132326",
+    "valid_runs": [
+      "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-27/train/034503.132326"
+    ]
+  },
+  "smoke": {
+    "completed_exception": true,
+    "contains_nan": false,
+    "exists": true,
+    "iterations_logged": [
+      1500,
+      0
+    ],
+    "last_iteration": 0,
+    "last_timesteps": 1536,
+    "last_total_reward": 0.0,
+    "path": "logs/go2_yoga_ball/train_smoke/train.log",
+    "size_bytes": 31710
+  },
+  "urdf": {
+    "mesh_root": "/workspace/eureka-workspace/thirdparties/go2_description",
+    "note": "package://go2_description mesh paths replaced with workspace absolute paths for Isaac Gym.",
+    "ok": true,
+    "output": "artifacts/go2_yoga_ball/build/go2_description_isaacgym.urdf",
+    "source": "thirdparties/go2_description/urdf/go2_description.urdf"
+  }
+}

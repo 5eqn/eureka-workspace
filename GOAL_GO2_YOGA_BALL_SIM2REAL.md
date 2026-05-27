@@ -1,124 +1,184 @@
-# Goal: Go2 Yoga-Ball Sim2Real Migration
+# Goal: Go2 Yoga-Ball Migration With Real-Swappable Sim2Sim Boundary
 
 ## Outcome
 
-Migrate the Go1 yoga-ball Sim2Real pipeline to Unitree Go2 while preserving the same standard of evidence:
+Migrate the DrEureka Go1 yoga-ball setup to Unitree Go2 without wasting an 11-hour training run on a mismatched robot contract.
 
-1. A MuJoCo Go2-on-yoga-ball simulator smoke path that is designed to be swapped with the real Go2 robot bridge without policy-code changes.
-2. DrEureka/Isaac Gym training configured for Go2 model geometry, joint limits, default pose, actuator/PD behavior, torque limits, action scale, observation order, and deployment joint order.
-3. Baseline Go2 training smoke tests that compare reward curves before committing to a full run.
-4. A smoke-tested Go2 baseline under a 20-minute wall-clock budget, followed by a one-shot 1/8-budget training run that is checked for 5 minutes of healthy execution, with artifacts proving what did and did not pass.
+The target architecture is deliberately simple:
 
-The final result should be reviewable by human embodied-intelligence experts without relying on console claims.
-This goal is allowed to finish only after the 20-minute smoke-test gate passes, then the one-shot 1/8-budget run has been started with pretrained-matching settings as closely as possible and verified healthy for 5 minutes, and the evidence files are written. Full-scale Go2 training is a follow-up goal, not required for this goal to complete.
+```text
+Go2 policy/deploy container
+  DrEureka policy
+  LCM policy contract
+  LCM -> Unitree SDK2 DDS bridge
+
+Go2 robot endpoint
+  either Unitree MuJoCo Go2 DDS simulator container
+  or real Unitree Go2 on the robot network interface
+```
+
+For Go2, the simulator container must have one responsibility: behave like a real Go2 low-level DDS endpoint. It must not consume DrEureka LCM directly. LCM-to-DDS translation belongs inside the policy/deploy side, so a successful Sim2Sim run proves the same translation path needed for real Go2 deployment.
+
+After that boundary is faithful, add Go2 model, actuator, joint-order, default-pose, limits, and controller/actuator assumptions inside DrEureka/Isaac Gym so training uses the same robot contract. Actuator consistency is especially important: the source of truth is the fetched `unitree_mujoco` implementation, including both `unitree_robots/go2/go2.xml` actuator metadata and the SDK2 bridge code that maps `LowCmd` fields into MuJoCo torques. Both MuJoCo deploy-time fidelity and Isaac Gym train-time fidelity must be proven by reports containing concrete source excerpts with filename and line references. A single mismatch can waste the long run, so the 1/8-budget training must not be launched until these reports pass.
+
+Human embodied-intelligence reviewers should be able to inspect the reports and see the exact code that proves each claim, what is approximated, and what remains unproven without relying on console claims.
+
+## Scope
+
+In scope:
+
+- Fetching and using `thirdparties/unitree_mujoco` as the authoritative Go2 real-robot low-level contract.
+- Building a faithful Go2 DDS MuJoCo simulator endpoint that is directly swappable with a real Go2 backend.
+- Implementing or wiring a Go2 policy/deploy bridge that converts DrEureka LCM policy messages to Unitree SDK2 DDS `LowCmd`/`LowState`.
+- Porting DrEureka Isaac Gym training to Go2 as a separate robot/config path, not by mutating Go1 constants in place.
+- Adding Go2 model and actuator configuration in DrEureka. If a defensible Go2 actuator network exists in fetched resources, use it. If not, the PD command path may pass only if reports prove it is the actual `unitree_mujoco`/SDK2 actuator interface: deploy sends `q_des`, `qd_des`, `kp`, `kd`, and `tau_ff`, and both MuJoCo and Isaac Gym use the same torque equation, gains, and torque limits.
+- Running Isaac Gym smoke training and exactly one 1/8-budget training health check only after fidelity reports pass.
+- Generating reports under `artifacts/go2_yoga_ball/`.
+
+Out of scope for this goal:
+
+- MJLab training or MJLab smoke tests.
+- Real Go2 robot testing.
+- Full-budget training.
+- Reworking the legacy Go1 deploy path. Go1 may stay LCM -> Unitree Go1 SDK UDP.
 
 ## Current Evidence And Constraints
 
-- Current Go1 state is committed in root commit `9d3adf4`.
-- Current DrEureka submodule source changes are committed in `thirdparties/DrEureka` commit `aacfbf9`.
-- The existing checked-out DrEureka tree contains Go1 assets only under `globe_walking/resources/robots/go1/`.
-- The current MJLab checkout contains Unitree Go1 and G1 assets, but no Go2 asset was found under `src/mjlab/asset_zoo/robots/`.
-- The checked-out `thirdparties/wbc-workspace` reference contains an official Unitree MuJoCo dependency at `thirdparties/wbc-workspace/thirdparties/unitree_mujoco`, commit `c598f103acb87a5fd3de7c9037f4dab6aa7f232b`, including `unitree_robots/go2/go2.xml` and `unitree_robots/go2/scene.xml`.
-- Do not treat Go1 actuator net `unitree_go1.pt`, Go1 joint limits, Go1 default pose, or Go1 LCM/SDK details as valid for Go2 without evidence.
-- Heavy dependencies and fetched Go2 assets belong under root `thirdparties/` or Docker images. Major logic should keep running inside Docker.
-- Preferred Go2 asset/source candidates:
-  - MuJoCo simulator/real-robot swap contract: fetch `https://github.com/unitreerobotics/unitree_mujoco` into root `thirdparties/unitree_mujoco`, using `unitree_robots/go2/` and the SDK2 low-level command/state path. The nested copy in `thirdparties/wbc-workspace/thirdparties/unitree_mujoco` is a reference, not the root build-context dependency.
-  - DrEureka/Isaac Gym asset import: fetch `https://github.com/Unitree-Go2-Robot/go2_description` or the underlying `unitreerobotics/go2_urdf` model into root `thirdparties/`, with documented collision edits for Isaac Gym-style training.
-  - MJLab Go2 reference: fetch `https://github.com/unitreerobotics/unitree_rl_mjlab` into root `thirdparties/` or vendor only its Go2 asset/config with provenance. The current `thirdparties/MJLab` dependency lacks a Go2 asset, so MJLab Go2 support must be added as an explicit dependency, the same way DrEureka consumes Isaac Gym as an external dependency.
-  - Secondary MuJoCo model reference: `https://github.com/google-deepmind/mujoco_menagerie`, which includes a `unitree_go2/scene.xml` model useful for cross-checking MJCF parameters.
+- DrEureka lives at `thirdparties/DrEureka`.
+- Isaac Gym is a dependency under `thirdparties/IsaacGym/` and is used inside `docker/isaacgym.Dockerfile`.
+- Unitree MuJoCo Go2 source lives at `thirdparties/unitree_mujoco`; its Go2 MJCF and SDK2 bridge implementation are the authoritative Go2 robot and actuator contract.
+- Go2 URDF source lives at `thirdparties/go2_description`; use it for Isaac Gym import only after proving consistency against `unitree_mujoco`.
+- Heavy fetched dependencies stay under root `thirdparties/` and are ignored by git.
+- Major logic runs inside Docker containers.
+- Shared Docker environment remains under `docker/`; do not create Go1/Go2-prefixed Dockerfiles unless dependency requirements actually diverge.
 
 ## Required Artifact Tree
 
 ```text
 scripts/go2_yoga_ball/
   run.sh
+  asset_inventory.py
+  runner.py
   reward_curve_compare.py
-  go2_mujoco_lcm_bridge.py
 
 docker/
-  isaacgym.Dockerfile          # shared by Go1 and Go2
-  mujoco_sim2sim.Dockerfile    # shared by Go1 and Go2
-  mjlab.Dockerfile             # shared by Go1 and Go2
+  isaacgym.Dockerfile
+  mujoco_sim2sim.Dockerfile
 
 thirdparties/
-  IsaacGym/                  # fetched by agent if absent, accepted license required
+  IsaacGym/
   DrEureka/
-  MJLab/
-  unitree_mujoco/            # root build-context copy, not only nested under wbc-workspace
-  go2_description_or_urdf/   # exact name may follow upstream repo
-  unitree_rl_mjlab/          # optional if needed for authoritative MJLab Go2 config
+  unitree_mujoco/
+  go2_description/
 
 artifacts/go2_yoga_ball/
   manifest.json
   go2_asset_inventory.json
-  sim2sim_contract.md
+  go2_mujoco_dds_endpoint_report.json
+  go2_mujoco_dds_endpoint_report.md
+  go2_lcm_to_dds_bridge_report.json
+  go2_lcm_to_dds_bridge_report.md
+  go2_isaacgym_consistency_report.json
+  go2_isaacgym_consistency_report.md
+  go2_isaacgym_urdf.json
+  phase_go2_train_report.json
+  phase_go2_train_report.md
+  go2_train_smoke_run.json
+  go2_train_smoke_selected_run.txt
+  train_1_8_budget_health.json
+  train_1_8_budget_health.md
   reward_curve_comparison.csv
   reward_curve_comparison.json
   reward_curve_comparison.md
   reward_curve_total.svg
-  phase_go2_train_report.md
-  mujoco_sim2sim_health_report.md
-  videos/
-    go2_mujoco_1_8_budget.mp4
 
 logs/go2_yoga_ball/
+  mujoco_dds_endpoint_smoke/
   train_smoke/
   train_1_8_budget/
-  mujoco_sim2sim/
 ```
-
-Dockerfile rule: use shared environment Dockerfiles directly under `docker/`; do not create robot-prefixed Dockerfiles such as `go1_*` or `go2_*` unless the runtime dependencies genuinely diverge. Build shared images as `eureka-isaacgym`, `eureka-mujoco_sim2sim`, and `eureka-mjlab`, then keep robot/task-specific behavior in mounted scripts and runtime arguments. Use suitable base images for the stack, for example CUDA/PyTorch for Isaac Gym training and Ubuntu/MuJoCo for Sim2Sim. Build from the repository root so `thirdparties/` is available as Docker build context. Keep stable base-image, system dependency, and heavy dependency install layers before source `COPY` lines. Only copy root source and frequently changing scripts after those stable layers so Docker build cache survives normal code/report edits. Once those pre-`COPY` layers work, avoid changing them unless the dependency set itself changes.
 
 ## Implementation Requirements
 
-1. Acquire or create a defensible Go2 model source.
-   - Prefer official Unitree Go2 URDF/MJCF or a widely used upstream model with clear provenance.
-   - Store fetched model assets under root `thirdparties/` or a documented project-owned asset path if generated.
-   - Fetch missing Isaac Gym and MJLab-related dependencies during the goal; do not require manual host installation except for license-gated archive availability.
-   - Record source URL, commit/hash, license, joint names, limits, masses, inertias, actuator configuration, and mesh paths in `artifacts/go2_yoga_ball/go2_asset_inventory.json`.
-   - Do not proceed with training edits until the inventory proves which model is authoritative for MuJoCo, Isaac Gym, and MJLab.
+1. Treat `unitree_mujoco` as the Go2 ground truth before training.
+   - Parse `thirdparties/unitree_mujoco/unitree_robots/go2/go2.xml`.
+   - Record commit, license, joint names, motor order, default/home joint pose, joint limits, torque limits, mesh paths, actuator classes, and sensor order in `go2_asset_inventory.json`.
+   - Do not train until the inventory is generated.
 
-2. Update DrEureka training for Go2.
-   - Add a Go2 robot config rather than mutating Go1 constants in place.
-   - Change asset file, default joint angles, joint limits, torque limits, action scale, hip scale reduction, PD gains or actuator model, foot/body contact names, and deployment joint order.
-   - If no Go2 actuator network exists, use a documented PD fallback first and mark it as not actuator-equivalent until validated.
+2. Build the Go2 MuJoCo simulator as a DDS robot endpoint.
+   - The simulator container must consume Unitree SDK2 DDS `LowCmd` and publish DDS `LowState`, matching the real Go2 low-level interface.
+   - It must not subscribe to DrEureka LCM policy topics.
+   - It must use Unitree Go2 joint order, joint names, default pose, motor command semantics, torque limits, and state ordering from `unitree_mujoco`.
+   - For actuator semantics, the source of truth is the `unitree_mujoco` implementation of `LowCmd` handling and torque application, not an inferred or hand-written PD convention.
+   - `go2_mujoco_dds_endpoint_report.md` must include inline source excerpts and line references proving the DDS topics, command fields, PD/torque equation, motor order, joint limits, and actuator limits. Example format:
+     - `thirdparties/unitree_mujoco/simulate/src/unitree_sdk2_bridge.h:183`: `mj_data_->ctrl[i] = m.tau() + ...`
+   - The report must state whether replacing the simulator container with a real Go2 on `eth0` should require policy/deploy code changes. The target answer is no, except for network/backend selection and safety procedures.
 
-3. Prove MuJoCo Sim2Sim is swappable with real Go2.
-   - Use the same deployment-level contract style as the Go1 pipeline: policy process publishes PD/torque targets and consumes robot state.
-   - Document any Go2 bridge differences from the Go1 LCM contract before using them.
-   - Prove support release, actual release, control removal, and wall-clock consistency.
-   - For any policy described as working, report released-window duration, joint-limit violation count, base-height-below-threshold frames, policy step timing, sim step timing, and wall-clock drift. Expected behavior is no or very few released-window joint-limit violations and no sustained height-below-threshold interval.
+3. Put LCM-to-DDS conversion in the Go2 policy/deploy side.
+   - DrEureka policy may keep its LCM policy contract internally.
+   - The Go2 deploy container must convert DrEureka LCM command/state contract to Unitree SDK2 DDS, not rely on a simulator that understands LCM.
+   - `go2_lcm_to_dds_bridge_report.md` must include inline source excerpts and line references proving:
+     - input LCM channels and fields,
+     - output DDS topics and fields,
+     - joint-order mapping,
+     - PD gain forwarding,
+     - `q_des`, `qd_des`, `kp`, `kd`, and `tau_ff` mapping into DDS `LowCmd`,
+     - DDS `LowState` mapping back into the LCM state used by DrEureka.
 
-4. Compare reward curves before scaling.
-   - Run short smoke training tests with the Go2 config and compare reward curves against the Go1 pretrained curve and the existing Go1 1/8-budget curve.
-   - Preserve `reward_curve_comparison.csv`, `.json`, `.md`, and `.svg`.
-   - Do not report "training is effective" or "training failed" from a tiny non-equivalent run. The smoke run only proves the pipeline can train, log, export, and be inspected.
+4. Make Isaac Gym Go2 faithful to the same Go2 contract.
+   - Use the Go2 URDF only as an Isaac Gym import carrier.
+   - Match the 12 actuated joint names.
+   - Match Unitree MuJoCo Go2 motor/action order or explicitly document the policy-order mapping.
+   - Match the Unitree MuJoCo home/default pose: hip `0.0`, thigh `0.9`, calf `-1.8` for all four legs unless the report proves a different Unitree default is more authoritative.
+   - Match joint limits and effort/torque limits as closely as Isaac Gym allows.
+   - Add Go2 actuator configuration in DrEureka. This is a critical fidelity gate. If a defensible Go2 actuator network is available from fetched resources, use it. If not, the documented PD command path may pass only when its gains, torque limits, and command equation are explicitly compared against `unitree_mujoco` and the Go2 deploy bridge forwards the same gains to DDS `LowCmd`.
+   - `go2_isaacgym_consistency_report.md` must include inline source excerpts and line references for the MuJoCo source and the Isaac Gym/DrEureka source side by side. It must cover joint names, action order, default pose, joint limits, effort limits, actuator/controller settings, foot/body names, asset path, and training PD/actuator network selection.
 
-5. Run smoke-budget Go2 training, then start the one-shot 1/8-budget run.
-   - Target wall-clock budget: 20 minutes.
-   - Use a small env count and iteration count sufficient to prove model load, reset, stepping, reward logging, checkpoint export, and curve generation.
-   - After the smoke gate passes, start exactly one 1/8-budget run with settings as consistent with the pretrained model as possible. Use `ITERATIONS=20000` and `TRAIN_NUM_ENVS=4096` because only one GPU card is available, and treat this as the single allowed shot for that budget level.
-   - Verify the 1/8-budget run stays healthy for 5 minutes of wall-clock time after launch, then stop the goal and rate it from the training results.
-   - Treat any full-budget run as follow-up work once this goal completes.
+5. Run the Go2 Isaac Gym smoke gate.
+   - Target wall-clock budget: 20 minutes or less.
+   - The run must prove model load, reset, stepping, reward logging, checkpoint export or explicit checkpoint-interval reason, and no NaNs/immediate termination.
+   - The report must say this is smoke validation only, not final policy equivalence.
+
+6. Launch exactly one 1/8-budget run after all fidelity and smoke gates pass.
+   - Use settings closest to the pretrained Go1 run where defensible:
+     - `ITERATIONS=20000`
+     - `TRAIN_NUM_ENVS=4096`
+     - `TRAIN_NO_VIDEO=1`
+     - `TRAIN_SAVE_INTERVAL=1000`
+     - pretrained domain-randomization profile only if the consistency report proves it remains valid for Go2.
+   - This is the only allowed 1/8-budget launch for this goal.
+   - Monitor for 5 minutes and record process health, log advancement, no NaNs, GPU memory/utilization, run path, and artifact paths.
+   - The goal completes after this 5-minute health check and report generation. The training may continue outside the goal.
 
 ## Verification Gates
 
-- Go2 asset inventory exists and proves the model/actuator source.
-- Isaac Gym can load the Go2 model, reset on the yoga ball, and run a smoke train within the 20-minute budget without NaNs or immediate termination.
-- Reward curves are generated from raw smoke training logs, not manually transcribed values.
-- The smoke run produces at least one checkpoint/export artifact or clearly reports why export is not available at the chosen smoke length.
-- After the smoke gate passes, exactly one 1/8-budget run is launched with the closest defensible pretrained-matching settings, including `ITERATIONS=20000`, `TRAIN_NUM_ENVS=4096`, `TRAIN_NO_VIDEO=1`, `TRAIN_SAVE_INTERVAL=1000`, and the pretrained domain-randomization profile if it remains valid for Go2.
-- The 1/8-budget run is monitored for 5 minutes and has evidence that training is healthy: process still alive, no NaNs, iteration/log output advancing, GPU utilization/memory stable enough for the run, and artifacts/log paths recorded. The goal completes after this health check; final rating comes from the resulting training curve/checkpoint quality.
-- MuJoCo Go2 model loads, support/release mechanics execute in a smoke run, and the bridge design is documented against the real Go2 SDK2 low-level state/command contract.
-- Videos are rendered from raw replay logs and mark joint-limit violations when a MuJoCo smoke replay exists.
-- `mujoco_sim2sim_health_report.md` reports release timing, actual release state, joint-limit violation counts, base-height-below-threshold counts, policy timing, sim timing, and wall-clock drift. If the smoke policy is untrained or unstable, the report must say that explicitly rather than treating the smoke as a successful walking policy.
-- `phase_go2_train_report.md` explicitly says this is smoke validation only and does not claim final policy equivalence.
+- `go2_asset_inventory.json` exists and identifies `unitree_mujoco` as the ground-truth Go2 source.
+- `go2_mujoco_dds_endpoint_report.md` and `.json` prove the simulator is a DDS low-level Go2 endpoint and does not depend on DrEureka LCM.
+- `go2_lcm_to_dds_bridge_report.md` and `.json` prove the Go2 deploy path owns LCM-to-DDS conversion.
+- `go2_isaacgym_consistency_report.md` and `.json` prove or explicitly fail each train-time consistency field:
+  - joint names
+  - action order
+  - default pose
+  - joint limits
+  - effort/torque limits
+  - actuator network or PD fallback
+  - foot/body names used by training
+  - asset file and mesh path handling
+- Each fidelity report contains concrete inline code excerpts with filename and line references for both sides of every major claim.
+- DrEureka has a separate Go2 robot/config path.
+- Isaac Gym smoke training completes within the 20-minute budget without NaNs or immediate termination.
+- Smoke training produces at least one checkpoint/export artifact, or the report explicitly explains why the chosen smoke length cannot export.
+- The one-shot 1/8-budget command is launched only after all fidelity and smoke reports pass.
+- The 1/8-budget health report proves the run stayed healthy for 5 minutes.
 
 ## Blocked Stop Conditions
 
 Stop with evidence if:
 
-- No defensible Go2 model/actuator source can be fetched or created under the allowed dependency constraints.
-- The Go2 model cannot be loaded in Isaac Gym or MuJoCo after concrete fixes.
-- Go2 deployment semantics cannot be mapped to a real-robot-swappable bridge without changing policy-code behavior.
-- The 20-minute smoke training repeatedly produces NaNs or immediate termination after correcting model, joint order, and action scaling issues.
+- `unitree_mujoco` Go2 cannot be fetched or parsed.
+- The DDS Go2 simulator endpoint cannot be made directly swappable with a real Go2 backend under the current Docker/network constraints.
+- The LCM-to-DDS bridge cannot preserve DrEureka command/state semantics and Unitree SDK2 DDS semantics.
+- The Go2 URDF cannot be made consistent enough with `unitree_mujoco` for Isaac Gym training.
+- No defensible Go2 actuator network exists and the PD command path cannot be proven equivalent to the `unitree_mujoco`/SDK2 `LowCmd` actuator semantics.
+- Isaac Gym cannot load or step the Go2 model after concrete fixes to paths, joint order, default pose, limits, and actuator settings.
+- The 20-minute smoke training repeatedly produces NaNs or immediate termination after the fidelity reports pass.

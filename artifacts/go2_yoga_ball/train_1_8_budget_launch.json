@@ -1,0 +1,12 @@
+{
+  "claim": "This marker records the single allowed 1/8-budget Go2 Isaac Gym launch for this goal.",
+  "container_id": "7ce1c1f64cc471fce043b09dd983cf1a1efbaf9cc0815128c830a8d0895ff9a9",
+  "container_name": "eureka-go2-train-1-8-20260527-114551",
+  "domain_rand_profile": "pretrained",
+  "generated_at_unix": 1779853552.4577732,
+  "iterations": 20000,
+  "log": "logs/go2_yoga_ball/train_1_8_budget/train.log",
+  "num_envs": 4096,
+  "ok": true,
+  "save_interval": 1000
+}

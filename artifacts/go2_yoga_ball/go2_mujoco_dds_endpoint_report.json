@@ -1,0 +1,100 @@
+{
+  "claim": "Unitree MuJoCo Go2 is a DDS LowCmd/LowState robot endpoint; replacing it with a real Go2 should not require policy/deploy code changes beyond network/backend selection and real-robot safety procedure.",
+  "evidence": {
+    "dds_factory_and_go2_selection": {
+      "end_line": 602,
+      "path": "thirdparties/unitree_mujoco/simulate/src/main.cc",
+      "ref": "thirdparties/unitree_mujoco/simulate/src/main.cc:587",
+      "start_line": 587,
+      "text": "  unitree::robot::ChannelFactory::Instance()->Init(param::config.domain_id, param::config.interface);\n\n\n  int body_id = mj_name2id(m, mjOBJ_BODY, \"torso_link\");\n  if (body_id < 0) {\n    body_id = mj_name2id(m, mjOBJ_BODY, \"base_link\");\n  }\n  param::config.band_attached_link = 6 * body_id;\n  \n  std::unique_ptr<UnitreeSDK2BridgeBase> interface = nullptr;\n  if (m->nu > NUM_MOTOR_IDL_GO) {\n    interface = std::make_unique<G1Bridge>(m, d);\n  } else {\n    interface = std::make_unique<Go2Bridge>(m, d);\n  }\n  interface->start();"
+    },
+    "dds_topic_setup": {
+      "end_line": 165,
+      "path": "thirdparties/unitree_mujoco/simulate/src/unitree_sdk2_bridge.h",
+      "ref": "thirdparties/unitree_mujoco/simulate/src/unitree_sdk2_bridge.h:151",
+      "start_line": 151,
+      "text": "template <typename LowCmd_t, typename LowState_t>\nclass RobotBridge : public UnitreeSDK2BridgeBase\n{\nusing HighState_t = unitree::robot::go2::publisher::SportModeState;\nusing WirelessController_t = unitree::robot::go2::publisher::WirelessController;\n\npublic:\n    RobotBridge(mjModel *model, mjData *data) : UnitreeSDK2BridgeBase(model, data)\n    {\n        lowcmd = std::make_shared<LowCmd_t>(\"rt/lowcmd\");\n        lowstate = std::make_unique<LowState_t>();\n        lowstate->joystick = joystick;\n        highstate = std::make_unique<HighState_t>();\n        wireless_controller = std::make_unique<WirelessController_t>();\n        wireless_controller->joystick = joystick;"
+    },
+    "go2_bridge_type": {
+      "end_line": 257,
+      "path": "thirdparties/unitree_mujoco/simulate/src/unitree_sdk2_bridge.h",
+      "ref": "thirdparties/unitree_mujoco/simulate/src/unitree_sdk2_bridge.h:257",
+      "start_line": 257,
+      "text": "using Go2Bridge = RobotBridge<unitree::robot::go2::subscription::LowCmd, unitree::robot::go2::publisher::LowState>;"
+    },
+    "go2_joint_and_actuator_limits": {
+      "end_line": 24,
+      "path": "thirdparties/unitree_mujoco/unitree_robots/go2/go2.xml",
+      "ref": "thirdparties/unitree_mujoco/unitree_robots/go2/go2.xml:7",
+      "start_line": 7,
+      "text": "    <default class=\"go2\">\n      <geom friction=\"0.4\" margin=\"0.001\" condim=\"1\"/>\n      <joint axis=\"0 1 0\" damping=\"0.1\" armature=\"0.01\" frictionloss=\"0.2\"/>\n      <motor ctrlrange=\"-23.7 23.7\"/>\n      <default class=\"abduction\">\n        <joint axis=\"1 0 0\" range=\"-1.0472 1.0472\"/>\n      </default>\n      <default class=\"hip\">\n        <default class=\"front_hip\">\n          <joint range=\"-1.5708 3.4907\"/>\n        </default>\n        <default class=\"back_hip\">\n          <joint range=\"-0.5236 4.5379\"/>\n        </default>\n      </default>\n      <default class=\"knee\">\n        <joint range=\"-2.7227 -0.83776\"/>\n        <motor ctrlrange=\"-45.43 45.43\"/>"
+    },
+    "go2_motor_order": {
+      "end_line": 234,
+      "path": "thirdparties/unitree_mujoco/unitree_robots/go2/go2.xml",
+      "ref": "thirdparties/unitree_mujoco/unitree_robots/go2/go2.xml:222",
+      "start_line": 222,
+      "text": "  <actuator>\n    <motor class=\"abduction\" name=\"FR_hip\" joint=\"FR_hip_joint\" />\n    <motor class=\"hip\" name=\"FR_thigh\" joint=\"FR_thigh_joint\" />\n    <motor class=\"knee\" name=\"FR_calf\" joint=\"FR_calf_joint\" />\n    <motor class=\"abduction\" name=\"FL_hip\" joint=\"FL_hip_joint\" />\n    <motor class=\"hip\" name=\"FL_thigh\" joint=\"FL_thigh_joint\" />\n    <motor class=\"knee\" name=\"FL_calf\" joint=\"FL_calf_joint\" />\n    <motor class=\"abduction\" name=\"RR_hip\" joint=\"RR_hip_joint\" />\n    <motor class=\"hip\" name=\"RR_thigh\" joint=\"RR_thigh_joint\" />\n    <motor class=\"knee\" name=\"RR_calf\" joint=\"RR_calf_joint\" />\n    <motor class=\"abduction\" name=\"RL_hip\" joint=\"RL_hip_joint\" />\n    <motor class=\"hip\" name=\"RL_thigh\" joint=\"RL_thigh_joint\" />\n    <motor class=\"knee\" name=\"RL_calf\" joint=\"RL_calf_joint\" />"
+    },
+    "go2_sensor_order": {
+      "end_line": 275,
+      "path": "thirdparties/unitree_mujoco/unitree_robots/go2/go2.xml",
+      "ref": "thirdparties/unitree_mujoco/unitree_robots/go2/go2.xml:238",
+      "start_line": 238,
+      "text": "    <jointpos name=\"FR_hip_pos\" joint=\"FR_hip_joint\" />\n    <jointpos name=\"FR_thigh_pos\" joint=\"FR_thigh_joint\" />\n    <jointpos name=\"FR_calf_pos\" joint=\"FR_calf_joint\" />\n    <jointpos name=\"FL_hip_pos\" joint=\"FL_hip_joint\" />\n    <jointpos name=\"FL_thigh_pos\" joint=\"FL_thigh_joint\" />\n    <jointpos name=\"FL_calf_pos\" joint=\"FL_calf_joint\" />\n    <jointpos name=\"RR_hip_pos\" joint=\"RR_hip_joint\" />\n    <jointpos name=\"RR_thigh_pos\" joint=\"RR_thigh_joint\" />\n    <jointpos name=\"RR_calf_pos\" joint=\"RR_calf_joint\" />\n    <jointpos name=\"RL_hip_pos\" joint=\"RL_hip_joint\" />\n    <jointpos name=\"RL_thigh_pos\" joint=\"RL_thigh_joint\" />\n    <jointpos name=\"RL_calf_pos\" joint=\"RL_calf_joint\" />\n\n    <jointvel name=\"FR_hip_vel\" joint=\"FR_hip_joint\" />\n    <jointvel name=\"FR_thigh_vel\" joint=\"FR_thigh_joint\" />\n    <jointvel name=\"FR_calf_vel\" joint=\"FR_calf_joint\" />\n    <jointvel name=\"FL_hip_vel\" joint=\"FL_hip_joint\" />\n    <jointvel name=\"FL_thigh_vel\" joint=\"FL_thigh_joint\" />\n    <jointvel name=\"FL_calf_vel\" joint=\"FL_calf_joint\" />\n    <jointvel name=\"RR_hip_vel\" joint=\"RR_hip_joint\" />\n    <jointvel name=\"RR_thigh_vel\" joint=\"RR_thigh_joint\" />\n    <jointvel name=\"RR_calf_vel\" joint=\"RR_calf_joint\" />\n    <jointvel name=\"RL_hip_vel\" joint=\"RL_hip_joint\" />\n    <jointvel name=\"RL_thigh_vel\" joint=\"RL_thigh_joint\" />\n    <jointvel name=\"RL_calf_vel\" joint=\"RL_calf_joint\" />\n\n    <jointactuatorfrc name=\"FR_hip_torque\" joint=\"FR_hip_joint\" noise=\"0.01\" />\n    <jointactuatorfrc name=\"FR_thigh_torque\" joint=\"FR_thigh_joint\" noise=\"0.01\" />\n    <jointactuatorfrc name=\"FR_calf_torque\" joint=\"FR_calf_joint\" noise=\"0.01\" />\n    <jointactuatorfrc name=\"FL_hip_torque\" joint=\"FL_hip_joint\" noise=\"0.01\" />\n    <jointactuatorfrc name=\"FL_thigh_torque\" joint=\"FL_thigh_joint\" noise=\"0.01\" />\n    <jointactuatorfrc name=\"FL_calf_torque\" joint=\"FL_calf_joint\" noise=\"0.01\" />\n    <jointactuatorfrc name=\"RR_hip_torque\" joint=\"RR_hip_joint\" noise=\"0.01\" />\n    <jointactuatorfrc name=\"RR_thigh_torque\" joint=\"RR_thigh_joint\" noise=\"0.01\" />\n    <jointactuatorfrc name=\"RR_calf_torque\" joint=\"RR_calf_joint\" noise=\"0.01\" />\n    <jointactuatorfrc name=\"RL_hip_torque\" joint=\"RL_hip_joint\" noise=\"0.01\" />\n    <jointactuatorfrc name=\"RL_thigh_torque\" joint=\"RL_thigh_joint\" noise=\"0.01\" />\n    <jointactuatorfrc name=\"RL_calf_torque\" joint=\"RL_calf_joint\" noise=\"0.01\" />"
+    },
+    "lowcmd_torque_equation": {
+      "end_line": 186,
+      "path": "thirdparties/unitree_mujoco/simulate/src/unitree_sdk2_bridge.h",
+      "ref": "thirdparties/unitree_mujoco/simulate/src/unitree_sdk2_bridge.h:178",
+      "start_line": 178,
+      "text": "        // lowcmd\n        {\n            std::lock_guard<std::mutex> lock(lowcmd->mutex_);\n            for(int i(0); i<num_motor_; i++) {\n                auto & m = lowcmd->msg_.motor_cmd()[i];\n                mj_data_->ctrl[i] = m.tau() +\n                                    m.kp() * (m.q() - mj_data_->sensordata[i]) +\n                                    m.kd() * (m.dq() - mj_data_->sensordata[i + num_motor_]);\n            }"
+    },
+    "lowstate_imu": {
+      "end_line": 226,
+      "path": "thirdparties/unitree_mujoco/simulate/src/unitree_sdk2_bridge.h",
+      "ref": "thirdparties/unitree_mujoco/simulate/src/unitree_sdk2_bridge.h:197",
+      "start_line": 197,
+      "text": "            if(imu_quat_adr_ >= 0) {\n                lowstate->msg_.imu_state().quaternion()[0] = mj_data_->sensordata[imu_quat_adr_ + 0];\n                lowstate->msg_.imu_state().quaternion()[1] = mj_data_->sensordata[imu_quat_adr_ + 1];\n                lowstate->msg_.imu_state().quaternion()[2] = mj_data_->sensordata[imu_quat_adr_ + 2];\n                lowstate->msg_.imu_state().quaternion()[3] = mj_data_->sensordata[imu_quat_adr_ + 3];\n\n                double w = lowstate->msg_.imu_state().quaternion()[0];\n                double x = lowstate->msg_.imu_state().quaternion()[1];\n                double y = lowstate->msg_.imu_state().quaternion()[2];\n                double z = lowstate->msg_.imu_state().quaternion()[3];\n\n                lowstate->msg_.imu_state().rpy()[0] = atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y));\n                lowstate->msg_.imu_state().rpy()[1] = asin(2 * (w * y - z * x));\n                lowstate->msg_.imu_state().rpy()[2] = atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z));\n            }\n            \n            if(imu_gyro_adr_ >= 0) {\n                lowstate->msg_.imu_state().gyroscope()[0] = mj_data_->sensordata[imu_gyro_adr_ + 0];\n                lowstate->msg_.imu_state().gyroscope()[1] = mj_data_->sensordata[imu_gyro_adr_ + 1];\n                lowstate->msg_.imu_state().gyroscope()[2] = mj_data_->sensordata[imu_gyro_adr_ + 2];\n            }\n\n            if(imu_acc_adr_ >= 0) {\n                lowstate->msg_.imu_state().accelerometer()[0] = mj_data_->sensordata[imu_acc_adr_ + 0];\n                lowstate->msg_.imu_state().accelerometer()[1] = mj_data_->sensordata[imu_acc_adr_ + 1];\n                lowstate->msg_.imu_state().accelerometer()[2] = mj_data_->sensordata[imu_acc_adr_ + 2];\n            }\n            \n            lowstate->msg_.tick() = std::round(mj_data_->time / 1e-3);\n            lowstate->unlockAndPublish();"
+    },
+    "lowstate_motor_state": {
+      "end_line": 195,
+      "path": "thirdparties/unitree_mujoco/simulate/src/unitree_sdk2_bridge.h",
+      "ref": "thirdparties/unitree_mujoco/simulate/src/unitree_sdk2_bridge.h:189",
+      "start_line": 189,
+      "text": "        // lowstate\n        if(lowstate->trylock()) {\n            for(int i(0); i<num_motor_; i++) {\n                lowstate->msg_.motor_state()[i].q() = mj_data_->sensordata[i];\n                lowstate->msg_.motor_state()[i].dq() = mj_data_->sensordata[i + num_motor_];\n                lowstate->msg_.motor_state()[i].tau_est() = mj_data_->sensordata[i + 2 * num_motor_];\n            }"
+    },
+    "python_dds_topics": {
+      "end_line": 29,
+      "path": "thirdparties/unitree_mujoco/simulate_python/unitree_sdk2py_bridge.py",
+      "ref": "thirdparties/unitree_mujoco/simulate_python/unitree_sdk2py_bridge.py:25",
+      "start_line": 25,
+      "text": "TOPIC_LOWCMD = \"rt/lowcmd\"\nTOPIC_LOWSTATE = \"rt/lowstate\"\nTOPIC_HIGHSTATE = \"rt/sportmodestate\"\nTOPIC_WIRELESS_CONTROLLER = \"rt/wirelesscontroller\"\n"
+    },
+    "python_lowcmd_torque_equation": {
+      "end_line": 123,
+      "path": "thirdparties/unitree_mujoco/simulate_python/unitree_sdk2py_bridge.py",
+      "ref": "thirdparties/unitree_mujoco/simulate_python/unitree_sdk2py_bridge.py:111",
+      "start_line": 111,
+      "text": "    def LowCmdHandler(self, msg: LowCmd_):\n        if self.mj_data != None:\n            for i in range(self.num_motor):\n                self.mj_data.ctrl[i] = (\n                    msg.motor_cmd[i].tau\n                    + msg.motor_cmd[i].kp\n                    * (msg.motor_cmd[i].q - self.mj_data.sensordata[i])\n                    + msg.motor_cmd[i].kd\n                    * (\n                        msg.motor_cmd[i].dq\n                        - self.mj_data.sensordata[i + self.num_motor]\n                    )\n                )"
+    },
+    "real_robot_interface_argument": {
+      "end_line": 258,
+      "path": "thirdparties/unitree_mujoco/readme.md",
+      "ref": "thirdparties/unitree_mujoco/readme.md:253",
+      "start_line": 253,
+      "text": "```\n2. Run:\n```bash\n./stand_go2 # Control the robot in the simulation (make sure the Go2 simulation scene has been loaded)\n./stand_go2 enp3s0 # Control the physical robot, where enp3s0 is the name of the network card connected to the robot\n```"
+    },
+    "upstream_real_swap_claim": {
+      "end_line": 9,
+      "path": "thirdparties/unitree_mujoco/readme.md",
+      "ref": "thirdparties/unitree_mujoco/readme.md:3",
+      "start_line": 3,
+      "text": "`unitree_mujoco` is a simulator developed based on `Unitree sdk2` and `mujoco`. Users can easily integrate the control programs developed with `Unitree_sdk2`, `unitree_ros2`, and `unitree_sdk2_python` into this simulator, enabling a seamless transition from simulation to physical development. The repository includes two versions of the simulator implemented in C++ and Python, with a structure as follows:\n![](./doc/func.png)\n\n## Directory Structure\n- `simulate`: Simulator implemented based on unitree_sdk2 and mujoco (C++, recommended)\n- `simulate_python`: Simulator implemented based on unitree_sdk2_python and mujoco (Python)\n- `unitree_robots`: MJCF description files for robots supported by unitree_sdk2"
+    }
+  },
+  "generated_at_unix": 1779853551.8167377,
+  "lcm_mentions_in_endpoint_sources": [],
+  "ok": true,
+  "unitree_mujoco_commit": "c598f103acb87a5fd3de7c9037f4dab6aa7f232b"
+}

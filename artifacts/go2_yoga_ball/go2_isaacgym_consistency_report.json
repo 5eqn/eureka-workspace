@@ -1,0 +1,750 @@
+{
+  "actuator_path_ok": true,
+  "checks": [
+    {
+      "details": {
+        "isaacgym_urdf": [
+          "FL_calf_joint",
+          "FL_hip_joint",
+          "FL_thigh_joint",
+          "FR_calf_joint",
+          "FR_hip_joint",
+          "FR_thigh_joint",
+          "RL_calf_joint",
+          "RL_hip_joint",
+          "RL_thigh_joint",
+          "RR_calf_joint",
+          "RR_hip_joint",
+          "RR_thigh_joint"
+        ],
+        "policy_order": [
+          "FL_hip_joint",
+          "FL_thigh_joint",
+          "FL_calf_joint",
+          "FR_hip_joint",
+          "FR_thigh_joint",
+          "FR_calf_joint",
+          "RL_hip_joint",
+          "RL_thigh_joint",
+          "RL_calf_joint",
+          "RR_hip_joint",
+          "RR_thigh_joint",
+          "RR_calf_joint"
+        ],
+        "unitree_mujoco": [
+          "FL_calf_joint",
+          "FL_hip_joint",
+          "FL_thigh_joint",
+          "FR_calf_joint",
+          "FR_hip_joint",
+          "FR_thigh_joint",
+          "RL_calf_joint",
+          "RL_hip_joint",
+          "RL_thigh_joint",
+          "RR_calf_joint",
+          "RR_hip_joint",
+          "RR_thigh_joint"
+        ]
+      },
+      "name": "joint_names",
+      "ok": true
+    },
+    {
+      "details": {
+        "dr_eureka_policy_order": [
+          "FL_hip_joint",
+          "FL_thigh_joint",
+          "FL_calf_joint",
+          "FR_hip_joint",
+          "FR_thigh_joint",
+          "FR_calf_joint",
+          "RL_hip_joint",
+          "RL_thigh_joint",
+          "RL_calf_joint",
+          "RR_hip_joint",
+          "RR_thigh_joint",
+          "RR_calf_joint"
+        ],
+        "unitree_policy_order": [
+          "FL_hip_joint",
+          "FL_thigh_joint",
+          "FL_calf_joint",
+          "FR_hip_joint",
+          "FR_thigh_joint",
+          "FR_calf_joint",
+          "RL_hip_joint",
+          "RL_thigh_joint",
+          "RL_calf_joint",
+          "RR_hip_joint",
+          "RR_thigh_joint",
+          "RR_calf_joint"
+        ]
+      },
+      "name": "action_order",
+      "ok": true
+    },
+    {
+      "details": {
+        "isaacgym_cfg": {
+          "FL_calf_joint": -1.8,
+          "FL_hip_joint": 0.0,
+          "FL_thigh_joint": 0.9,
+          "FR_calf_joint": -1.8,
+          "FR_hip_joint": 0.0,
+          "FR_thigh_joint": 0.9,
+          "RL_calf_joint": -1.8,
+          "RL_hip_joint": 0.0,
+          "RL_thigh_joint": 0.9,
+          "RR_calf_joint": -1.8,
+          "RR_hip_joint": 0.0,
+          "RR_thigh_joint": 0.9
+        },
+        "mismatches": {},
+        "unitree_home": {
+          "FL_calf_joint": -1.8,
+          "FL_hip_joint": 0.0,
+          "FL_thigh_joint": 0.9,
+          "FR_calf_joint": -1.8,
+          "FR_hip_joint": 0.0,
+          "FR_thigh_joint": 0.9,
+          "RL_calf_joint": -1.8,
+          "RL_hip_joint": 0.0,
+          "RL_thigh_joint": 0.9,
+          "RR_calf_joint": -1.8,
+          "RR_hip_joint": 0.0,
+          "RR_thigh_joint": 0.9
+        }
+      },
+      "name": "default_pose",
+      "ok": true
+    },
+    {
+      "details": {
+        "mismatches": {}
+      },
+      "name": "joint_limits",
+      "ok": true
+    },
+    {
+      "details": {
+        "mismatches": {},
+        "tolerance": 0.15
+      },
+      "name": "effort_limits",
+      "ok": true
+    },
+    {
+      "details": {
+        "claim": "No Go2 actuator network found in fetched DrEureka resources; use SDK2 LowCmd PD semantics with explicit gains, torque limits, and command equation.",
+        "control_type": "P",
+        "damping": {
+          "calf": 2.0,
+          "hip": 1.0,
+          "thigh": 1.0
+        },
+        "go2_actuator_net_candidates": [],
+        "stiffness": {
+          "calf": 40.0,
+          "hip": 20.0,
+          "thigh": 20.0
+        }
+      },
+      "name": "controller_assumption",
+      "ok": true
+    },
+    {
+      "details": {
+        "isaacgym_cfg": "foot",
+        "unitree_mujoco_foot_bodies": [
+          "FL_foot",
+          "FR_foot",
+          "RL_foot",
+          "RR_foot"
+        ]
+      },
+      "name": "foot_name",
+      "ok": true
+    }
+  ],
+  "core_consistency_ok": true,
+  "dr_eureka_go2_config": {
+    "action_scale": 0.25,
+    "asset_file": "/home/seqn/eureka-workspace/thirdparties/go2_description/urdf/go2_description.urdf",
+    "control_type": "P",
+    "damping": {
+      "calf": 2.0,
+      "hip": 1.0,
+      "thigh": 1.0
+    },
+    "default_joint_angles": {
+      "FL_calf_joint": -1.8,
+      "FL_hip_joint": 0.0,
+      "FL_thigh_joint": 0.9,
+      "FR_calf_joint": -1.8,
+      "FR_hip_joint": 0.0,
+      "FR_thigh_joint": 0.9,
+      "RL_calf_joint": -1.8,
+      "RL_hip_joint": 0.0,
+      "RL_thigh_joint": 0.9,
+      "RR_calf_joint": -1.8,
+      "RR_hip_joint": 0.0,
+      "RR_thigh_joint": 0.9
+    },
+    "foot_name": "foot",
+    "hip_scale_reduction": 0.5,
+    "path": "thirdparties/DrEureka/globe_walking/go1_gym/envs/go2/go2_config.py",
+    "stiffness": {
+      "calf": 40.0,
+      "hip": 20.0,
+      "thigh": 20.0
+    }
+  },
+  "evidence": {
+    "drek_robot_registry": {
+      "end_line": 1390,
+      "path": "thirdparties/DrEureka/globe_walking/go1_gym/envs/base/legged_robot.py",
+      "ref": "thirdparties/DrEureka/globe_walking/go1_gym/envs/base/legged_robot.py:1380",
+      "start_line": 1380,
+      "text": "        # create robot\n        from globe_walking.go1_gym.robots.go1 import Go1\n        from globe_walking.go1_gym.robots.go2 import Go2\n\n        robot_classes = {\n            'go1': Go1,\n            'go2': Go2,\n        }\n\n        self.robot = robot_classes[self.cfg.robot.name](self)\n        all_assets.append(self.robot)"
+    },
+    "drek_train_robot_selector": {
+      "end_line": 143,
+      "path": "thirdparties/DrEureka/globe_walking/scripts/train.py",
+      "ref": "thirdparties/DrEureka/globe_walking/scripts/train.py:108",
+      "start_line": 108,
+      "text": "        Cfg.domain_rand = Cfg.domain_rand_off\n        Cfg.sim.physx = Cfg.sim.physx_mini\n    else:\n        raise ValueError(f\"Invalid dr_config: {dr_config}\")\n\n    robot_configs = {\n        \"go1\": config_go1,\n        \"go2\": config_go2,\n    }\n    if robot not in robot_configs:\n        raise ValueError(f\"Invalid robot: {robot}\")\n    robot_configs[robot](Cfg)\n    apply_domain_rand_profile(Cfg, domain_rand_profile)\n    if num_envs is not None:\n        Cfg.env.num_envs = int(num_envs)\n    Cfg.env.record_video = bool(record_video)\n\n    if resume_path:\n        RunnerArgs.resume = True\n        RunnerArgs.load_run = resume_path\n        RunnerArgs.resume_checkpoint = os.path.join(RunnerArgs.load_run, \"checkpoints\", \"ac_weights_last.pt\")\n\n    Cfg.robot.name = robot\n\n    Cfg.commands.num_lin_vel_bins = 30\n    Cfg.commands.num_ang_vel_bins = 30\n    Cfg.curriculum_thresholds.tracking_ang_vel = 0.7\n    Cfg.curriculum_thresholds.tracking_lin_vel = 0.8\n    Cfg.curriculum_thresholds.tracking_contacts_shaped_vel = 0.90\n    Cfg.curriculum_thresholds.tracking_contacts_shaped_force = 0.90\n\n    Cfg.commands.distributional_commands = True\n\n    if robot == \"go1\":\n        Cfg.control.control_type = \"actuator_net\"\n"
+    },
+    "isaacgym_go2_asset_path_and_names": {
+      "end_line": 61,
+      "path": "thirdparties/DrEureka/globe_walking/go1_gym/envs/go2/go2_config.py",
+      "ref": "thirdparties/DrEureka/globe_walking/go1_gym/envs/go2/go2_config.py:49",
+      "start_line": 49,
+      "text": "    _ = Cnfg.asset\n    _.file = _go2_urdf_path()\n    _.foot_name = \"foot\"\n    _.penalize_contacts_on = [\"thigh\", \"calf\"]\n    _.terminate_after_contacts_on = [\"base\"]\n    _.self_collisions = 0\n    _.flip_visual_attachments = False\n    _.fix_base_link = False\n\n    _ = Cnfg.rewards\n    _.soft_dof_pos_limit = 0.9\n\n    _ = Cnfg.terrain"
+    },
+    "isaacgym_go2_default_pose_and_control": {
+      "end_line": 47,
+      "path": "thirdparties/DrEureka/globe_walking/go1_gym/envs/go2/go2_config.py",
+      "ref": "thirdparties/DrEureka/globe_walking/go1_gym/envs/go2/go2_config.py:21",
+      "start_line": 21,
+      "text": "def config_go2(Cnfg: Union[Cfg, Meta]):\n    _ = Cnfg.init_state\n\n    # Unitree MuJoCo Go2 home keyframe:\n    # qpos joints are [hip, thigh, calf] * 4 with hip=0, thigh=0.9, calf=-1.8.\n    _.default_joint_angles = {\n        \"FL_hip_joint\": 0.0,\n        \"FL_thigh_joint\": 0.9,\n        \"FL_calf_joint\": -1.8,\n        \"FR_hip_joint\": 0.0,\n        \"FR_thigh_joint\": 0.9,\n        \"FR_calf_joint\": -1.8,\n        \"RL_hip_joint\": 0.0,\n        \"RL_thigh_joint\": 0.9,\n        \"RL_calf_joint\": -1.8,\n        \"RR_hip_joint\": 0.0,\n        \"RR_thigh_joint\": 0.9,\n        \"RR_calf_joint\": -1.8,\n    }\n\n    _ = Cnfg.control\n    _.control_type = \"P\"\n    _.stiffness = {\"hip\": 20.0, \"thigh\": 20.0, \"calf\": 40.0}\n    _.damping = {\"hip\": 1.0, \"thigh\": 1.0, \"calf\": 2.0}\n    _.action_scale = 0.25\n    _.hip_scale_reduction = 0.5\n    _.decimation = 4"
+    },
+    "isaacgym_go2_robot_loader": {
+      "end_line": 45,
+      "path": "thirdparties/DrEureka/globe_walking/go1_gym/robots/go2.py",
+      "ref": "thirdparties/DrEureka/globe_walking/go1_gym/robots/go2.py:8",
+      "start_line": 8,
+      "text": "class Go2(Robot):\n    def __init__(self, env):\n        super().__init__(env)\n\n    def initialize(self):\n        asset_path = self.env.cfg.asset.file\n        asset_root = os.path.dirname(asset_path)\n        asset_file = os.path.basename(asset_path)\n\n        asset_config = self.env.cfg.asset\n\n        asset_options = gymapi.AssetOptions()\n        asset_options.default_dof_drive_mode = asset_config.default_dof_drive_mode\n        asset_options.collapse_fixed_joints = asset_config.collapse_fixed_joints\n        asset_options.replace_cylinder_with_capsule = asset_config.replace_cylinder_with_capsule\n        asset_options.flip_visual_attachments = asset_config.flip_visual_attachments\n        asset_options.fix_base_link = asset_config.fix_base_link\n        asset_options.density = asset_config.density\n        asset_options.angular_damping = asset_config.angular_damping\n        asset_options.linear_damping = asset_config.linear_damping\n        asset_options.max_angular_velocity = asset_config.max_angular_velocity\n        asset_options.max_linear_velocity = asset_config.max_linear_velocity\n        asset_options.armature = asset_config.armature\n        asset_options.thickness = asset_config.thickness\n        asset_options.disable_gravity = asset_config.disable_gravity\n        asset_options.vhacd_enabled = True\n        asset_options.vhacd_params = gymapi.VhacdParams()\n        asset_options.vhacd_params.resolution = 500000\n\n        asset = self.env.gym.load_asset(self.env.sim, asset_root, asset_file, asset_options)\n\n        self.num_dof = self.env.gym.get_asset_dof_count(asset)\n        self.num_actuated_dof = 12\n        self.num_bodies = self.env.gym.get_asset_rigid_body_count(asset)\n        dof_props_asset = self.env.gym.get_asset_dof_properties(asset)\n        rigid_shape_props_asset = self.env.gym.get_asset_rigid_shape_properties(asset)\n\n        return asset, dof_props_asset, rigid_shape_props_asset"
+    },
+    "unitree_mujoco_home_keyframe": {
+      "end_line": 288,
+      "path": "thirdparties/unitree_mujoco/unitree_robots/go2/go2.xml",
+      "ref": "thirdparties/unitree_mujoco/unitree_robots/go2/go2.xml:286",
+      "start_line": 286,
+      "text": "    <key name=\"home\" qpos=\"0 0 0.27 1 0 0 0 0 0.9 -1.8 0 0.9 -1.8 0 0.9 -1.8 0 0.9 -1.8\"\n      ctrl=\"0 0.9 -1.8 0 0.9 -1.8 0 0.9 -1.8 0 0.9 -1.8\" />\n  </keyframe>"
+    },
+    "unitree_mujoco_joint_and_actuator_limits": {
+      "end_line": 24,
+      "path": "thirdparties/unitree_mujoco/unitree_robots/go2/go2.xml",
+      "ref": "thirdparties/unitree_mujoco/unitree_robots/go2/go2.xml:7",
+      "start_line": 7,
+      "text": "    <default class=\"go2\">\n      <geom friction=\"0.4\" margin=\"0.001\" condim=\"1\"/>\n      <joint axis=\"0 1 0\" damping=\"0.1\" armature=\"0.01\" frictionloss=\"0.2\"/>\n      <motor ctrlrange=\"-23.7 23.7\"/>\n      <default class=\"abduction\">\n        <joint axis=\"1 0 0\" range=\"-1.0472 1.0472\"/>\n      </default>\n      <default class=\"hip\">\n        <default class=\"front_hip\">\n          <joint range=\"-1.5708 3.4907\"/>\n        </default>\n        <default class=\"back_hip\">\n          <joint range=\"-0.5236 4.5379\"/>\n        </default>\n      </default>\n      <default class=\"knee\">\n        <joint range=\"-2.7227 -0.83776\"/>\n        <motor ctrlrange=\"-45.43 45.43\"/>"
+    },
+    "unitree_mujoco_motor_order": {
+      "end_line": 234,
+      "path": "thirdparties/unitree_mujoco/unitree_robots/go2/go2.xml",
+      "ref": "thirdparties/unitree_mujoco/unitree_robots/go2/go2.xml:222",
+      "start_line": 222,
+      "text": "  <actuator>\n    <motor class=\"abduction\" name=\"FR_hip\" joint=\"FR_hip_joint\" />\n    <motor class=\"hip\" name=\"FR_thigh\" joint=\"FR_thigh_joint\" />\n    <motor class=\"knee\" name=\"FR_calf\" joint=\"FR_calf_joint\" />\n    <motor class=\"abduction\" name=\"FL_hip\" joint=\"FL_hip_joint\" />\n    <motor class=\"hip\" name=\"FL_thigh\" joint=\"FL_thigh_joint\" />\n    <motor class=\"knee\" name=\"FL_calf\" joint=\"FL_calf_joint\" />\n    <motor class=\"abduction\" name=\"RR_hip\" joint=\"RR_hip_joint\" />\n    <motor class=\"hip\" name=\"RR_thigh\" joint=\"RR_thigh_joint\" />\n    <motor class=\"knee\" name=\"RR_calf\" joint=\"RR_calf_joint\" />\n    <motor class=\"abduction\" name=\"RL_hip\" joint=\"RL_hip_joint\" />\n    <motor class=\"hip\" name=\"RL_thigh\" joint=\"RL_thigh_joint\" />\n    <motor class=\"knee\" name=\"RL_calf\" joint=\"RL_calf_joint\" />"
+    },
+    "unitree_mujoco_torque_equation": {
+      "end_line": 186,
+      "path": "thirdparties/unitree_mujoco/simulate/src/unitree_sdk2_bridge.h",
+      "ref": "thirdparties/unitree_mujoco/simulate/src/unitree_sdk2_bridge.h:178",
+      "start_line": 178,
+      "text": "        // lowcmd\n        {\n            std::lock_guard<std::mutex> lock(lowcmd->mutex_);\n            for(int i(0); i<num_motor_; i++) {\n                auto & m = lowcmd->msg_.motor_cmd()[i];\n                mj_data_->ctrl[i] = m.tau() +\n                                    m.kp() * (m.q() - mj_data_->sensordata[i]) +\n                                    m.kd() * (m.dq() - mj_data_->sensordata[i + num_motor_]);\n            }"
+    }
+  },
+  "generated_at_unix": 1779853551.899141,
+  "go2_actuator_net_candidates": [],
+  "isaacgym_urdf": {
+    "joints": {
+      "FL_calf_joint": {
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "effort": 45.43,
+        "lower": -2.7227,
+        "type": "revolute",
+        "upper": -0.83776,
+        "velocity": 15.7
+      },
+      "FL_hip_joint": {
+        "axis": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "effort": 23.7,
+        "lower": -1.0472,
+        "type": "revolute",
+        "upper": 1.0472,
+        "velocity": 30.1
+      },
+      "FL_thigh_joint": {
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "effort": 23.7,
+        "lower": -1.5708,
+        "type": "revolute",
+        "upper": 3.4907,
+        "velocity": 30.1
+      },
+      "FR_calf_joint": {
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "effort": 45.43,
+        "lower": -2.7227,
+        "type": "revolute",
+        "upper": -0.83776,
+        "velocity": 15.7
+      },
+      "FR_hip_joint": {
+        "axis": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "effort": 23.7,
+        "lower": -1.0472,
+        "type": "revolute",
+        "upper": 1.0472,
+        "velocity": 30.1
+      },
+      "FR_thigh_joint": {
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "effort": 23.7,
+        "lower": -1.5708,
+        "type": "revolute",
+        "upper": 3.4907,
+        "velocity": 30.1
+      },
+      "RL_calf_joint": {
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "effort": 45.43,
+        "lower": -2.7227,
+        "type": "revolute",
+        "upper": -0.83776,
+        "velocity": 15.7
+      },
+      "RL_hip_joint": {
+        "axis": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "effort": 23.7,
+        "lower": -1.0472,
+        "type": "revolute",
+        "upper": 1.0472,
+        "velocity": 30.1
+      },
+      "RL_thigh_joint": {
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "effort": 23.7,
+        "lower": -0.5236,
+        "type": "revolute",
+        "upper": 4.5379,
+        "velocity": 30.1
+      },
+      "RR_calf_joint": {
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "effort": 45.43,
+        "lower": -2.7227,
+        "type": "revolute",
+        "upper": -0.83776,
+        "velocity": 15.7
+      },
+      "RR_hip_joint": {
+        "axis": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "effort": 23.7,
+        "lower": -1.0472,
+        "type": "revolute",
+        "upper": 1.0472,
+        "velocity": 30.1
+      },
+      "RR_thigh_joint": {
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "effort": 23.7,
+        "lower": -0.5236,
+        "type": "revolute",
+        "upper": 4.5379,
+        "velocity": 30.1
+      }
+    },
+    "path": "artifacts/go2_yoga_ball/build/go2_description_isaacgym.urdf"
+  },
+  "long_training_allowed": true,
+  "ok": true,
+  "pretrained_domain_rand_valid_for_go2": true,
+  "unitree_mujoco_ground_truth": {
+    "actuator_order": [
+      "FR_hip_joint",
+      "FR_thigh_joint",
+      "FR_calf_joint",
+      "FL_hip_joint",
+      "FL_thigh_joint",
+      "FL_calf_joint",
+      "RR_hip_joint",
+      "RR_thigh_joint",
+      "RR_calf_joint",
+      "RL_hip_joint",
+      "RL_thigh_joint",
+      "RL_calf_joint"
+    ],
+    "actuators": {
+      "FL_calf_joint": {
+        "class": "knee",
+        "ctrlrange": [
+          -45.43,
+          45.43
+        ],
+        "effort": 45.43,
+        "name": "FL_calf"
+      },
+      "FL_hip_joint": {
+        "class": "abduction",
+        "ctrlrange": [
+          -23.7,
+          23.7
+        ],
+        "effort": 23.7,
+        "name": "FL_hip"
+      },
+      "FL_thigh_joint": {
+        "class": "hip",
+        "ctrlrange": [
+          -23.7,
+          23.7
+        ],
+        "effort": 23.7,
+        "name": "FL_thigh"
+      },
+      "FR_calf_joint": {
+        "class": "knee",
+        "ctrlrange": [
+          -45.43,
+          45.43
+        ],
+        "effort": 45.43,
+        "name": "FR_calf"
+      },
+      "FR_hip_joint": {
+        "class": "abduction",
+        "ctrlrange": [
+          -23.7,
+          23.7
+        ],
+        "effort": 23.7,
+        "name": "FR_hip"
+      },
+      "FR_thigh_joint": {
+        "class": "hip",
+        "ctrlrange": [
+          -23.7,
+          23.7
+        ],
+        "effort": 23.7,
+        "name": "FR_thigh"
+      },
+      "RL_calf_joint": {
+        "class": "knee",
+        "ctrlrange": [
+          -45.43,
+          45.43
+        ],
+        "effort": 45.43,
+        "name": "RL_calf"
+      },
+      "RL_hip_joint": {
+        "class": "abduction",
+        "ctrlrange": [
+          -23.7,
+          23.7
+        ],
+        "effort": 23.7,
+        "name": "RL_hip"
+      },
+      "RL_thigh_joint": {
+        "class": "hip",
+        "ctrlrange": [
+          -23.7,
+          23.7
+        ],
+        "effort": 23.7,
+        "name": "RL_thigh"
+      },
+      "RR_calf_joint": {
+        "class": "knee",
+        "ctrlrange": [
+          -45.43,
+          45.43
+        ],
+        "effort": 45.43,
+        "name": "RR_calf"
+      },
+      "RR_hip_joint": {
+        "class": "abduction",
+        "ctrlrange": [
+          -23.7,
+          23.7
+        ],
+        "effort": 23.7,
+        "name": "RR_hip"
+      },
+      "RR_thigh_joint": {
+        "class": "hip",
+        "ctrlrange": [
+          -23.7,
+          23.7
+        ],
+        "effort": 23.7,
+        "name": "RR_thigh"
+      }
+    },
+    "commit": "c598f103acb87a5fd3de7c9037f4dab6aa7f232b",
+    "home": {
+      "ctrl": [
+        0.0,
+        0.9,
+        -1.8,
+        0.0,
+        0.9,
+        -1.8,
+        0.0,
+        0.9,
+        -1.8,
+        0.0,
+        0.9,
+        -1.8
+      ],
+      "ctrl_by_actuator_order": {
+        "FL_calf_joint": -1.8,
+        "FL_hip_joint": 0.0,
+        "FL_thigh_joint": 0.9,
+        "FR_calf_joint": -1.8,
+        "FR_hip_joint": 0.0,
+        "FR_thigh_joint": 0.9,
+        "RL_calf_joint": -1.8,
+        "RL_hip_joint": 0.0,
+        "RL_thigh_joint": 0.9,
+        "RR_calf_joint": -1.8,
+        "RR_hip_joint": 0.0,
+        "RR_thigh_joint": 0.9
+      },
+      "joint_defaults_by_policy_order": {
+        "FL_calf_joint": -1.8,
+        "FL_hip_joint": 0.0,
+        "FL_thigh_joint": 0.9,
+        "FR_calf_joint": -1.8,
+        "FR_hip_joint": 0.0,
+        "FR_thigh_joint": 0.9,
+        "RL_calf_joint": -1.8,
+        "RL_hip_joint": 0.0,
+        "RL_thigh_joint": 0.9,
+        "RR_calf_joint": -1.8,
+        "RR_hip_joint": 0.0,
+        "RR_thigh_joint": 0.9
+      },
+      "qpos": [
+        0.0,
+        0.0,
+        0.27,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.9,
+        -1.8,
+        0.0,
+        0.9,
+        -1.8,
+        0.0,
+        0.9,
+        -1.8,
+        0.0,
+        0.9,
+        -1.8
+      ]
+    },
+    "joint_order": [
+      "FL_hip_joint",
+      "FL_thigh_joint",
+      "FL_calf_joint",
+      "FR_hip_joint",
+      "FR_thigh_joint",
+      "FR_calf_joint",
+      "RL_hip_joint",
+      "RL_thigh_joint",
+      "RL_calf_joint",
+      "RR_hip_joint",
+      "RR_thigh_joint",
+      "RR_calf_joint"
+    ],
+    "joints": {
+      "FL_calf_joint": {
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "class": "knee",
+        "lower": -2.7227,
+        "upper": -0.83776
+      },
+      "FL_hip_joint": {
+        "axis": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "class": "abduction",
+        "lower": -1.0472,
+        "upper": 1.0472
+      },
+      "FL_thigh_joint": {
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "class": "front_hip",
+        "lower": -1.5708,
+        "upper": 3.4907
+      },
+      "FR_calf_joint": {
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "class": "knee",
+        "lower": -2.7227,
+        "upper": -0.83776
+      },
+      "FR_hip_joint": {
+        "axis": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "class": "abduction",
+        "lower": -1.0472,
+        "upper": 1.0472
+      },
+      "FR_thigh_joint": {
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "class": "front_hip",
+        "lower": -1.5708,
+        "upper": 3.4907
+      },
+      "RL_calf_joint": {
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "class": "knee",
+        "lower": -2.7227,
+        "upper": -0.83776
+      },
+      "RL_hip_joint": {
+        "axis": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "class": "abduction",
+        "lower": -1.0472,
+        "upper": 1.0472
+      },
+      "RL_thigh_joint": {
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "class": "back_hip",
+        "lower": -0.5236,
+        "upper": 4.5379
+      },
+      "RR_calf_joint": {
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "class": "knee",
+        "lower": -2.7227,
+        "upper": -0.83776
+      },
+      "RR_hip_joint": {
+        "axis": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "class": "abduction",
+        "lower": -1.0472,
+        "upper": 1.0472
+      },
+      "RR_thigh_joint": {
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "class": "back_hip",
+        "lower": -0.5236,
+        "upper": 4.5379
+      }
+    },
+    "path": "thirdparties/unitree_mujoco/unitree_robots/go2/go2.xml"
+  }
+}

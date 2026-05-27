@@ -1,0 +1,129 @@
+{
+  "claim": "The Go2 deploy-side bridge preserves DrEureka LCM policy semantics while translating to Unitree SDK2 DDS LowCmd/LowState.",
+  "drek_lcm_command_is_unitree_order": true,
+  "evidence": {
+    "bridge_dds_initialization": {
+      "end_line": 72,
+      "path": "scripts/go2_yoga_ball/lcm_to_dds_bridge.py",
+      "ref": "scripts/go2_yoga_ball/lcm_to_dds_bridge.py:61",
+      "start_line": 61,
+      "text": "        self.lc = lcm.LCM(lcm_url)\n        self.crc = CRC()\n        self.low_cmd = unitree_go_msg_dds__LowCmd_()\n        self.lowcmd_pub = ChannelPublisher(\"rt/lowcmd\", LowCmd_)\n        self.lowcmd_pub.Init()\n        self.lowstate_sub = ChannelSubscriber(\"rt/lowstate\", LowState_)\n        self.lowstate_sub.Init(self.on_lowstate, 10)\n        self.lc.subscribe(\"pd_plustau_targets\", self.on_lcm_command)\n        self.last_lowstate: Any | None = None\n        self.last_lowstate_monotonic: float | None = None\n        self.last_cmd_monotonic: float | None = None\n        self.init_lowcmd()"
+    },
+    "bridge_dds_to_lcm_state_mapping": {
+      "end_line": 159,
+      "path": "scripts/go2_yoga_ball/lcm_to_dds_bridge.py",
+      "ref": "scripts/go2_yoga_ball/lcm_to_dds_bridge.py:115",
+      "start_line": 115,
+      "text": "        leg.tau_est = [float(msg.motor_state[i].tau_est) for i in range(12)]\n        leg.timestamp_us = now_us\n        leg.id = 0\n        leg.robot_id = 1\n        self.lc.publish(\"leg_control_data\", leg.encode())\n\n        state = state_estimator_lcmt()\n        state.p = [0.0, 0.0, 0.0]\n        state.vWorld = [0.0, 0.0, 0.0]\n        state.vBody = [0.0, 0.0, 0.0]\n        state.quat = [float(v) for v in msg.imu_state.quaternion]\n        state.rpy = [float(v) for v in msg.imu_state.rpy]\n        if state.rpy == [0.0, 0.0, 0.0] and state.quat != [0.0, 0.0, 0.0, 0.0]:\n            state.rpy = quat_to_rpy(state.quat)\n        state.omegaBody = [float(v) for v in msg.imu_state.gyroscope]\n        state.omegaWorld = list(state.omegaBody)\n        state.aBody = [float(v) for v in msg.imu_state.accelerometer]\n        state.aWorld = list(state.aBody)\n        state.contact_estimate = [float(v) for v in msg.foot_force_est]\n        if not any(state.contact_estimate):\n            state.contact_estimate = [float(v) for v in msg.foot_force]\n        state.timestamp_us = now_us\n        state.id = 0\n        state.robot_id = 1\n        self.lc.publish(\"state_estimator_data\", state.encode())\n\n        rc = rc_command_lcmt()\n        rc.mode = 0\n        rc.left_stick = [0.0, 0.0]\n        rc.right_stick = [0.0, 0.0]\n        rc.knobs = [0.0, 0.0]\n        rc.left_upper_switch = 0\n        rc.left_lower_left_switch = 0\n        rc.left_lower_right_switch = 0\n        rc.right_upper_switch = 0\n        rc.right_lower_left_switch = 0\n        rc.right_lower_right_switch = 0\n        self.lc.publish(\"rc_command\", rc.encode())\n\n    def spin(self, duration_s: float | None) -> int:\n        start = time.monotonic()\n        while duration_s is None or time.monotonic() - start < duration_s:\n            readable, _, _ = select.select([self.lc.fileno()], [], [], 0.001)\n            if readable:\n                self.lc.handle()"
+    },
+    "bridge_imports": {
+      "end_line": 31,
+      "path": "scripts/go2_yoga_ball/lcm_to_dds_bridge.py",
+      "ref": "scripts/go2_yoga_ball/lcm_to_dds_bridge.py:21",
+      "start_line": 21,
+      "text": "if str(DREUREKA / \"globe_walking\" / \"go1_gym_deploy\") not in sys.path:\n    sys.path.insert(0, str(DREUREKA / \"globe_walking\" / \"go1_gym_deploy\"))\n\nfrom go1_gym_deploy.lcm_types.leg_control_data_lcmt import leg_control_data_lcmt  # noqa: E402\nfrom go1_gym_deploy.lcm_types.pd_tau_targets_lcmt import pd_tau_targets_lcmt  # noqa: E402\nfrom go1_gym_deploy.lcm_types.rc_command_lcmt import rc_command_lcmt  # noqa: E402\nfrom go1_gym_deploy.lcm_types.state_estimator_lcmt import state_estimator_lcmt  # noqa: E402\nfrom unitree_sdk2py.core.channel import ChannelFactoryInitialize, ChannelPublisher, ChannelSubscriber  # noqa: E402\nfrom unitree_sdk2py.idl.default import unitree_go_msg_dds__LowCmd_  # noqa: E402\nfrom unitree_sdk2py.idl.unitree_go.msg.dds_ import LowCmd_, LowState_  # noqa: E402\nfrom unitree_sdk2py.utils.crc import CRC  # noqa: E402"
+    },
+    "bridge_lcm_to_dds_command_mapping": {
+      "end_line": 109,
+      "path": "scripts/go2_yoga_ball/lcm_to_dds_bridge.py",
+      "ref": "scripts/go2_yoga_ball/lcm_to_dds_bridge.py:94",
+      "start_line": 94,
+      "text": "            motor.q = float(msg.q_des[i])\n            motor.dq = float(msg.qd_des[i])\n            motor.tau = float(msg.tau_ff[i])\n            motor.kp = float(msg.kp[i])\n            motor.kd = float(msg.kd[i])\n        self.low_cmd.crc = self.crc.Crc(self.low_cmd)\n        self.lowcmd_pub.Write(self.low_cmd)\n        self.last_cmd_monotonic = time.monotonic()\n\n    def on_lowstate(self, msg: LowState_) -> None:\n        self.last_lowstate = msg\n        self.last_lowstate_monotonic = time.monotonic()\n        self.publish_lcm_state(msg)\n\n    def publish_lcm_state(self, msg: LowState_) -> None:\n        now_us = int(time.time() * 1e6)"
+    },
+    "bridge_lowcmd_defaults": {
+      "end_line": 92,
+      "path": "scripts/go2_yoga_ball/lcm_to_dds_bridge.py",
+      "ref": "scripts/go2_yoga_ball/lcm_to_dds_bridge.py:80",
+      "start_line": 80,
+      "text": "            motor = self.low_cmd.motor_cmd[i]\n            motor.mode = 0x01\n            motor.q = 2.146e9\n            motor.dq = 16000.0\n            motor.kp = 0.0\n            motor.kd = 0.0\n            motor.tau = 0.0\n\n    def on_lcm_command(self, channel: str, data: bytes) -> None:\n        del channel\n        msg = pd_tau_targets_lcmt.decode(data)\n        for i in range(12):\n            motor = self.low_cmd.motor_cmd[i]"
+    },
+    "bridge_spin_lcm_poll": {
+      "end_line": 183,
+      "path": "scripts/go2_yoga_ball/lcm_to_dds_bridge.py",
+      "ref": "scripts/go2_yoga_ball/lcm_to_dds_bridge.py:176",
+      "start_line": 176,
+      "text": "    return bridge.spin(args.duration_s)\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())"
+    },
+    "dds_channel_factory": {
+      "end_line": 301,
+      "path": "thirdparties/unitree_sdk2_python/unitree_sdk2py/core/channel.py",
+      "ref": "thirdparties/unitree_sdk2_python/unitree_sdk2py/core/channel.py:256",
+      "start_line": 256,
+      "text": "class ChannelPublisher:\n    def __init__(self, name: str, type: Any):\n        factory = ChannelFactory()\n        self.__channel = factory.CreateChannel(name, type)\n        self.__inited = False\n\n    def Init(self):\n        if not self.__inited:\n            self.__channel.SetWriter(None)\n            self.__inited = True\n\n    def Close(self):\n        self.__channel.CloseWriter()\n        self.__inited = False\n\n    def Write(self, sample: Any, timeout: float = None):\n        return self.__channel.Write(sample, timeout)\n\n\"\"\"\n\" class ChannelSubscriber\n\"\"\"\nclass ChannelSubscriber:\n    def __init__(self, name: str, type: Any):\n        factory = ChannelFactory()\n        self.__channel = factory.CreateChannel(name, type)\n        self.__inited = False\n\n    def Init(self, handler: Callable = None, queueLen: int = 0):\n        if not self.__inited:\n            self.__channel.SetReader(None, handler, queueLen)\n            self.__inited = True\n\n    def Close(self):\n        self.__channel.CloseReader()\n        self.__inited = False\n\n    def Read(self, timeout: int = None):\n        return self.__channel.Read(timeout)\n\n\"\"\"\n\" function ChannelFactoryInitialize. used to intialize channel everenment.\n\"\"\"\ndef ChannelFactoryInitialize(id: int = 0, networkInterface: str = None):\n    factory = ChannelFactory()\n    if not factory.Init(id, networkInterface):\n        raise Exception(\"channel factory init error.\")"
+    },
+    "dds_lowcmd_crc_fields": {
+      "end_line": 79,
+      "path": "thirdparties/unitree_sdk2_python/unitree_sdk2py/utils/crc.py",
+      "ref": "thirdparties/unitree_sdk2_python/unitree_sdk2py/utils/crc.py:51",
+      "start_line": 51,
+      "text": "    def __PackLowCmd(self, cmd: LowCmd_):\n        origData = []\n        origData.extend(cmd.head)\n        origData.append(cmd.level_flag)\n        origData.append(cmd.frame_reserve)\n        origData.extend(cmd.sn)\n        origData.extend(cmd.version)\n        origData.append(cmd.bandwidth)\n\n        for i in range(20):\n            origData.append(cmd.motor_cmd[i].mode)\n            origData.append(cmd.motor_cmd[i].q)\n            origData.append(cmd.motor_cmd[i].dq)\n            origData.append(cmd.motor_cmd[i].tau)\n            origData.append(cmd.motor_cmd[i].kp)\n            origData.append(cmd.motor_cmd[i].kd)\n            origData.extend(cmd.motor_cmd[i].reserve)\n\n        origData.append(cmd.bms_cmd.off)\n        origData.extend(cmd.bms_cmd.reserve)\n\n        origData.extend(cmd.wireless_remote)\n        origData.extend(cmd.led)\n        origData.extend(cmd.fan)\n        origData.append(cmd.gpio)\n        origData.append(cmd.reserve)\n        origData.append(cmd.crc)\n\n        return self.__Trans(struct.pack(self.__packFmtLowCmd, *origData))"
+    },
+    "dds_lowcmd_default": {
+      "end_line": 157,
+      "path": "thirdparties/unitree_sdk2_python/unitree_sdk2py/idl/default.py",
+      "ref": "thirdparties/unitree_sdk2_python/unitree_sdk2py/idl/default.py:147",
+      "start_line": 147,
+      "text": "def unitree_go_msg_dds__MotorCmd_():\n    return MotorCmd_(0, 0.0, 0.0, 0.0, 0.0, 0.0, [0, 0, 0])\n\ndef unitree_go_msg_dds__MotorState_():\n    return MotorState_(0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0, [0, 0])\n\ndef unitree_go_msg_dds__LowCmd_():\n    return LowCmd_([0, 0], 0, 0, [0, 0], [0, 0], 0, [unitree_go_msg_dds__MotorCmd_() for i in range(20)],\n                unitree_go_msg_dds__BmsCmd_(),\n                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],\n                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0], 0, 0, 0)"
+    },
+    "dr_eureka_state_reorder": {
+      "end_line": 56,
+      "path": "thirdparties/DrEureka/globe_walking/go1_gym_deploy/utils/cheetah_state_estimator.py",
+      "ref": "thirdparties/DrEureka/globe_walking/go1_gym_deploy/utils/cheetah_state_estimator.py:51",
+      "start_line": 51,
+      "text": "class StateEstimator:\n    def __init__(self, lc, use_cameras=True):\n\n        # reverse legs\n        self.joint_idxs = [3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8]\n        self.contact_idxs = [1, 0, 3, 2]"
+    },
+    "lcm_imu_state_fields": {
+      "end_line": 18,
+      "path": "thirdparties/DrEureka/globe_walking/go1_gym_deploy/lcm_types/state_estimator_lcmt.lcm",
+      "ref": "thirdparties/DrEureka/globe_walking/go1_gym_deploy/lcm_types/state_estimator_lcmt.lcm:1",
+      "start_line": 1,
+      "text": "struct state_estimator_lcmt\n{\n    float p[3];\n    float vWorld[3];\n    float vBody[3];\n    float rpy[3];\n    float omegaBody[3];\n    float omegaWorld[3];\n    float quat[4];\n    float contact_estimate[4];\n    float aBody[3];\n    float aWorld[3];\n    int64_t timestamp_us;\n    int64_t id;\n    int64_t robot_id;\n}"
+    },
+    "lcm_leg_state_fields": {
+      "end_line": 9,
+      "path": "thirdparties/DrEureka/globe_walking/go1_gym_deploy/lcm_types/leg_control_data_lcmt.lcm",
+      "ref": "thirdparties/DrEureka/globe_walking/go1_gym_deploy/lcm_types/leg_control_data_lcmt.lcm:1",
+      "start_line": 1,
+      "text": "struct leg_control_data_lcmt \n{\n    float q[12];\n    float qd[12];\n    float p[12];\n    float v[12];\n    float tau_est[12];\n    int64_t timestamp_us;\n    int64_t id;"
+    },
+    "lcm_policy_command_fields": {
+      "end_line": 10,
+      "path": "thirdparties/DrEureka/globe_walking/go1_gym_deploy/lcm_types/pd_tau_targets_lcmt.lcm",
+      "ref": "thirdparties/DrEureka/globe_walking/go1_gym_deploy/lcm_types/pd_tau_targets_lcmt.lcm:1",
+      "start_line": 1,
+      "text": "struct pd_tau_targets_lcmt\n{\n    double q_des[12];\n    double qd_des[12];\n    double tau_ff[12];\n    double kp[12];\n    double kd[12];\n    int64_t timestamp_us;\n    int64_t id;\n    int64_t robot_id;"
+    },
+    "lcm_policy_publisher": {
+      "end_line": 222,
+      "path": "thirdparties/DrEureka/globe_walking/go1_gym_deploy/envs/lcm_agent.py",
+      "ref": "thirdparties/DrEureka/globe_walking/go1_gym_deploy/envs/lcm_agent.py:194",
+      "start_line": 194,
+      "text": "    def publish_action(self, action, hard_reset=False):\n\n        command_for_robot = pd_tau_targets_lcmt()\n        self.joint_pos_target = \\\n            (action[0, :12].detach().cpu().numpy() * self.cfg[\"control\"][\"action_scale\"]).flatten()\n        self.joint_pos_target[[0, 3, 6, 9]] *= self.cfg[\"control\"][\"hip_scale_reduction\"]\n        # self.joint_pos_target[[0, 3, 6, 9]] *= -1\n        self.joint_pos_target = self.joint_pos_target\n        self.joint_pos_target += self.default_dof_pos\n        joint_pos_target = self.joint_pos_target[self.joint_idxs]\n        self.joint_vel_target = np.zeros(12)\n        # print(f'cjp {self.joint_pos_target}')\n\n        command_for_robot.q_des = joint_pos_target\n        command_for_robot.qd_des = self.joint_vel_target\n        command_for_robot.kp = self.p_gains\n        command_for_robot.kd = self.d_gains\n        command_for_robot.tau_ff = np.zeros(12)\n        command_for_robot.se_contactState = np.zeros(4)\n        command_for_robot.timestamp_us = int(time.time() * 10 ** 6)\n        command_for_robot.id = 0\n\n        if hard_reset:\n            command_for_robot.id = -1\n\n\n        self.torques = (self.joint_pos_target - self.dof_pos) * self.p_gains + (self.joint_vel_target - self.dof_vel) * self.d_gains\n\n        lc.publish(\"pd_plustau_targets\", command_for_robot.encode())"
+    },
+    "lcm_state_subscriptions": {
+      "end_line": 113,
+      "path": "thirdparties/DrEureka/globe_walking/go1_gym_deploy/utils/cheetah_state_estimator.py",
+      "ref": "thirdparties/DrEureka/globe_walking/go1_gym_deploy/utils/cheetah_state_estimator.py:111",
+      "start_line": 111,
+      "text": "        self.imu_subscription = self.lc.subscribe(\"state_estimator_data\", self._imu_cb)\n        self.legdata_state_subscription = self.lc.subscribe(\"leg_control_data\", self._legdata_cb)\n        self.rc_command_subscription = self.lc.subscribe(\"rc_command\", self._rc_command_cb)"
+    }
+  },
+  "generated_at_unix": 1779853551.856894,
+  "missing_required_tokens": [],
+  "ok": true,
+  "unitree_motor_order": [
+    "FR_hip_joint",
+    "FR_thigh_joint",
+    "FR_calf_joint",
+    "FL_hip_joint",
+    "FL_thigh_joint",
+    "FL_calf_joint",
+    "RR_hip_joint",
+    "RR_thigh_joint",
+    "RR_calf_joint",
+    "RL_hip_joint",
+    "RL_thigh_joint",
+    "RL_calf_joint"
+  ],
+  "unitree_sdk2_python_commit": "794fb2b3fd9165fd245a7b568698d9e97d8ac0a0"
+}

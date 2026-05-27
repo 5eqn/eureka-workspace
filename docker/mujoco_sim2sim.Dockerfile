@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
     libosmesa6 \
     libglfw3 \
+    libyaml-dev \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
@@ -31,6 +32,21 @@ RUN python3 -m pip install --no-cache-dir \
     pillow \
     pyyaml \
     scipy
+
+COPY thirdparties/cyclonedds /workspace/thirdparties/cyclonedds
+RUN cmake -S /workspace/thirdparties/cyclonedds -B /tmp/cyclonedds-build \
+      -DCMAKE_INSTALL_PREFIX=/opt/cyclonedds \
+      -DBUILD_EXAMPLES=OFF \
+      -DBUILD_TESTING=OFF \
+    && cmake --build /tmp/cyclonedds-build --target install -j"$(nproc)" \
+    && rm -rf /tmp/cyclonedds-build
+
+ENV CYCLONEDDS_HOME=/opt/cyclonedds
+ENV CMAKE_PREFIX_PATH=/opt/cyclonedds
+
+COPY thirdparties/unitree_sdk2_python /workspace/thirdparties/unitree_sdk2_python
+RUN python3 -m pip install --no-cache-dir --no-deps -e /workspace/thirdparties/unitree_sdk2_python \
+    && python3 -m pip install --no-cache-dir cyclonedds==0.10.2 opencv-python-headless
 
 WORKDIR /workspace/eureka-workspace
 
