@@ -1,29 +1,24 @@
 {
-  "actual_monitor_duration_s": 31.13,
+  "actual_monitor_duration_s": 310.693,
   "container_end": {
-    "exit_code": 139,
-    "finished_at": "2026-05-27T04:30:19.769122625Z",
-    "id": "32c9e4edf186534f9ef64cbb33d08f855e832689c83fb4c089895f93eaf6ea87",
-    "name": "eureka-go2-train-1-8-20260527-122957",
+    "exit_code": 0,
+    "finished_at": "0001-01-01T00:00:00Z",
+    "id": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+    "name": "eureka-go2-train-1-8-restart-20260527-124302",
     "ok": true,
-    "running": false,
-    "started_at": "2026-05-27T04:29:58.015526504Z",
-    "status": "exited"
+    "running": true,
+    "started_at": "2026-05-27T04:43:03.081341319Z",
+    "status": "running"
   },
-  "container_id": "32c9e4edf186534f9ef64cbb33d08f855e832689c83fb4c089895f93eaf6ea87",
-  "container_runtime_s": 21.754,
+  "container_id": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+  "container_runtime_s": null,
   "docker_logs_tail": {
-    "contains_segfault": true,
+    "contains_segfault": false,
     "ok": true,
-    "tail": " critic_hidden_dims \u2502 [512, 256, 128]     \n     activation     \u2502 elu                 \nadaptation_module_branch_hidden_dims\u2502 [256, 128]          \n adaptation_labels  \u2502 []                  \n  adaptation_dims   \u2502 []                  \n adaptation_weights \u2502 []                  \n    use_decoder     \u2502 False               \n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2567\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n      PPO_Args      \n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  value_loss_coef   \u2502 1.0                 \nuse_clipped_value_loss\u2502 True                \n     clip_param     \u2502 0.2                 \n    entropy_coef    \u2502 0.01                \nnum_learning_epochs \u2502 5                   \n  num_mini_batches  \u2502 4                   \n   learning_rate    \u2502 0.001               \nadaptation_module_learning_rate\u2502 0.001               \nnum_adaptation_module_substeps\u2502 1                   \n      schedule      \u2502 adaptive            \n       gamma        \u2502 0.99                \n        lam         \u2502 0.95                \n     desired_kl     \u2502 0.01                \n   max_grad_norm    \u2502 1.0                 \nselective_adaptation_module_loss\u2502 False               \n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2567\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n     RunnerArgs     \n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nalgorithm_class_name\u2502 RMA                 \n num_steps_per_env  \u2502 24                  \n   max_iterations   \u2502 1500                \n   save_interval    \u2502 1000                \nsave_video_interval \u2502 500                 \n      log_freq      \u2502 10                  \n       resume       \u2502 False               \n      load_run      \u2502 -1                  \n     checkpoint     \u2502 -1                  \n    resume_path     \u2502 None                \n resume_curriculum  \u2502 True                \n resume_checkpoint  \u2502 ac_weights_last.pt  \n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2567\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n        Cfg         \n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n     multi_gpu      \u2502 False               \n      env_mini      \u2502 {'num_envs': 4096, 'num_observations': 56, 'num_privileged_obs': 6, 'num_actions': 12, 'num_observation_history': 15, 'env_spacing': 3.0, 'send_timeouts': True, 'episode_length_s': 40.0, 'record_video': False, 'recording_width_px': 360, 'recording_height_px': 240, 'recording_mode': 'COLOR', 'num_recording_envs': 1, 'add_balls': True}\n      env_full      \u2502 {'num_envs': 4096, 'num_observations': 235, 'num_privileged_obs': 11, 'num_actions': 12, 'num_observation_history': 15, 'env_spacing': 3.0, 'send_timeouts': True, 'episode_length_s': 20, 'record_video': True, 'recording_width_px': 360, 'recording_height_px': 240, 'recording_mode': 'COLOR', 'num_recording_envs': 1, 'add_balls': True}\n       robot        \u2502 {'name': 'go2'}     \n        ball        \u2502 {'asset': 'ball', 'ball_init_pos': [0.0, 0.0, 0.0], 'ball_init_rot': [0, 0, 0, 1], 'ball_init_lin_vel': [0, 0, 0], 'ball_init_ang_vel': [0, 0, 0], 'init_pos_range': [0.0, 0.0, 0.0], 'init_vel_range': [0.0, 0.0, 0.0], 'pos_reset_prob': 0.0002, 'vel_reset_prob': 0.0008, 'pos_reset_range': [1.0, 1.0, 0.0], 'vel_reset_range': [0.3, 0.3, 0.3], 'vision_receive_prob': 0.7, 'limit_movement': False}\n    sensors_mini    \u2502 {'sensor_names': ['OrientationSensor', 'JointPositionSensor', 'JointVelocitySensor', 'ActionSensor', 'LastActionSensor', 'ClockSensor', 'YawSensor'], 'sensor_args': {'OrientationSensor': {}, 'JointPositionSensor': {}, 'JointVelocitySensor': {}, 'ActionSensor': {}, 'LastActionSensor': {'delay': 1}, 'ClockSensor': {}, 'YawSensor': {}}, 'privileged_sensor_names': {'BodyVelocitySensor': {}, 'ObjectVelocitySensor': {}}, 'privileged_sensor_args': {'BodyVelocitySensor': {}, 'ObjectVelocitySensor': {}}}\n    sensors_full    \u2502 {'sensor_names': ['OrientationSensor', 'JointPositionSensor', 'JointVelocitySensor', 'ActionSensor', 'LastActionSensor', 'ClockSensor', 'YawSensor'], 'sensor_args': {'OrientationSensor': {}, 'JointPositionSensor': {}, 'JointVelocitySensor': {}, 'ActionSensor': {}, 'LastActionSensor': {'delay': 1}, 'ClockSensor': {}, 'YawSensor': {}}, 'privileged_sensor_names': {'ObjectSensor': {}, 'BodyVelocitySensor': {}, 'ObjectVelocitySensor': {}, 'RestitutionSensor': {}, 'FrictionSensor': {}}, 'privileged_sensor_args': {'ObjectSensor': {}, 'BodyVelocitySensor': {}, 'ObjectVelocitySensor': {}, 'RestitutionSensor': {}, 'FrictionSensor': {}}}\n    terrain_mini    \u2502 {'mesh_type': 'boxes_tm', 'horizontal_scale': 0.05, 'vertical_scale': 0.005, 'border_size': 0.0, 'curriculum': False, 'static_friction': 1.0, 'dynamic_friction': 1.0, 'restitution': 0.0, 'terrain_noise_magnitude': 0.0, 'terrain_smoothness': 0.005, 'min_init_terrain_level': 0, 'max_init_terrain_level': 1, 'terrain_length': 5.0, 'terrain_width': 5.0, 'num_rows': 20, 'num_cols': 20, 'num_border_boxes': 5.0, 'terrain_proportions': [1.0, 0.0, 0.0, 0.0, 0.0], 'slope_treshold': 0.75, 'difficulty_scale': 1.0, 'x_init_range': 0.05, 'y_init_range': 0.05, 'yaw_init_range': 3.14, 'x_init_offset': 0.0, 'y_init_offset': 0.0, 'teleport_robots': False, 'teleport_thresh': 0.3, 'max_platform_height': 0.2, 'max_step_height': 0.26, 'min_step_run': 0.25, 'max_step_run': 0.4, 'center_robots': False, 'center_span': 3, 'measure_heights': False}\n    terrain_full    \u2502 {'mesh_type': 'trimesh', 'horizontal_scale': 0.1, 'vertical_scale': 0.005, 'border_size': 0, 'curriculum': True, 'static_friction': 1.0, 'dynamic_friction': 1.0, 'restitution': 0.0, 'terrain_noise_magnitude': 0.1, 'terrain_smoothness': 0.005, 'min_init_terrain_level': 0, 'max_init_terrain_level': 5, 'terrain_length': 8.0, 'terrain_width': 8.0, 'num_rows': 10, 'num_cols': 20, 'num_border_boxes': 0, 'terrain_proportions': [0.1, 0.1, 0.35, 0.25, 0.2], 'slope_treshold': 0.75, 'difficulty_scale': 1.0, 'x_init_range': 0.1, 'y_init_range': 0.1, 'yaw_init_range': 3.14, 'x_init_offset': 0.0, 'y_init_offset': 0.0, 'teleport_robots': True, 'teleport_thresh': 2.0, 'max_platform_height': 0.2, 'max_step_height': 0.26, 'min_step_run': 0.25, 'max_step_run': 0.4, 'center_robots': False, 'center_span': 5}\n      commands      \u2502 {'command_curriculum': False, 'max_reverse_curriculum': 1.0, 'max_forward_curriculum': 1.0, 'yaw_command_curriculum': False, 'max_yaw_curriculum': 1.0, 'exclusive_command_sampling': False, 'num_commands': 0, 'resampling_time': 10.0, 'subsample_gait': False, 'gait_interval_s': 10.0, 'vel_interval_s': 10.0, 'jump_interval_s': 20.0, 'jump_duration_s': 0.1, 'jump_height': 0.3, 'heading_command': False, 'global_reference': False, 'observe_accel': False, 'distributional_commands': True, 'curriculum_type': 'RewardThresholdCurriculum', 'lipschitz_threshold': 0.9, 'num_lin_vel_bins': 30, 'lin_vel_step': 0.3, 'num_ang_vel_bins': 30, 'ang_vel_step': 0.3, 'distribution_update_extension_distance': 1, 'curriculum_seed': 100, 'lin_vel_x': [-0.6, 0.6], 'lin_vel_y': [-0.6, 0.6], 'ang_vel_yaw': [-1, 1], 'body_height_cmd': [-0.05, 0.05], 'impulse_height_commands': False, 'limit_vel_x': [-10.0, 10.0], 'limit_vel_y': [-0.6, 0.6], 'limit_vel_yaw': [-10.0, 10.0], 'limit_body_height': [-0.05, 0.05], 'limit_gait_phase': [0, 0.01], 'limit_gait_offset': [0, 0.01], 'limit_gait_bound': [0, 0.01], 'limit_gait_frequency': [2.0, 2.01], 'limit_gait_duration': [0.49, 0.5], 'limit_footswing_height': [0.06, 0.061], 'limit_body_pitch': [0.0, 0.01], 'limit_body_roll': [0.0, 0.01], 'limit_aux_reward_coef': [0.0, 0.01], 'limit_compliance': [0.0, 0.01], 'limit_stance_width': [0.0, 0.01], 'limit_stance_length': [0.0, 0.01], 'num_bins_vel_x': 25, 'num_bins_vel_y': 3, 'num_bins_vel_yaw': 25, 'num_bins_body_height': 1, 'num_bins_gait_frequency': 11, 'num_bins_gait_phase': 11, 'num_bins_gait_offset': 2, 'num_bins_gait_bound': 2, 'num_bins_gait_duration': 3, 'num_bins_footswing_height': 1, 'num_bins_body_pitch': 1, 'num_bins_body_roll': 1, 'num_bins_aux_reward_coef': 1, 'num_bins_compliance': 1, 'num_bins_stance_width': 1, 'num_bins_stance_length': 1, 'heading': [-3.14, 3.14], 'gait_phase_cmd_range': [0.0, 0.01], 'gait_offset_cmd_range': [0.0, 0.01], 'gait_bound_cmd_range': [0.0, 0.01], 'gait_frequency_cmd_range': [2.0, 2.01], 'gait_duration_cmd_range': [0.49, 0.5], 'footswing_height_range': [0.06, 0.061], 'body_pitch_range': [0.0, 0.01], 'body_roll_range': [0.0, 0.01], 'aux_reward_coef_range': [0.0, 0.01], 'compliance_range': [0.0, 0.01], 'stance_width_range': [0.0, 0.01], 'stance_length_range': [0.0, 0.01], 'exclusive_phase_offset': False, 'binary_phases': False, 'pacing_offset': False, 'balance_gait_distribution': False, 'gaitwise_curricula': False}\ncurriculum_thresholds\u2502 {'tracking_lin_vel': 0.8, 'tracking_ang_vel': 0.7, 'tracking_contacts_shaped_force': 0.9, 'tracking_contacts_shaped_vel': 0.9}\n     init_state     \u2502 {'pos': [0.0, 0.0, 0.3], 'rot': [0.0, 0.0, 0.0, 1.0], 'lin_vel': [0.0, 0.0, 0.0], 'ang_vel': [0.0, 0.0, 0.0], 'default_joint_angles': {'FL_hip_joint': 0.0, 'FL_thigh_joint': 0.9, 'FL_calf_joint': -1.8, 'FR_hip_joint': 0.0, 'FR_thigh_joint': 0.9, 'FR_calf_joint': -1.8, 'RL_hip_joint': 0.0, 'RL_thigh_joint': 0.9, 'RL_calf_joint': -1.8, 'RR_hip_joint': 0.0, 'RR_thigh_joint': 0.9, 'RR_calf_joint': -1.8}}\n      control       \u2502 {'control_type': 'P', 'stiffness': {'hip': 20.0, 'thigh': 20.0, 'calf': 40.0}, 'damping': {'hip': 1.0, 'thigh': 1.0, 'calf': 2.0}, 'action_scale': 0.25, 'hip_scale_reduction': 0.5, 'decimation': 4}\n       asset        \u2502 {'file': '/workspace/eureka-workspace/artifacts/go2_yoga_ball/build/go2_description_isaacgym.urdf', 'foot_name': 'foot', 'penalize_contacts_on': ['thigh', 'calf'], 'terminate_after_contacts_on': [], 'disable_gravity': False, 'collapse_fixed_joints': True, 'fix_base_link': False, 'default_dof_drive_mode': 3, 'self_collisions': 0, 'replace_cylinder_with_capsule': True, 'flip_visual_attachments': False, 'density': 0.001, 'angular_damping': 0.0, 'linear_damping': 0.0, 'max_angular_velocity': 1000.0, 'max_linear_velocity': 1000.0, 'armature': 0.0, 'thickness': 0.01}\n domain_rand_eureka \u2502 {'randomize': True, 'robot_friction_range': [1.0, 1.0], 'robot_restitution_range': [0.0, 0.0], 'robot_payload_mass_range': [0.0, 0.0], 'robot_com_displacement_range': [0.0, 0.0], 'robot_motor_strength_range': [1.0, 1.0], 'robot_motor_offset_range': [0.0, 0.0], 'robot_Kp_factor_range': [1.0, 1.0], 'robot_Kd_factor_range': [1.0, 1.0], 'ball_radius_range': [0.35, 0.45], 'ball_mass_range': [1.0, 1.0], 'ball_friction_range': [1.0, 1.0], 'ball_restitution_range': [0.0, 0.0], 'ball_compliance_range': [0.0, 0.0], 'ball_inertia_multiplier_range': [1.6666666666666667, 1.6666666666666667], 'ball_spring_coefficient_range': [0.0, 0.0], 'ball_drag_range': [0.0, 0.0], 'ball_drag_rand_interval_s': 15, 'terrain_ground_friction_range': [1.0, 1.0], 'terrain_ground_restitution_range': [0.0, 0.0], 'terrain_tile_roughness_range': [0.0, 0.0], 'push_robot_interval_s': 15, 'robot_push_vel_range': [0.0, 0.0], 'push_ball_interval_s': 10, 'ball_push_vel_range': [0.0, 0.0], 'gravity_range': [0.0, 0.0], 'gravity_rand_interval_s': 10, 'lag_timesteps_range': [6, 6], 'lag_timesteps_rand_interval_s': 10}\n  domain_rand_off   \u2502 {'randomize': True, 'robot_friction_range': [0.1, 1.0], 'robot_restitution_range': [0.2, 0.8], 'robot_payload_mass_range': [0.0, 3.0], 'robot_com_displacement_range': [-0.05, 0.05], 'robot_motor_strength_range': [0.95, 1.05], 'robot_motor_offset_range': [-0.005, 0.05], 'robot_Kp_factor_range': [1.0, 1.0], 'robot_Kd_factor_range': [1.0, 1.0], 'ball_radius_range': [0.45, 0.45], 'ball_mass_range': [1.0, 3.0], 'ball_friction_range': [0.5, 2.5], 'ball_restitution_range': [0.4, 0.9], 'ball_compliance_range': [0.0, 1.0], 'ball_inertia_multiplier_range': [1.6666666666666667, 1.6666666666666667], 'ball_spring_coefficient_range': [0.0, 0.0], 'ball_drag_range': [0.1, 0.5], 'ball_drag_rand_interval_s': 15, 'terrain_ground_friction_range': [0.2, 0.8], 'terrain_ground_restitution_range': [0.0, 0.5], 'terrain_tile_roughness_range': [0.02, 0.08], 'push_robot_interval_s': 15, 'robot_push_vel_range': [0.1, 0.4], 'push_ball_interval_s': 10, 'ball_push_vel_range': [0.1, 0.4], 'gravity_range': [-0.1, 0.1], 'gravity_rand_interval_s': 10, 'lag_timesteps_range': [6, 6], 'lag_timesteps_rand_interval_s': 10}\n      rewards       \u2502 {'reward_container_name': 'EurekaReward', 'soft_dof_pos_limit': 0.9, 'use_terminal_body_height': True, 'terminal_body_height': 0.2, 'use_terminal_roll_pitch': False, 'terminal_body_ori': 0.5, 'constrict': False, 'constrict_indices': [], 'constrict_ranges': [[]], 'constrict_after': 0}\n   reward_scales    \u2502 {'termination': -0.0, 'tracking_lin_vel': 1.0, 'tracking_ang_vel': 0.5, 'lin_vel_z': -2.0, 'ang_vel_xy': -0.05, 'orientation': -0.0, 'torques': -1e-05, 'dof_vel': -0.0, 'dof_acc': -2.5e-07, 'base_height': -0.0, 'feet_air_time': 1.0, 'collision': -1.0, 'feet_stumble': -0.0, 'action_rate': -0.01, 'stand_still': -0.0, 'tracking_lin_vel_lat': 0.0, 'tracking_lin_vel_long': 0.0, 'tracking_contacts': 0.0, 'tracking_contacts_shaped': 0.0, 'tracking_contacts_shaped_force': 0.0, 'tracking_contacts_shaped_vel': 0.0, 'jump': 0.0, 'energy': 0.0, 'energy_expenditure': 0.0, 'survival': 0.0, 'dof_pos_limits': 0.0, 'dof_vel_limits': 0.0, 'torque_limits': 0.0, 'feet_contact_forces': 0.0, 'feet_slip': 0.0, 'feet_accel': 0.0, 'dof_pos': 0.0, 'action_smoothness_1': 0.0, 'action_smoothness_2': 0.0, 'base_motion': 0.0, 'feet_impact_vel': 0.0, 'raibert_heuristic': 0.0, 'dribbling_robot_ball_vel': 0.0, 'dribbling_robot_ball_pos': 0.0, 'dribbling_ball_vel': 0.0, 'dribbling_robot_ball_yaw': 0.0, 'dribbling_ball_vel_norm': 0.0, 'dribbling_ball_vel_angle': 0.0, 'gripper_handle_pos': 0.0, 'gripper_handle_height': 0.0, 'turn_handle': 0.0, 'open_door': 0.0, 'robot_door_pos': 0.0, 'robot_door_ori': 0.0, 'estimation_bonus': 0.0}\n   normalization    \u2502 {'clip_observations': 100.0, 'clip_actions': 10.0}\n     obs_scales     \u2502 {'lin_vel': 2.0, 'ang_vel': 0.25, 'dof_pos': 1.0, 'dof_vel': 0.05, 'imu': 0.1, 'height_measurements': 5.0, 'friction_measurements': 1.0, 'body_height_cmd': 2.0, 'gait_phase_cmd': 1.0, 'gait_freq_cmd': 1.0, 'footswing_height_cmd': 0.15, 'body_pitch_cmd': 0.3, 'body_roll_cmd': 0.3, 'aux_reward_cmd': 1.0, 'compliance_cmd': 1.0, 'stance_width_cmd': 1.0, 'stance_length_cmd': 1.0, 'segmentation_image': 1.0, 'rgb_image': 1.0, 'depth_image': 1.0, 'ball_pos': 1.0}\n       noise        \u2502 {'add_noise': True, 'noise_level': 1.0}\n    noise_scales    \u2502 {'dof_pos': 0.01, 'dof_vel': 1.5, 'gravity': 0.05, 'feet_contact_states': 0.05, 'ball_pos': 0.05}\n       viewer       \u2502 {'ref_env': 0, 'pos': None, 'lookat': None}\n        sim         \u2502 {'dt': 0.005, 'substeps': 1, 'gravity': [0.0, 0.0, -9.81], 'up_axis': 1, 'use_gpu_pipeline': True, 'physx_mini': {'num_threads': 10, 'solver_type': 1, 'num_position_iterations': 4, 'num_velocity_iterations': 0, 'contact_offset': 0.01, 'rest_offset': 0.0, 'bounce_threshold_velocity': 0.5, 'max_depenetration_velocity': 1.0, 'max_gpu_contact_pairs': 8388608, 'default_buffer_size_multiplier': 5, 'contact_collection': 2}, 'physx_full': {'num_threads': 10, 'solver_type': 1, 'num_position_iterations': 4, 'num_velocity_iterations': 0, 'contact_offset': 0.01, 'rest_offset': 0.0, 'bounce_threshold_velocity': 0.5, 'max_depenetration_velocity': 1.0, 'max_gpu_contact_pairs': 16777216, 'default_buffer_size_multiplier': 64, 'contact_collection': 2}, 'physx': {'num_threads': 10, 'solver_type': 1, 'num_position_iterations': 4, 'num_velocity_iterations': 0, 'contact_offset': 0.01, 'rest_offset': 0.0, 'bounce_threshold_velocity': 0.5, 'max_depenetration_velocity': 1.0, 'max_gpu_contact_pairs': 8388608, 'default_buffer_size_multiplier': 5, 'contact_collection': 2}}\n     perception     \u2502 {'measure_heights': False, 'compute_heights': False, 'measure_frictions': False, 'compute_frictions': False, 'measure_roughnesses': False, 'compute_roughnesses': False, 'camera_names': ['front', 'left', 'right', 'bottom', 'rear'], 'camera_poses': [[0.3, 0, 0], [0, 0.15, 0], [0, -0.15, 0], [0.1, 0, -0.1], [-0.2, 0, -0.1]], 'camera_rpys': [[0.0, 0, 0], [0, 0, 1.57], [0, 0, -1.57], [0, -1.57, 0], [0, -1.57, 0]], 'compute_depth': False, 'compute_rgb': False, 'compute_segmentation': False, 'image_height': 100, 'image_width': 100, 'image_horizontal_fov': 110.0}\n        env         \u2502 {'num_envs': 4096, 'num_observations': 56, 'num_privileged_obs': 6, 'num_actions': 12, 'num_observation_history': 15, 'env_spacing': 3.0, 'send_timeouts': True, 'episode_length_s': 40.0, 'record_video': False, 'recording_width_px': 360, 'recording_height_px': 240, 'recording_mode': 'COLOR', 'num_recording_envs': 1, 'add_balls': True}\n      sensors       \u2502 {'sensor_names': ['OrientationSensor', 'JointPositionSensor', 'JointVelocitySensor', 'ActionSensor', 'LastActionSensor', 'ClockSensor', 'YawSensor'], 'sensor_args': {'OrientationSensor': {}, 'JointPositionSensor': {}, 'JointVelocitySensor': {}, 'ActionSensor': {}, 'LastActionSensor': {'delay': 1}, 'ClockSensor': {}, 'YawSensor': {}}, 'privileged_sensor_names': {'BodyVelocitySensor': {}, 'ObjectVelocitySensor': {}}, 'privileged_sensor_args': {'BodyVelocitySensor': {}, 'ObjectVelocitySensor': {}}}\n      terrain       \u2502 {'mesh_type': 'boxes_tm', 'horizontal_scale': 0.05, 'vertical_scale': 0.005, 'border_size': 0.0, 'curriculum': False, 'static_friction': 1.0, 'dynamic_friction': 1.0, 'restitution': 0.0, 'terrain_noise_magnitude': 0.0, 'terrain_smoothness': 0.005, 'min_init_terrain_level': 0, 'max_init_terrain_level': 1, 'terrain_length': 5.0, 'terrain_width': 5.0, 'num_rows': 20, 'num_cols': 20, 'num_border_boxes': 5.0, 'terrain_proportions': [1.0, 0.0, 0.0, 0.0, 0.0], 'slope_treshold': 0.75, 'difficulty_scale': 1.0, 'x_init_range': 0.05, 'y_init_range': 0.05, 'yaw_init_range': 3.14, 'x_init_offset': 0.0, 'y_init_offset': 0.0, 'teleport_robots': False, 'teleport_thresh': 0.3, 'max_platform_height': 0.2, 'max_step_height': 0.26, 'min_step_run': 0.25, 'max_step_run': 0.4, 'center_robots': False, 'center_span': 3, 'measure_heights': False}\n    domain_rand     \u2502 {'randomize': True, 'robot_friction_range': [0.1, 1.0], 'robot_restitution_range': [0.2, 0.8], 'robot_payload_mass_range': [0.0, 3.0], 'robot_com_displacement_range': [-0.05, 0.05], 'robot_motor_strength_range': [0.95, 1.05], 'robot_motor_offset_range': [-0.005, 0.05], 'robot_Kp_factor_range': [1.0, 1.0], 'robot_Kd_factor_range': [1.0, 1.0], 'ball_radius_range': [0.45, 0.45], 'ball_mass_range': [1.0, 3.0], 'ball_friction_range': [0.5, 2.5], 'ball_restitution_range': [0.4, 0.9], 'ball_compliance_range': [0.0, 1.0], 'ball_inertia_multiplier_range': [1.6666666666666667, 1.6666666666666667], 'ball_spring_coefficient_range': [0.0, 0.0], 'ball_drag_range': [0.1, 0.5], 'ball_drag_rand_interval_s': 15, 'terrain_ground_friction_range': [0.2, 0.8], 'terrain_ground_restitution_range': [0.0, 0.5], 'terrain_tile_roughness_range': [0.02, 0.08], 'push_robot_interval_s': 15, 'robot_push_vel_range': [0.1, 0.4], 'push_ball_interval_s': 10, 'ball_push_vel_range': [0.1, 0.4], 'gravity_range': [-0.1, 0.1], 'gravity_rand_interval_s': 10, 'lag_timesteps_range': [6, 6], 'lag_timesteps_rand_interval_s': 10}\n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2567\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550[Warning] [carb.gym.plugin] useGpuPipeline is set, forcing GPU PhysX\nNot connected to PVD\n+++ Using GPU PhysX\nPhysics Engine: PhysX\nPhysics Device: cuda:0\nGPU Pipeline: enabled\nbash: line 1:    55 Segmentation fault      (core dumped) python globe_walking/scripts/train.py --robot go2 --dr-config off --reward-config eureka --iterations '20000' --num-envs '4096' --no-video --no-wandb --domain-rand-profile 'pretrained' --save-interval '1000' 2>&1\n        56 Done                    | tee /workspace/eureka-workspace/logs/go2_yoga_ball/train_1_8_budget/train.log\n"
+    "tail": "\u2502train/episode/rew penalize large actions/mean\u2502      -10.716       \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502    train/episode/rew smooth actions/mean    \u2502      -47.696       \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502        train/episode/rew total/mean         \u2502       77.283       \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502       train/episode/rew success/mean        \u2502         0.         \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502      train/episode/episode length/mean      \u2502       45.556       \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502              time elapsed/mean              \u2502      168.934       \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502               time iter/mean                \u2502       4.634        \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502            adaptation loss/mean             \u2502         0.         \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502            mean value loss/mean             \u2502       61.855       \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502          mean surrogate loss/mean           \u2502       -0.01        \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502           mean decoder loss/mean            \u2502         0.         \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502       mean decoder loss student/mean        \u2502         0.         \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502         mean decoder test loss/mean         \u2502         0.         \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502     mean decoder test loss student/mean     \u2502         0.         \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502    mean adaptation module test loss/mean    \u2502         0.         \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502                  timesteps                  \u2502      4030464       \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502                 iterations                  \u2502         40         \u2502\n\u2558\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2567\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255b\n\n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n        job         \n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n       status       \u2502 running             \n      runTime       \u2502 2026-05-27 04:46:45.153823\n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2567\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n\u2552\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2564\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2555\n\u2502       train/episode/rew balance/mean        \u2502       85.218       \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502        train/episode/rew height/mean        \u2502       52.032       \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502train/episode/rew penalize large actions/mean\u2502      -10.657       \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502    train/episode/rew smooth actions/mean    \u2502      -45.814       \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502        train/episode/rew total/mean         \u2502       80.779       \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502       train/episode/rew success/mean        \u2502         0.         \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502      train/episode/episode length/mean      \u2502       45.787       \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502              time elapsed/mean              \u2502      215.451       \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502               time iter/mean                \u2502       4.643        \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502            adaptation loss/mean             \u2502         0.         \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502            mean value loss/mean             \u2502       31.565       \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502          mean surrogate loss/mean           \u2502       -0.015       \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502           mean decoder loss/mean            \u2502         0.         \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502       mean decoder loss student/mean        \u2502         0.         \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502         mean decoder test loss/mean         \u2502         0.         \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502     mean decoder test loss student/mean     \u2502         0.         \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502    mean adaptation module test loss/mean    \u2502         0.         \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502                  timesteps                  \u2502      5013504       \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502                 iterations                  \u2502         50         \u2502\n\u2558\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2567\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255b\n"
   },
-  "failure_summary": {
-    "contains_segfault": true,
-    "exit_code": 139,
-    "note": "The launch used the requested 20000 iterations and 4096 envs; the RunnerArgs.max_iterations banner is static config, while train.py passes --iterations into runner.learn.",
-    "reason": "container did not remain running for the requested monitor duration"
-  },
-  "generated_at_unix": 1779856229.395183,
+  "failure_summary": null,
+  "generated_at_unix": 1779857301.6676342,
   "log_advanced": true,
   "log_end": {
     "completed_exception": true,
@@ -32,13 +27,19 @@
     "effective_iterations_from_launch": 20000,
     "exists": true,
     "iterations_logged": [
-      1500
+      1500,
+      0,
+      10,
+      20,
+      30,
+      40,
+      50
     ],
-    "last_iteration": 1500,
-    "last_timesteps": null,
-    "last_total_reward": null,
+    "last_iteration": 50,
+    "last_timesteps": 5013504,
+    "last_total_reward": 80.779,
     "path": "logs/go2_yoga_ball/train_1_8_budget/train.log",
-    "size_bytes": 22091
+    "size_bytes": 58766
   },
   "log_start": {
     "completed_exception": true,
@@ -51,35 +52,35 @@
     "last_timesteps": null,
     "last_total_reward": null,
     "path": "logs/go2_yoga_ball/train_1_8_budget/train.log",
-    "size_bytes": 0
+    "size_bytes": 1663
   },
   "monitor_duration_s": 300,
   "no_nan_or_error_text": true,
-  "ok": false,
+  "ok": true,
   "samples": [
     {
       "container": {
         "exit_code": 0,
         "finished_at": "0001-01-01T00:00:00Z",
-        "id": "32c9e4edf186534f9ef64cbb33d08f855e832689c83fb4c089895f93eaf6ea87",
-        "name": "eureka-go2-train-1-8-20260527-122957",
+        "id": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+        "name": "eureka-go2-train-1-8-restart-20260527-124302",
         "ok": true,
         "running": true,
-        "started_at": "2026-05-27T04:29:58.015526504Z",
+        "started_at": "2026-05-27T04:43:03.081341319Z",
         "status": "running"
       },
       "docker_stats": {
         "ok": true,
         "raw": {
-          "BlockIO": "0B / 106kB",
-          "CPUPerc": "235.57%",
-          "Container": "32c9e4edf186534f9ef64cbb33d08f855e832689c83fb4c089895f93eaf6ea87",
-          "ID": "32c9e4edf186",
-          "MemPerc": "1.81%",
-          "MemUsage": "285.7MiB / 15.43GiB",
-          "Name": "eureka-go2-train-1-8-20260527-122957",
-          "NetIO": "526B / 84B",
-          "PIDs": "8"
+          "BlockIO": "941MB / 7.92MB",
+          "CPUPerc": "81.77%",
+          "Container": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+          "ID": "dee1a3158eb3",
+          "MemPerc": "10.58%",
+          "MemUsage": "1.632GiB / 15.43GiB",
+          "Name": "eureka-go2-train-1-8-restart-20260527-124302",
+          "NetIO": "2.6kB / 126B",
+          "PIDs": "7"
         }
       },
       "log": {
@@ -93,45 +94,45 @@
         "last_timesteps": null,
         "last_total_reward": null,
         "path": "logs/go2_yoga_ball/train_1_8_budget/train.log",
-        "size_bytes": 0
+        "size_bytes": 1663
       },
       "nvidia_smi": {
         "gpus": [
           {
             "index": "0",
             "memory_total_mib": "24576",
-            "memory_used_mib": "168",
+            "memory_used_mib": "903",
             "name": "NVIDIA GeForce RTX 3090",
-            "utilization_gpu_percent": "0"
+            "utilization_gpu_percent": "11"
           }
         ],
         "ok": true
       },
-      "t_since_start_s": 0.01
+      "t_since_start_s": 0.012
     },
     {
       "container": {
-        "exit_code": 139,
-        "finished_at": "2026-05-27T04:30:19.769122625Z",
-        "id": "32c9e4edf186534f9ef64cbb33d08f855e832689c83fb4c089895f93eaf6ea87",
-        "name": "eureka-go2-train-1-8-20260527-122957",
+        "exit_code": 0,
+        "finished_at": "0001-01-01T00:00:00Z",
+        "id": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+        "name": "eureka-go2-train-1-8-restart-20260527-124302",
         "ok": true,
-        "running": false,
-        "started_at": "2026-05-27T04:29:58.015526504Z",
-        "status": "exited"
+        "running": true,
+        "started_at": "2026-05-27T04:43:03.081341319Z",
+        "status": "running"
       },
       "docker_stats": {
         "ok": true,
         "raw": {
-          "BlockIO": "0B / 0B",
-          "CPUPerc": "0.00%",
-          "Container": "32c9e4edf186534f9ef64cbb33d08f855e832689c83fb4c089895f93eaf6ea87",
-          "ID": "32c9e4edf186",
-          "MemPerc": "0.00%",
-          "MemUsage": "0B / 0B",
-          "Name": "eureka-go2-train-1-8-20260527-122957",
-          "NetIO": "0B / 0B",
-          "PIDs": "0"
+          "BlockIO": "2.55GB / 88.9MB",
+          "CPUPerc": "158.78%",
+          "Container": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+          "ID": "dee1a3158eb3",
+          "MemPerc": "74.16%",
+          "MemUsage": "11.44GiB / 15.43GiB",
+          "Name": "eureka-go2-train-1-8-restart-20260527-124302",
+          "NetIO": "3.06kB / 126B",
+          "PIDs": "29"
         }
       },
       "log": {
@@ -147,23 +148,479 @@
         "last_timesteps": null,
         "last_total_reward": null,
         "path": "logs/go2_yoga_ball/train_1_8_budget/train.log",
-        "size_bytes": 22091
+        "size_bytes": 22093
       },
       "nvidia_smi": {
         "gpus": [
           {
             "index": "0",
             "memory_total_mib": "24576",
-            "memory_used_mib": "165",
+            "memory_used_mib": "13215",
             "name": "NVIDIA GeForce RTX 3090",
-            "utilization_gpu_percent": "0"
+            "utilization_gpu_percent": "33"
           }
         ],
         "ok": true
       },
-      "t_since_start_s": 31.074
+      "t_since_start_s": 31.139
+    },
+    {
+      "container": {
+        "exit_code": 0,
+        "finished_at": "0001-01-01T00:00:00Z",
+        "id": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+        "name": "eureka-go2-train-1-8-restart-20260527-124302",
+        "ok": true,
+        "running": true,
+        "started_at": "2026-05-27T04:43:03.081341319Z",
+        "status": "running"
+      },
+      "docker_stats": {
+        "ok": true,
+        "raw": {
+          "BlockIO": "2.55GB / 88.9MB",
+          "CPUPerc": "176.47%",
+          "Container": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+          "ID": "dee1a3158eb3",
+          "MemPerc": "74.30%",
+          "MemUsage": "11.46GiB / 15.43GiB",
+          "Name": "eureka-go2-train-1-8-restart-20260527-124302",
+          "NetIO": "3.23kB / 126B",
+          "PIDs": "29"
+        }
+      },
+      "log": {
+        "completed_exception": true,
+        "contains_nan": false,
+        "contains_segfault": false,
+        "effective_iterations_from_launch": 20000,
+        "exists": true,
+        "iterations_logged": [
+          1500
+        ],
+        "last_iteration": 1500,
+        "last_timesteps": null,
+        "last_total_reward": null,
+        "path": "logs/go2_yoga_ball/train_1_8_budget/train.log",
+        "size_bytes": 22093
+      },
+      "nvidia_smi": {
+        "gpus": [
+          {
+            "index": "0",
+            "memory_total_mib": "24576",
+            "memory_used_mib": "13215",
+            "name": "NVIDIA GeForce RTX 3090",
+            "utilization_gpu_percent": "30"
+          }
+        ],
+        "ok": true
+      },
+      "t_since_start_s": 62.205
+    },
+    {
+      "container": {
+        "exit_code": 0,
+        "finished_at": "0001-01-01T00:00:00Z",
+        "id": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+        "name": "eureka-go2-train-1-8-restart-20260527-124302",
+        "ok": true,
+        "running": true,
+        "started_at": "2026-05-27T04:43:03.081341319Z",
+        "status": "running"
+      },
+      "docker_stats": {
+        "ok": true,
+        "raw": {
+          "BlockIO": "2.55GB / 88.9MB",
+          "CPUPerc": "182.48%",
+          "Container": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+          "ID": "dee1a3158eb3",
+          "MemPerc": "74.30%",
+          "MemUsage": "11.46GiB / 15.43GiB",
+          "Name": "eureka-go2-train-1-8-restart-20260527-124302",
+          "NetIO": "3.23kB / 126B",
+          "PIDs": "29"
+        }
+      },
+      "log": {
+        "completed_exception": true,
+        "contains_nan": false,
+        "contains_segfault": false,
+        "effective_iterations_from_launch": 20000,
+        "exists": true,
+        "iterations_logged": [
+          1500,
+          0,
+          10
+        ],
+        "last_iteration": 10,
+        "last_timesteps": 1081344,
+        "last_total_reward": 71.51,
+        "path": "logs/go2_yoga_ball/train_1_8_budget/train.log",
+        "size_bytes": 34670
+      },
+      "nvidia_smi": {
+        "gpus": [
+          {
+            "index": "0",
+            "memory_total_mib": "24576",
+            "memory_used_mib": "13215",
+            "name": "NVIDIA GeForce RTX 3090",
+            "utilization_gpu_percent": "23"
+          }
+        ],
+        "ok": true
+      },
+      "t_since_start_s": 93.329
+    },
+    {
+      "container": {
+        "exit_code": 0,
+        "finished_at": "0001-01-01T00:00:00Z",
+        "id": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+        "name": "eureka-go2-train-1-8-restart-20260527-124302",
+        "ok": true,
+        "running": true,
+        "started_at": "2026-05-27T04:43:03.081341319Z",
+        "status": "running"
+      },
+      "docker_stats": {
+        "ok": true,
+        "raw": {
+          "BlockIO": "2.55GB / 89MB",
+          "CPUPerc": "174.64%",
+          "Container": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+          "ID": "dee1a3158eb3",
+          "MemPerc": "74.30%",
+          "MemUsage": "11.46GiB / 15.43GiB",
+          "Name": "eureka-go2-train-1-8-restart-20260527-124302",
+          "NetIO": "3.41kB / 126B",
+          "PIDs": "29"
+        }
+      },
+      "log": {
+        "completed_exception": true,
+        "contains_nan": false,
+        "contains_segfault": false,
+        "effective_iterations_from_launch": 20000,
+        "exists": true,
+        "iterations_logged": [
+          1500,
+          0,
+          10
+        ],
+        "last_iteration": 10,
+        "last_timesteps": 1081344,
+        "last_total_reward": 71.51,
+        "path": "logs/go2_yoga_ball/train_1_8_budget/train.log",
+        "size_bytes": 34670
+      },
+      "nvidia_smi": {
+        "gpus": [
+          {
+            "index": "0",
+            "memory_total_mib": "24576",
+            "memory_used_mib": "13215",
+            "name": "NVIDIA GeForce RTX 3090",
+            "utilization_gpu_percent": "31"
+          }
+        ],
+        "ok": true
+      },
+      "t_since_start_s": 124.379
+    },
+    {
+      "container": {
+        "exit_code": 0,
+        "finished_at": "0001-01-01T00:00:00Z",
+        "id": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+        "name": "eureka-go2-train-1-8-restart-20260527-124302",
+        "ok": true,
+        "running": true,
+        "started_at": "2026-05-27T04:43:03.081341319Z",
+        "status": "running"
+      },
+      "docker_stats": {
+        "ok": true,
+        "raw": {
+          "BlockIO": "2.55GB / 89MB",
+          "CPUPerc": "182.52%",
+          "Container": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+          "ID": "dee1a3158eb3",
+          "MemPerc": "74.30%",
+          "MemUsage": "11.46GiB / 15.43GiB",
+          "Name": "eureka-go2-train-1-8-restart-20260527-124302",
+          "NetIO": "3.41kB / 126B",
+          "PIDs": "29"
+        }
+      },
+      "log": {
+        "completed_exception": true,
+        "contains_nan": false,
+        "contains_segfault": false,
+        "effective_iterations_from_launch": 20000,
+        "exists": true,
+        "iterations_logged": [
+          1500,
+          0,
+          10
+        ],
+        "last_iteration": 10,
+        "last_timesteps": 1081344,
+        "last_total_reward": 71.51,
+        "path": "logs/go2_yoga_ball/train_1_8_budget/train.log",
+        "size_bytes": 34670
+      },
+      "nvidia_smi": {
+        "gpus": [
+          {
+            "index": "0",
+            "memory_total_mib": "24576",
+            "memory_used_mib": "13215",
+            "name": "NVIDIA GeForce RTX 3090",
+            "utilization_gpu_percent": "36"
+          }
+        ],
+        "ok": true
+      },
+      "t_since_start_s": 155.43
+    },
+    {
+      "container": {
+        "exit_code": 0,
+        "finished_at": "0001-01-01T00:00:00Z",
+        "id": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+        "name": "eureka-go2-train-1-8-restart-20260527-124302",
+        "ok": true,
+        "running": true,
+        "started_at": "2026-05-27T04:43:03.081341319Z",
+        "status": "running"
+      },
+      "docker_stats": {
+        "ok": true,
+        "raw": {
+          "BlockIO": "2.55GB / 89.1MB",
+          "CPUPerc": "182.50%",
+          "Container": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+          "ID": "dee1a3158eb3",
+          "MemPerc": "74.30%",
+          "MemUsage": "11.46GiB / 15.43GiB",
+          "Name": "eureka-go2-train-1-8-restart-20260527-124302",
+          "NetIO": "3.41kB / 126B",
+          "PIDs": "29"
+        }
+      },
+      "log": {
+        "completed_exception": true,
+        "contains_nan": false,
+        "contains_segfault": false,
+        "effective_iterations_from_launch": 20000,
+        "exists": true,
+        "iterations_logged": [
+          1500,
+          0,
+          10,
+          20,
+          30
+        ],
+        "last_iteration": 30,
+        "last_timesteps": 3047424,
+        "last_total_reward": 74.944,
+        "path": "logs/go2_yoga_ball/train_1_8_budget/train.log",
+        "size_bytes": 46718
+      },
+      "nvidia_smi": {
+        "gpus": [
+          {
+            "index": "0",
+            "memory_total_mib": "24576",
+            "memory_used_mib": "13215",
+            "name": "NVIDIA GeForce RTX 3090",
+            "utilization_gpu_percent": "28"
+          }
+        ],
+        "ok": true
+      },
+      "t_since_start_s": 186.471
+    },
+    {
+      "container": {
+        "exit_code": 0,
+        "finished_at": "0001-01-01T00:00:00Z",
+        "id": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+        "name": "eureka-go2-train-1-8-restart-20260527-124302",
+        "ok": true,
+        "running": true,
+        "started_at": "2026-05-27T04:43:03.081341319Z",
+        "status": "running"
+      },
+      "docker_stats": {
+        "ok": true,
+        "raw": {
+          "BlockIO": "2.55GB / 90.8MB",
+          "CPUPerc": "182.34%",
+          "Container": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+          "ID": "dee1a3158eb3",
+          "MemPerc": "74.30%",
+          "MemUsage": "11.46GiB / 15.43GiB",
+          "Name": "eureka-go2-train-1-8-restart-20260527-124302",
+          "NetIO": "3.41kB / 126B",
+          "PIDs": "29"
+        }
+      },
+      "log": {
+        "completed_exception": true,
+        "contains_nan": false,
+        "contains_segfault": false,
+        "effective_iterations_from_launch": 20000,
+        "exists": true,
+        "iterations_logged": [
+          1500,
+          0,
+          10,
+          20,
+          30
+        ],
+        "last_iteration": 30,
+        "last_timesteps": 3047424,
+        "last_total_reward": 74.944,
+        "path": "logs/go2_yoga_ball/train_1_8_budget/train.log",
+        "size_bytes": 46718
+      },
+      "nvidia_smi": {
+        "gpus": [
+          {
+            "index": "0",
+            "memory_total_mib": "24576",
+            "memory_used_mib": "13215",
+            "name": "NVIDIA GeForce RTX 3090",
+            "utilization_gpu_percent": "41"
+          }
+        ],
+        "ok": true
+      },
+      "t_since_start_s": 217.528
+    },
+    {
+      "container": {
+        "exit_code": 0,
+        "finished_at": "0001-01-01T00:00:00Z",
+        "id": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+        "name": "eureka-go2-train-1-8-restart-20260527-124302",
+        "ok": true,
+        "running": true,
+        "started_at": "2026-05-27T04:43:03.081341319Z",
+        "status": "running"
+      },
+      "docker_stats": {
+        "ok": true,
+        "raw": {
+          "BlockIO": "2.55GB / 90.8MB",
+          "CPUPerc": "181.01%",
+          "Container": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+          "ID": "dee1a3158eb3",
+          "MemPerc": "74.30%",
+          "MemUsage": "11.46GiB / 15.43GiB",
+          "Name": "eureka-go2-train-1-8-restart-20260527-124302",
+          "NetIO": "3.52kB / 126B",
+          "PIDs": "29"
+        }
+      },
+      "log": {
+        "completed_exception": true,
+        "contains_nan": false,
+        "contains_segfault": false,
+        "effective_iterations_from_launch": 20000,
+        "exists": true,
+        "iterations_logged": [
+          1500,
+          0,
+          10,
+          20,
+          30
+        ],
+        "last_iteration": 30,
+        "last_timesteps": 3047424,
+        "last_total_reward": 74.944,
+        "path": "logs/go2_yoga_ball/train_1_8_budget/train.log",
+        "size_bytes": 46718
+      },
+      "nvidia_smi": {
+        "gpus": [
+          {
+            "index": "0",
+            "memory_total_mib": "24576",
+            "memory_used_mib": "13215",
+            "name": "NVIDIA GeForce RTX 3090",
+            "utilization_gpu_percent": "34"
+          }
+        ],
+        "ok": true
+      },
+      "t_since_start_s": 248.575
+    },
+    {
+      "container": {
+        "exit_code": 0,
+        "finished_at": "0001-01-01T00:00:00Z",
+        "id": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+        "name": "eureka-go2-train-1-8-restart-20260527-124302",
+        "ok": true,
+        "running": true,
+        "started_at": "2026-05-27T04:43:03.081341319Z",
+        "status": "running"
+      },
+      "docker_stats": {
+        "ok": true,
+        "raw": {
+          "BlockIO": "2.55GB / 91.5MB",
+          "CPUPerc": "180.09%",
+          "Container": "dee1a3158eb3afa2a2e5335f3ea739e3cbce30572aea6b9ccbc94ea430741f50",
+          "ID": "dee1a3158eb3",
+          "MemPerc": "74.29%",
+          "MemUsage": "11.46GiB / 15.43GiB",
+          "Name": "eureka-go2-train-1-8-restart-20260527-124302",
+          "NetIO": "3.59kB / 126B",
+          "PIDs": "29"
+        }
+      },
+      "log": {
+        "completed_exception": true,
+        "contains_nan": false,
+        "contains_segfault": false,
+        "effective_iterations_from_launch": 20000,
+        "exists": true,
+        "iterations_logged": [
+          1500,
+          0,
+          10,
+          20,
+          30,
+          40,
+          50
+        ],
+        "last_iteration": 50,
+        "last_timesteps": 5013504,
+        "last_total_reward": 80.779,
+        "path": "logs/go2_yoga_ball/train_1_8_budget/train.log",
+        "size_bytes": 58766
+      },
+      "nvidia_smi": {
+        "gpus": [
+          {
+            "index": "0",
+            "memory_total_mib": "24576",
+            "memory_used_mib": "13215",
+            "name": "NVIDIA GeForce RTX 3090",
+            "utilization_gpu_percent": "35"
+          }
+        ],
+        "ok": true
+      },
+      "t_since_start_s": 279.62
     }
   ],
-  "selected_run": "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-27/train/043005.243837",
+  "selected_run": "thirdparties/DrEureka/globe_walking/runs/globe_walking/2026-05-27/train/044311.018107",
   "selected_run_file": "artifacts/go2_yoga_ball/train_1_8_budget_selected_run.txt"
 }

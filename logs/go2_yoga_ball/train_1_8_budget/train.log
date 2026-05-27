@@ -14,7 +14,7 @@ Allowing ninja to set a default number of workers... (overridable by setting the
 [2/2] c++ gymtorch.o -shared -L/opt/conda/lib/python3.7/site-packages/torch/lib -lc10 -ltorch_cpu -ltorch -ltorch_python -o gymtorch.so
 Loading extension module gymtorch...
 creating new logging client...✓ created a new logging client
-Dashboard: http://app.dash.ml/globe_walking/2026-05-27/train/043005.243837
+Dashboard: http://app.dash.ml/globe_walking/2026-05-27/train/044311.018107
 Log_directory: /workspace/eureka-workspace/thirdparties/DrEureka/globe_walking/runs
 ══════════════════════════════════════════
       AC_Args       
@@ -87,7 +87,7 @@ curriculum_thresholds│ {'tracking_lin_vel': 0.8, 'tracking_ang_vel': 0.7, 'tra
        noise        │ {'add_noise': True, 'noise_level': 1.0}
     noise_scales    │ {'dof_pos': 0.01, 'dof_vel': 1.5, 'gravity': 0.05, 'feet_contact_states': 0.05, 'ball_pos': 0.05}
        viewer       │ {'ref_env': 0, 'pos': None, 'lookat': None}
-        sim         │ {'dt': 0.005, 'substeps': 1, 'gravity': [0.0, 0.0, -9.81], 'up_axis': 1, 'use_gpu_pipeline': True, 'physx_mini': {'num_threads': 10, 'solver_type': 1, 'num_position_iterations': 4, 'num_velocity_iterations': 0, 'contact_offset': 0.01, 'rest_offset': 0.0, 'bounce_threshold_velocity': 0.5, 'max_depenetration_velocity': 1.0, 'max_gpu_contact_pairs': 8388608, 'default_buffer_size_multiplier': 5, 'contact_collection': 2}, 'physx_full': {'num_threads': 10, 'solver_type': 1, 'num_position_iterations': 4, 'num_velocity_iterations': 0, 'contact_offset': 0.01, 'rest_offset': 0.0, 'bounce_threshold_velocity': 0.5, 'max_depenetration_velocity': 1.0, 'max_gpu_contact_pairs': 16777216, 'default_buffer_size_multiplier': 64, 'contact_collection': 2}, 'physx': {'num_threads': 10, 'solver_type': 1, 'num_position_iterations': 4, 'num_velocity_iterations': 0, 'contact_offset': 0.01, 'rest_offset': 0.0, 'bounce_threshold_velocity': 0.5, 'max_depenetration_velocity': 1.0, 'max_gpu_contact_pairs': 8388608, 'default_buffer_size_multiplier': 5, 'contact_collection': 2}}
+        sim         │ {'dt': 0.005, 'substeps': 1, 'gravity': [0.0, 0.0, -9.81], 'up_axis': 1, 'use_gpu_pipeline': True, 'physx_mini': {'num_threads': 10, 'solver_type': 1, 'num_position_iterations': 4, 'num_velocity_iterations': 0, 'contact_offset': 0.01, 'rest_offset': 0.0, 'bounce_threshold_velocity': 0.5, 'max_depenetration_velocity': 1.0, 'max_gpu_contact_pairs': 8388608, 'default_buffer_size_multiplier': 5, 'contact_collection': 2}, 'physx_full': {'num_threads': 10, 'solver_type': 1, 'num_position_iterations': 4, 'num_velocity_iterations': 0, 'contact_offset': 0.01, 'rest_offset': 0.0, 'bounce_threshold_velocity': 0.5, 'max_depenetration_velocity': 1.0, 'max_gpu_contact_pairs': 16777216, 'default_buffer_size_multiplier': 64, 'contact_collection': 2}, 'physx': {'num_threads': 10, 'solver_type': 1, 'num_position_iterations': 4, 'num_velocity_iterations': 0, 'contact_offset': 0.01, 'rest_offset': 0.0, 'bounce_threshold_velocity': 0.5, 'max_depenetration_velocity': 1.0, 'max_gpu_contact_pairs': 16777216, 'default_buffer_size_multiplier': 64, 'contact_collection': 2}}
      perception     │ {'measure_heights': False, 'compute_heights': False, 'measure_frictions': False, 'compute_frictions': False, 'measure_roughnesses': False, 'compute_roughnesses': False, 'camera_names': ['front', 'left', 'right', 'bottom', 'rear'], 'camera_poses': [[0.3, 0, 0], [0, 0.15, 0], [0, -0.15, 0], [0.1, 0, -0.1], [-0.2, 0, -0.1]], 'camera_rpys': [[0.0, 0, 0], [0, 0, 1.57], [0, 0, -1.57], [0, -1.57, 0], [0, -1.57, 0]], 'compute_depth': False, 'compute_rgb': False, 'compute_segmentation': False, 'image_height': 100, 'image_width': 100, 'image_horizontal_fov': 110.0}
         env         │ {'num_envs': 4096, 'num_observations': 56, 'num_privileged_obs': 6, 'num_actions': 12, 'num_observation_history': 15, 'env_spacing': 3.0, 'send_timeouts': True, 'episode_length_s': 40.0, 'record_video': False, 'recording_width_px': 360, 'recording_height_px': 240, 'recording_mode': 'COLOR', 'num_recording_envs': 1, 'add_balls': True}
       sensors       │ {'sensor_names': ['OrientationSensor', 'JointPositionSensor', 'JointVelocitySensor', 'ActionSensor', 'LastActionSensor', 'ClockSensor', 'YawSensor'], 'sensor_args': {'OrientationSensor': {}, 'JointPositionSensor': {}, 'JointVelocitySensor': {}, 'ActionSensor': {}, 'LastActionSensor': {'delay': 1}, 'ClockSensor': {}, 'YawSensor': {}}, 'privileged_sensor_names': {'BodyVelocitySensor': {}, 'ObjectVelocitySensor': {}}, 'privileged_sensor_args': {'BodyVelocitySensor': {}, 'ObjectVelocitySensor': {}}}
@@ -99,3 +99,301 @@ Not connected to PVD
 Physics Engine: PhysX
 Physics Device: cuda:0
 GPU Pipeline: enabled
+
+Running with headless and no recording, disabled graphics rendering
+Adaptation Module: Sequential(
+  (0): Linear(in_features=840, out_features=256, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=256, out_features=128, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=128, out_features=6, bias=True)
+)
+Actor MLP: Sequential(
+  (0): Linear(in_features=846, out_features=512, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=512, out_features=256, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=256, out_features=128, bias=True)
+  (5): ELU(alpha=1.0)
+  (6): Linear(in_features=128, out_features=12, bias=True)
+)
+Critic MLP: Sequential(
+  (0): Linear(in_features=846, out_features=512, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=512, out_features=256, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=256, out_features=128, bias=True)
+  (5): ELU(alpha=1.0)
+  (6): Linear(in_features=128, out_features=1, bias=True)
+)
+START RECORDING
+╒═════════════════════════════════════════════╤════════════════════╕
+│       train/episode/rew balance/mean        │       24.974       │
+├─────────────────────────────────────────────┼────────────────────┤
+│        train/episode/rew height/mean        │       19.817       │
+├─────────────────────────────────────────────┼────────────────────┤
+│train/episode/rew penalize large actions/mean│       -2.974       │
+├─────────────────────────────────────────────┼────────────────────┤
+│    train/episode/rew smooth actions/mean    │      -13.831       │
+├─────────────────────────────────────────────┼────────────────────┤
+│        train/episode/rew total/mean         │       27.986       │
+├─────────────────────────────────────────────┼────────────────────┤
+│       train/episode/rew success/mean        │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│      train/episode/episode length/mean      │       25.299       │
+├─────────────────────────────────────────────┼────────────────────┤
+│              time elapsed/mean              │       3.711        │
+├─────────────────────────────────────────────┼────────────────────┤
+│               time iter/mean                │        3.71        │
+├─────────────────────────────────────────────┼────────────────────┤
+│            adaptation loss/mean             │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│            mean value loss/mean             │       321.21       │
+├─────────────────────────────────────────────┼────────────────────┤
+│          mean surrogate loss/mean           │       -0.013       │
+├─────────────────────────────────────────────┼────────────────────┤
+│           mean decoder loss/mean            │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│       mean decoder loss student/mean        │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│         mean decoder test loss/mean         │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│     mean decoder test loss student/mean     │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│    mean adaptation module test loss/mean    │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│                  timesteps                  │       98304        │
+├─────────────────────────────────────────────┼────────────────────┤
+│                 iterations                  │         0          │
+╘═════════════════════════════════════════════╧════════════════════╛
+
+══════════════════════════════════════════
+        job         
+────────────────────┬─────────────────────
+       status       │ running             
+      runTime       │ 2026-05-27 04:43:38.993286
+════════════════════╧═════════════════════
+Saving model at iteration 0
+╒═════════════════════════════════════════════╤════════════════════╕
+│       train/episode/rew balance/mean        │       83.521       │
+├─────────────────────────────────────────────┼────────────────────┤
+│        train/episode/rew height/mean        │       48.758       │
+├─────────────────────────────────────────────┼────────────────────┤
+│train/episode/rew penalize large actions/mean│      -10.739       │
+├─────────────────────────────────────────────┼────────────────────┤
+│    train/episode/rew smooth actions/mean    │      -50.029       │
+├─────────────────────────────────────────────┼────────────────────┤
+│        train/episode/rew total/mean         │       71.51        │
+├─────────────────────────────────────────────┼────────────────────┤
+│       train/episode/rew success/mean        │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│      train/episode/episode length/mean      │      227.693       │
+├─────────────────────────────────────────────┼────────────────────┤
+│              time elapsed/mean              │       29.472       │
+├─────────────────────────────────────────────┼────────────────────┤
+│               time iter/mean                │       4.648        │
+├─────────────────────────────────────────────┼────────────────────┤
+│            adaptation loss/mean             │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│            mean value loss/mean             │      167.111       │
+├─────────────────────────────────────────────┼────────────────────┤
+│          mean surrogate loss/mean           │       0.001        │
+├─────────────────────────────────────────────┼────────────────────┤
+│           mean decoder loss/mean            │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│       mean decoder loss student/mean        │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│         mean decoder test loss/mean         │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│     mean decoder test loss student/mean     │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│    mean adaptation module test loss/mean    │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│                  timesteps                  │      1081344       │
+├─────────────────────────────────────────────┼────────────────────┤
+│                 iterations                  │         10         │
+╘═════════════════════════════════════════════╧════════════════════╛
+
+══════════════════════════════════════════
+        job         
+────────────────────┬─────────────────────
+       status       │ running             
+      runTime       │ 2026-05-27 04:44:25.694660
+════════════════════╧═════════════════════
+╒═════════════════════════════════════════════╤════════════════════╕
+│       train/episode/rew balance/mean        │       83.963       │
+├─────────────────────────────────────────────┼────────────────────┤
+│        train/episode/rew height/mean        │       49.06        │
+├─────────────────────────────────────────────┼────────────────────┤
+│train/episode/rew penalize large actions/mean│      -10.769       │
+├─────────────────────────────────────────────┼────────────────────┤
+│    train/episode/rew smooth actions/mean    │      -49.793       │
+├─────────────────────────────────────────────┼────────────────────┤
+│        train/episode/rew total/mean         │       72.461       │
+├─────────────────────────────────────────────┼────────────────────┤
+│       train/episode/rew success/mean        │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│      train/episode/episode length/mean      │       45.191       │
+├─────────────────────────────────────────────┼────────────────────┤
+│              time elapsed/mean              │       76.027       │
+├─────────────────────────────────────────────┼────────────────────┤
+│               time iter/mean                │       4.653        │
+├─────────────────────────────────────────────┼────────────────────┤
+│            adaptation loss/mean             │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│            mean value loss/mean             │      127.578       │
+├─────────────────────────────────────────────┼────────────────────┤
+│          mean surrogate loss/mean           │       -0.006       │
+├─────────────────────────────────────────────┼────────────────────┤
+│           mean decoder loss/mean            │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│       mean decoder loss student/mean        │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│         mean decoder test loss/mean         │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│     mean decoder test loss student/mean     │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│    mean adaptation module test loss/mean    │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│                  timesteps                  │      2064384       │
+├─────────────────────────────────────────────┼────────────────────┤
+│                 iterations                  │         20         │
+╘═════════════════════════════════════════════╧════════════════════╛
+
+══════════════════════════════════════════
+        job         
+────────────────────┬─────────────────────
+       status       │ running             
+      runTime       │ 2026-05-27 04:45:12.358725
+════════════════════╧═════════════════════
+╒═════════════════════════════════════════════╤════════════════════╕
+│       train/episode/rew balance/mean        │       84.456       │
+├─────────────────────────────────────────────┼────────────────────┤
+│        train/episode/rew height/mean        │       49.862       │
+├─────────────────────────────────────────────┼────────────────────┤
+│train/episode/rew penalize large actions/mean│      -10.706       │
+├─────────────────────────────────────────────┼────────────────────┤
+│    train/episode/rew smooth actions/mean    │      -48.668       │
+├─────────────────────────────────────────────┼────────────────────┤
+│        train/episode/rew total/mean         │       74.944       │
+├─────────────────────────────────────────────┼────────────────────┤
+│       train/episode/rew success/mean        │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│      train/episode/episode length/mean      │       45.411       │
+├─────────────────────────────────────────────┼────────────────────┤
+│              time elapsed/mean              │      122.515       │
+├─────────────────────────────────────────────┼────────────────────┤
+│               time iter/mean                │       4.619        │
+├─────────────────────────────────────────────┼────────────────────┤
+│            adaptation loss/mean             │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│            mean value loss/mean             │       106.42       │
+├─────────────────────────────────────────────┼────────────────────┤
+│          mean surrogate loss/mean           │       -0.008       │
+├─────────────────────────────────────────────┼────────────────────┤
+│           mean decoder loss/mean            │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│       mean decoder loss student/mean        │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│         mean decoder test loss/mean         │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│     mean decoder test loss student/mean     │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│    mean adaptation module test loss/mean    │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│                  timesteps                  │      3047424       │
+├─────────────────────────────────────────────┼────────────────────┤
+│                 iterations                  │         30         │
+╘═════════════════════════════════════════════╧════════════════════╛
+
+══════════════════════════════════════════
+        job         
+────────────────────┬─────────────────────
+       status       │ running             
+      runTime       │ 2026-05-27 04:45:58.678242
+════════════════════╧═════════════════════
+╒═════════════════════════════════════════════╤════════════════════╕
+│       train/episode/rew balance/mean        │       84.733       │
+├─────────────────────────────────────────────┼────────────────────┤
+│        train/episode/rew height/mean        │       50.962       │
+├─────────────────────────────────────────────┼────────────────────┤
+│train/episode/rew penalize large actions/mean│      -10.716       │
+├─────────────────────────────────────────────┼────────────────────┤
+│    train/episode/rew smooth actions/mean    │      -47.696       │
+├─────────────────────────────────────────────┼────────────────────┤
+│        train/episode/rew total/mean         │       77.283       │
+├─────────────────────────────────────────────┼────────────────────┤
+│       train/episode/rew success/mean        │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│      train/episode/episode length/mean      │       45.556       │
+├─────────────────────────────────────────────┼────────────────────┤
+│              time elapsed/mean              │      168.934       │
+├─────────────────────────────────────────────┼────────────────────┤
+│               time iter/mean                │       4.634        │
+├─────────────────────────────────────────────┼────────────────────┤
+│            adaptation loss/mean             │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│            mean value loss/mean             │       61.855       │
+├─────────────────────────────────────────────┼────────────────────┤
+│          mean surrogate loss/mean           │       -0.01        │
+├─────────────────────────────────────────────┼────────────────────┤
+│           mean decoder loss/mean            │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│       mean decoder loss student/mean        │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│         mean decoder test loss/mean         │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│     mean decoder test loss student/mean     │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│    mean adaptation module test loss/mean    │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│                  timesteps                  │      4030464       │
+├─────────────────────────────────────────────┼────────────────────┤
+│                 iterations                  │         40         │
+╘═════════════════════════════════════════════╧════════════════════╛
+
+══════════════════════════════════════════
+        job         
+────────────────────┬─────────────────────
+       status       │ running             
+      runTime       │ 2026-05-27 04:46:45.153823
+════════════════════╧═════════════════════
+╒═════════════════════════════════════════════╤════════════════════╕
+│       train/episode/rew balance/mean        │       85.218       │
+├─────────────────────────────────────────────┼────────────────────┤
+│        train/episode/rew height/mean        │       52.032       │
+├─────────────────────────────────────────────┼────────────────────┤
+│train/episode/rew penalize large actions/mean│      -10.657       │
+├─────────────────────────────────────────────┼────────────────────┤
+│    train/episode/rew smooth actions/mean    │      -45.814       │
+├─────────────────────────────────────────────┼────────────────────┤
+│        train/episode/rew total/mean         │       80.779       │
+├─────────────────────────────────────────────┼────────────────────┤
+│       train/episode/rew success/mean        │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│      train/episode/episode length/mean      │       45.787       │
+├─────────────────────────────────────────────┼────────────────────┤
+│              time elapsed/mean              │      215.451       │
+├─────────────────────────────────────────────┼────────────────────┤
+│               time iter/mean                │       4.643        │
+├─────────────────────────────────────────────┼────────────────────┤
+│            adaptation loss/mean             │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│            mean value loss/mean             │       31.565       │
+├─────────────────────────────────────────────┼────────────────────┤
+│          mean surrogate loss/mean           │       -0.015       │
+├─────────────────────────────────────────────┼────────────────────┤
+│           mean decoder loss/mean            │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│       mean decoder loss student/mean        │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│         mean decoder test loss/mean         │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│     mean decoder test loss student/mean     │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│    mean adaptation module test loss/mean    │         0.         │
+├─────────────────────────────────────────────┼────────────────────┤
+│                  timesteps                  │      5013504       │
+├─────────────────────────────────────────────┼────────────────────┤
+│                 iterations                  │         50         │
+╘═════════════════════════════════════════════╧════════════════════╛
