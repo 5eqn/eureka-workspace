@@ -24,7 +24,7 @@ The final evidence must be strong enough for Claude Opus 4.6 and human embodied-
 Dependency and project-owned paths:
 
 - Dependency checkouts/packages: `thirdparties/DrEureka`, `thirdparties/wbc-workspace`, `thirdparties/IsaacGym` or `thirdparties/isaacgym`, and `thirdparties/MJLab`.
-- Dockerfiles: `docker/go1_yoga_ball/`.
+- Shared Dockerfiles/images: `docker/isaacgym.Dockerfile` -> `eureka-isaacgym`, `docker/mujoco_sim2sim.Dockerfile` -> `eureka-mujoco_sim2sim`, and `docker/mjlab.Dockerfile` -> `eureka-mjlab`.
 - Orchestration scripts: `scripts/go1_yoga_ball/`.
 - Runtime logs: `logs/go1_yoga_ball/`.
 - Final reports and videos: `artifacts/go1_yoga_ball/`.
@@ -44,7 +44,7 @@ The default DrEureka LCM deploy stack is the preferred Sim2Sim contract because 
 All validation outputs must land under one stable tree:
 
 ```text
-docker/go1_yoga_ball/
+docker/
   isaacgym.Dockerfile
   mujoco_sim2sim.Dockerfile
   mjlab.Dockerfile

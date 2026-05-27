@@ -32,7 +32,7 @@ RUN python3 -m pip install --no-cache-dir \
     pyyaml \
     scipy
 
-WORKDIR /workspace/go1_yoga_ball
+WORKDIR /workspace/eureka-workspace
 
 COPY thirdparties/DrEureka /workspace/thirdparties/DrEureka
-COPY scripts/go1_yoga_ball /workspace/go1_yoga_ball/scripts/go1_yoga_ball
+COPY scripts /workspace/eureka-workspace/scripts

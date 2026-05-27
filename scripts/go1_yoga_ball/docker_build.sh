@@ -10,8 +10,8 @@ usage() {
 build_one() {
   local name="$1"
   docker build \
-    -f "$ROOT_DIR/docker/go1_yoga_ball/${name}.Dockerfile" \
-    -t "go1-yoga-ball-${name}" \
+    -f "$ROOT_DIR/docker/${name}.Dockerfile" \
+    -t "eureka-${name}" \
     "$ROOT_DIR"
 }
 

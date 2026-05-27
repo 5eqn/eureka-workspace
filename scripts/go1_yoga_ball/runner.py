@@ -199,11 +199,11 @@ def validate_deps() -> dict[str, Any]:
             "wbc-unitree_mujoco": path_status(WBC / "thirdparties" / "unitree_mujoco", False),
         },
         "dockerfiles": {
-            name: path_status(ROOT / "docker" / "go1_yoga_ball" / f"{name}.Dockerfile", True)
+            name: path_status(ROOT / "docker" / f"{name}.Dockerfile", True)
             for name in ["isaacgym", "mujoco_sim2sim", "mjlab"]
         },
         "docker_images": {
-            name: docker_image_status(f"go1-yoga-ball-{name}", name == "mujoco_sim2sim")
+            name: docker_image_status(f"eureka-{name}", name == "mujoco_sim2sim")
             for name in ["isaacgym", "mujoco_sim2sim", "mjlab"]
         },
         "notes": [
@@ -2241,7 +2241,7 @@ def phase_mjlab_report() -> Path:
             "",
             "## Port Strategy",
             "",
-            "Use MJLab as an installed dependency inside `go1-yoga-ball-mjlab`. Keep the yoga-ball task adapter root-owned until the API boundary is clear, then register it at runtime through MJLab's task registry. Start from MJLab's built-in Go1 velocity task only for robot/entity/action patterns; do not treat the flat-ground velocity task as yoga-ball evidence.",
+            "Use MJLab as an installed dependency inside `eureka-mjlab`. Keep the yoga-ball task adapter root-owned until the API boundary is clear, then register it at runtime through MJLab's task registry. Start from MJLab's built-in Go1 velocity task only for robot/entity/action patterns; do not treat the flat-ground velocity task as yoga-ball evidence.",
             "",
             "The next required increment is a minimal registered MJLab yoga-ball task with a dynamic sphere, Go1 reset on the ball, DrEureka-compatible action timing, and raw default-playback logs. Only after that should training be scaled.",
             "",

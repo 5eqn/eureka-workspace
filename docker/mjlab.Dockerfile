@@ -26,5 +26,5 @@ COPY thirdparties/MJLab /workspace/thirdparties/MJLab
 
 RUN uv sync --locked --no-editable --no-dev
 
-WORKDIR /workspace/go1_yoga_ball
-COPY scripts/go1_yoga_ball /workspace/go1_yoga_ball/scripts/go1_yoga_ball
+WORKDIR /workspace/eureka-workspace
+COPY scripts /workspace/eureka-workspace/scripts
