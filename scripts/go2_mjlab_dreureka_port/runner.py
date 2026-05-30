@@ -129,6 +129,10 @@ def conda_python_script(script: Path, *args: str) -> list[str]:
     return ["conda", "run", "--no-capture-output", "-n", CONDA_ENV_NAME, "python", str(script), *args]
 
 
+def has_hfield_overflow_warning(text: str) -> bool:
+    return "height field collision overflow" in text.lower()
+
+
 def git_head(path: Path) -> str | None:
     try:
         return run(["git", "-C", str(path), "rev-parse", "HEAD"])
@@ -263,7 +267,7 @@ def source_contract() -> dict[str, Any]:
             "Implement a caller-project MJLab task, not upstream edits.",
             "Use Unitree MJLab Go2 XML/model constants as the robot data source.",
             "Keep DrEureka-derived yoga-ball, observation, reward, and termination constants inline under scripts.",
-            "Use MJLab built-in HfPerlinNoiseTerrainCfg parameterized to the Isaac boxes_tm rough-terrain scale: 20x20 tiles, 5m tile size, 0.05m grid spacing, single octave, fixed per-env terrain origin assignment, and 0.02..0.08 height range.",
+            "Use script-local IsaacPerlinHFieldTerrainCfg with DrEureka's signed Perlin function and Isaac boxes_tm rough-terrain scale: 20x20 tiles, 5m tile size, 0.05m grid spacing, per-tile seed row*num_cols+col, fixed per-env terrain origin assignment, and 0.02..0.08 roughness range.",
             "Mirror 4096 envs, 20000 iterations, save interval 1000 for 1/8-budget launch.",
         ],
     }
@@ -457,7 +461,10 @@ import json
 import sys
 from dataclasses import asdict
 
+import mujoco
 import torch
+
+mujoco.mjMAXCONPAIR = 512
 
 sys.path.insert(0, "/home/seqn/eureka-workspace/scripts/go2_mjlab_dreureka_port")
 import src.tasks  # noqa: F401
@@ -504,6 +511,9 @@ summary = {
   "terrain_cols": cfg.scene.terrain.terrain_generator.num_cols if cfg.scene.terrain.terrain_generator is not None else None,
   "terrain_size": list(cfg.scene.terrain.terrain_generator.size) if cfg.scene.terrain.terrain_generator is not None else None,
   "terrain_sub_terrains": list(cfg.scene.terrain.terrain_generator.sub_terrains.keys()) if cfg.scene.terrain.terrain_generator is not None else [],
+  "mujoco_mjmaxconpair": mujoco.mjMAXCONPAIR,
+  "compiled_hfields": int(env.sim.model.hfield_nrow.shape[0]),
+  "compiled_meshes": int(env.sim.model.mesh_vertadr.shape[0]),
   "terrain_origin_shape": list(env.scene.terrain.terrain_origins.shape) if env.scene.terrain.terrain_origins is not None else None,
   "terrain_max_init_level_cfg": cfg.scene.terrain.max_init_terrain_level,
   "terrain_level_min": int(terrain_levels.min().item()),
@@ -582,7 +592,8 @@ print(json.dumps(summary, sort_keys=True))
             "terrain_rows": 20,
             "terrain_cols": 20,
             "terrain_size": [5.0, 5.0],
-            "terrain_sub_terrains": ["hf_perlin_noise"],
+            "terrain_sub_terrains": ["isaac_perlin_hfield"],
+            "mujoco_mjmaxconpair": 512,
             "terrain_max_init_level_cfg": 14,
             "actuator_gains": {
                 ".*hip_joint": {"stiffness": 20.0, "damping": 1.0},
@@ -612,6 +623,9 @@ print(json.dumps(summary, sort_keys=True))
             "terrain_cols": parsed["terrain_cols"] == expected["terrain_cols"],
             "terrain_size": parsed["terrain_size"] == expected["terrain_size"],
             "terrain_sub_terrains": parsed["terrain_sub_terrains"] == expected["terrain_sub_terrains"],
+            "mujoco_mjmaxconpair": parsed["mujoco_mjmaxconpair"] == expected["mujoco_mjmaxconpair"],
+            "compiled_hfields": parsed["compiled_hfields"] == 400,
+            "compiled_meshes": parsed["compiled_meshes"] >= 0,
             "terrain_origin_shape": parsed["terrain_origin_shape"] == [20, 20, 3],
             "terrain_max_init_level_cfg": parsed["terrain_max_init_level_cfg"] == expected["terrain_max_init_level_cfg"],
             "terrain_level_range": 5 <= parsed["terrain_level_min"] <= parsed["terrain_level_max"] <= 14,
@@ -660,6 +674,7 @@ print(json.dumps(summary, sort_keys=True))
                 f"- Train env count: `{parsed['num_envs_train']}`",
                 f"- Smoke env count: `{parsed['num_envs_smoke']}`",
                 f"- Terrain: `{parsed['terrain_type']}` `{parsed['terrain_generator_class']}` rows/cols `{parsed['terrain_rows']}`/`{parsed['terrain_cols']}` size `{parsed['terrain_size']}` sub-terrains `{parsed['terrain_sub_terrains']}`",
+                f"- MuJoCo hfield contact-pair cap: `{parsed['mujoco_mjmaxconpair']}`, compiled hfields `{parsed['compiled_hfields']}`, compiled meshes `{parsed['compiled_meshes']}`",
                 f"- Terrain assignment: level range `{parsed['terrain_level_min']}`..`{parsed['terrain_level_max']}` with max-init `{parsed['terrain_max_init_level_cfg']}`, type range `{parsed['terrain_type_min']}`..`{parsed['terrain_type_max']}`",
                 f"- Terrain type counts: `{parsed['terrain_type_counts']}`",
                 f"- Terrain level counts: `{parsed['terrain_level_counts']}`",
@@ -968,6 +983,7 @@ def report_training_run(
         "process_log_exists": console_log.exists(),
         "no_traceback": "Traceback (most recent call last)" not in text,
         "no_nan_text": "nan" not in text.lower(),
+        "no_hfield_overflow_warning": not has_hfield_overflow_warning(text),
         "curve_points": len(rows) >= min_points,
         "finite_curve": finite,
     }
