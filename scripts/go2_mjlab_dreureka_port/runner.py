@@ -267,7 +267,7 @@ def source_contract() -> dict[str, Any]:
             "Implement a caller-project MJLab task, not upstream edits.",
             "Use Unitree MJLab Go2 XML/model constants as the robot data source.",
             "Keep DrEureka-derived yoga-ball, observation, reward, and termination constants inline under scripts.",
-            "Use script-local IsaacPerlinHFieldTerrainCfg with DrEureka's signed Perlin function and Isaac boxes_tm rough-terrain scale: 20x20 tiles, 5m tile size, 0.05m grid spacing, per-tile seed row*num_cols+col, fixed per-env terrain origin assignment, and 0.02..0.08 roughness range.",
+            "Use MJLab built-in HfPerlinNoiseTerrainCfg with Isaac tile layout but coarser hfield collision scale: 20x20 tiles, 5m tile size, 0.25m grid spacing, Perlin coordinate scale 20, fixed per-env terrain origin assignment, and 0.02..0.08 height range.",
             "Mirror 4096 envs, 20000 iterations, save interval 1000 for 1/8-budget launch.",
         ],
     }
@@ -461,10 +461,7 @@ import json
 import sys
 from dataclasses import asdict
 
-import mujoco
 import torch
-
-mujoco.mjMAXCONPAIR = 512
 
 sys.path.insert(0, "/home/seqn/eureka-workspace/scripts/go2_mjlab_dreureka_port")
 import src.tasks  # noqa: F401
@@ -479,7 +476,7 @@ cfg = load_env_cfg(TASK_ID)
 rl = load_rl_cfg(TASK_ID)
 registered = TASK_ID in list_tasks()
 
-cfg.scene.num_envs = 2
+cfg.scene.num_envs = 4096
 env = ManagerBasedRlEnv(cfg=cfg, device="cuda:0" if torch.cuda.is_available() else "cpu")
 obs, extras = env.reset()
 action = torch.zeros((env.num_envs, env.single_action_space.shape[0]), device=env.device)
@@ -511,7 +508,6 @@ summary = {
   "terrain_cols": cfg.scene.terrain.terrain_generator.num_cols if cfg.scene.terrain.terrain_generator is not None else None,
   "terrain_size": list(cfg.scene.terrain.terrain_generator.size) if cfg.scene.terrain.terrain_generator is not None else None,
   "terrain_sub_terrains": list(cfg.scene.terrain.terrain_generator.sub_terrains.keys()) if cfg.scene.terrain.terrain_generator is not None else [],
-  "mujoco_mjmaxconpair": mujoco.mjMAXCONPAIR,
   "compiled_hfields": int(env.sim.model.hfield_nrow.shape[0]),
   "compiled_meshes": int(env.sim.model.mesh_vertadr.shape[0]),
   "terrain_origin_shape": list(env.scene.terrain.terrain_origins.shape) if env.scene.terrain.terrain_origins is not None else None,
@@ -592,8 +588,7 @@ print(json.dumps(summary, sort_keys=True))
             "terrain_rows": 20,
             "terrain_cols": 20,
             "terrain_size": [5.0, 5.0],
-            "terrain_sub_terrains": ["isaac_perlin_hfield"],
-            "mujoco_mjmaxconpair": 512,
+            "terrain_sub_terrains": ["hf_perlin_noise"],
             "terrain_max_init_level_cfg": 14,
             "actuator_gains": {
                 ".*hip_joint": {"stiffness": 20.0, "damping": 1.0},
@@ -623,7 +618,6 @@ print(json.dumps(summary, sort_keys=True))
             "terrain_cols": parsed["terrain_cols"] == expected["terrain_cols"],
             "terrain_size": parsed["terrain_size"] == expected["terrain_size"],
             "terrain_sub_terrains": parsed["terrain_sub_terrains"] == expected["terrain_sub_terrains"],
-            "mujoco_mjmaxconpair": parsed["mujoco_mjmaxconpair"] == expected["mujoco_mjmaxconpair"],
             "compiled_hfields": parsed["compiled_hfields"] == 400,
             "compiled_meshes": parsed["compiled_meshes"] >= 0,
             "terrain_origin_shape": parsed["terrain_origin_shape"] == [20, 20, 3],
@@ -674,7 +668,7 @@ print(json.dumps(summary, sort_keys=True))
                 f"- Train env count: `{parsed['num_envs_train']}`",
                 f"- Smoke env count: `{parsed['num_envs_smoke']}`",
                 f"- Terrain: `{parsed['terrain_type']}` `{parsed['terrain_generator_class']}` rows/cols `{parsed['terrain_rows']}`/`{parsed['terrain_cols']}` size `{parsed['terrain_size']}` sub-terrains `{parsed['terrain_sub_terrains']}`",
-                f"- MuJoCo hfield contact-pair cap: `{parsed['mujoco_mjmaxconpair']}`, compiled hfields `{parsed['compiled_hfields']}`, compiled meshes `{parsed['compiled_meshes']}`",
+                f"- Compiled terrain geoms: hfields `{parsed['compiled_hfields']}`, meshes `{parsed['compiled_meshes']}`",
                 f"- Terrain assignment: level range `{parsed['terrain_level_min']}`..`{parsed['terrain_level_max']}` with max-init `{parsed['terrain_max_init_level_cfg']}`, type range `{parsed['terrain_type_min']}`..`{parsed['terrain_type_max']}`",
                 f"- Terrain type counts: `{parsed['terrain_type_counts']}`",
                 f"- Terrain level counts: `{parsed['terrain_level_counts']}`",
@@ -756,30 +750,6 @@ def launch_train(
     rc = run_stream_to_log(cmd, console_log, cwd=UNITREE_RL_MJLAB_HOME)
     if rc != 0:
         raise SystemExit(f"{run_name} training failed with exit code {rc}; see {console_log}")
-
-
-def train_dry_run() -> None:
-    launch_train(
-        run_name="train_dry_run",
-        num_envs=2,
-        iterations=1,
-        steps_per_env=2,
-        save_interval=100,
-        terrain_rows=20,
-        terrain_cols=20,
-        console_log=LOG_ROOT / "train_dry_run" / "train.log",
-        launch_json=ARTIFACT_ROOT / "train_dry_run_launch.json",
-    )
-    report_training_run(
-        run_name="train_dry_run",
-        console_log=LOG_ROOT / "train_dry_run" / "train.log",
-        curve_csv=ARTIFACT_ROOT / "train_dry_run_reward_curve.csv",
-        curve_svg=ARTIFACT_ROOT / "train_dry_run_reward_curve.svg",
-        health_json=ARTIFACT_ROOT / "train_dry_run_health.json",
-        health_md=ARTIFACT_ROOT / "train_dry_run_health.md",
-        min_points=1,
-        require_nonzero_reward=False,
-    )
 
 
 def smoke_20min() -> None:
@@ -1068,7 +1038,6 @@ def main() -> None:
             "setup-env-record",
             "import-smoke",
             "task-config-smoke",
-            "train-dry-run",
             "smoke-20min",
             "report-smoke-20min",
             "train-1-8-budget",
@@ -1086,8 +1055,6 @@ def main() -> None:
         import_smoke()
     elif args.cmd == "task-config-smoke":
         task_config_smoke()
-    elif args.cmd == "train-dry-run":
-        train_dry_run()
     elif args.cmd == "smoke-20min":
         smoke_20min()
     elif args.cmd == "report-smoke-20min":

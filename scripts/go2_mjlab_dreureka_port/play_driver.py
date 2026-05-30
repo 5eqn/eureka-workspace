@@ -9,10 +9,7 @@ from pathlib import Path
 import re
 import sys
 
-import mujoco
 import torch
-
-mujoco.mjMAXCONPAIR = 512
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 

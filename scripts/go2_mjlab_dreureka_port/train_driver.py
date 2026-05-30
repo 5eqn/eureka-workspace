@@ -9,10 +9,7 @@ import json
 from pathlib import Path
 import sys
 
-import mujoco
 import torch
-
-mujoco.mjMAXCONPAIR = 512
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -89,8 +86,7 @@ def main() -> None:
       if cfg.scene.terrain.terrain_generator is not None
       else None
     ),
-    "terrain_runtime": "mjlab_isaac_perlin_hfield_exact_samples_mjmaxconpair_512",
-    "mujoco_mjmaxconpair": mujoco.mjMAXCONPAIR,
+    "terrain_runtime": "mjlab_builtin_hf_perlin_noise_resolution_0p25_scale_20",
     "actuator_gains": actuator_gains,
     "domain_rand_profile": "pretrained",
     "episode_length_s": cfg.episode_length_s,

@@ -19,13 +19,12 @@ from mjlab.managers.termination_manager import TerminationTermCfg
 from mjlab.scene import SceneCfg
 from mjlab.sensor import ContactMatch, ContactSensorCfg
 from mjlab.sim import MujocoCfg, SimulationCfg
-from mjlab.terrains import TerrainEntityCfg
+from mjlab.terrains import HfPerlinNoiseTerrainCfg, TerrainEntityCfg
 from mjlab.terrains.terrain_generator import TerrainGeneratorCfg
 from mjlab.viewer import ViewerConfig
 from src.assets.robots.unitree_go2.go2_constants import FULL_COLLISION, get_go2_robot_cfg
 
 from . import mdp
-from .terrain import IsaacPerlinHFieldTerrainCfg, install_mjlab_tile_index_patch
 
 TASK_ID = "DrEureka-Go2-YogaBall"
 
@@ -39,7 +38,7 @@ ISAAC_TERRAIN_MIN_INIT_LEVEL = ISAAC_TERRAIN_BORDER_BOXES
 ISAAC_TERRAIN_MAX_INIT_LEVEL = ISAAC_TERRAIN_ROWS - 1 - ISAAC_TERRAIN_BORDER_BOXES
 ISAAC_TERRAIN_MIN_INIT_TYPE = ISAAC_TERRAIN_BORDER_BOXES
 ISAAC_TERRAIN_MAX_INIT_TYPE = ISAAC_TERRAIN_COLS - 1 - ISAAC_TERRAIN_BORDER_BOXES
-ISAAC_TERRAIN_HORIZONTAL_SCALE = 0.05
+ISAAC_TERRAIN_HORIZONTAL_SCALE = 0.25
 ISAAC_TERRAIN_VERTICAL_SCALE = 0.005
 ISAAC_TERRAIN_PERLIN_SCALE = ISAAC_TERRAIN_TILE_SIZE[0] * 4.0
 ISAAC_TERRAIN_XY_INIT_RANGE = 0.05
@@ -108,7 +107,7 @@ DREUREKA_CONTRACT = {
     "num_observations": 56,
     "num_privileged_obs": 11,
     "num_observation_history": 15,
-    "terrain_mesh_type": "mjlab_isaac_perlin_hfield_exact_samples",
+    "terrain_mesh_type": "mjlab_builtin_hf_perlin_noise",
     "terrain_num_rows": ISAAC_TERRAIN_ROWS,
     "terrain_num_cols": ISAAC_TERRAIN_COLS,
     "terrain_border_boxes": ISAAC_TERRAIN_BORDER_BOXES,
@@ -123,7 +122,7 @@ DREUREKA_CONTRACT = {
     "terrain_perlin_octaves": 1,
     "terrain_roughness_range": PRETRAINED_DOMAIN_RAND["terrain_tile_roughness_range"],
     "terrain_curriculum": False,
-    "terrain_note": "Uses script-local IsaacPerlinHFieldTerrainCfg with DrEureka's signed Perlin function, 20x20 tiles, 5m tile size, 0.05m grid spacing, per-tile seed row*num_cols+col, Perlin coordinate scale 20 from terrain_length*4, and roughness range 0.02..0.08.",
+    "terrain_note": "Uses MJLab built-in HfPerlinNoiseTerrainCfg with 20x20 tiles, 5m tile size, 0.25m grid spacing, single octave, Perlin coordinate scale 20 from terrain_length*4, and height range 0.02..0.08.",
     "xy_init_range": ISAAC_TERRAIN_XY_INIT_RANGE,
     "use_terminal_body_height": True,
     "terminal_body_height": 0.20,
@@ -210,7 +209,6 @@ def _yoga_ball_cfg() -> EntityCfg:
 
 
 def _terrain_cfg() -> TerrainEntityCfg:
-  install_mjlab_tile_index_patch()
   terrain_generator = TerrainGeneratorCfg(
     seed=42,
     curriculum=False,
@@ -220,14 +218,16 @@ def _terrain_cfg() -> TerrainEntityCfg:
     num_cols=ISAAC_TERRAIN_COLS,
     color_scheme="height",
     sub_terrains={
-      "isaac_perlin_hfield": IsaacPerlinHFieldTerrainCfg(
+      "hf_perlin_noise": HfPerlinNoiseTerrainCfg(
         proportion=1.0,
-        roughness_range=PRETRAINED_DOMAIN_RAND["terrain_tile_roughness_range"],
+        height_range=PRETRAINED_DOMAIN_RAND["terrain_tile_roughness_range"],
+        octaves=1,
+        persistence=0.5,
+        lacunarity=2.0,
+        scale=ISAAC_TERRAIN_PERLIN_SCALE,
         horizontal_scale=ISAAC_TERRAIN_HORIZONTAL_SCALE,
-        vertical_scale=ISAAC_TERRAIN_VERTICAL_SCALE,
-        perlin_scale=ISAAC_TERRAIN_PERLIN_SCALE,
-        tile_rows=ISAAC_TERRAIN_ROWS,
-        tile_cols=ISAAC_TERRAIN_COLS,
+        resolution=ISAAC_TERRAIN_HORIZONTAL_SCALE,
+        border_width=0.0,
       ),
     },
     add_lights=True,
@@ -441,9 +441,9 @@ def make_dreureka_go2_yoga_ball_env_cfg(play: bool = False) -> ManagerBasedRlEnv
       azimuth=90.0,
     ),
     sim=SimulationCfg(
-      nconmax=512,
+      nconmax=None,
       njmax=1500,
-      contact_sensor_maxmatch=512,
+      contact_sensor_maxmatch=64,
       mujoco=MujocoCfg(
         timestep=0.005,
         iterations=10,
