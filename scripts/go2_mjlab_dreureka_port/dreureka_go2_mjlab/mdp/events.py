@@ -26,6 +26,52 @@ def _ids(env, ids) -> torch.Tensor:
   return torch.as_tensor(ids, device=env.device, dtype=torch.long)
 
 
+def assign_isaac_like_terrain_origins(
+  env,
+  env_ids: torch.Tensor | None,
+  num_border_boxes: int,
+  center_robots: bool,
+  center_span: int,
+) -> None:
+  del env_ids
+  terrain = env.scene.terrain
+  if terrain is None or terrain.terrain_origins is None:
+    return
+
+  num_rows, num_cols = terrain.terrain_origins.shape[:2]
+  ids = torch.arange(env.num_envs, device=env.device)
+  if center_robots:
+    min_level = num_rows // 2 - center_span
+    max_level = num_rows // 2 + center_span - 1
+    min_type = num_cols // 2 - center_span
+    max_type = num_cols // 2 + center_span - 1
+  else:
+    min_level = num_border_boxes
+    max_level = num_rows - 1 - num_border_boxes
+    min_type = num_border_boxes
+    max_type = num_cols - 1 - num_border_boxes
+
+  if min_level > max_level or min_type > max_type:
+    raise ValueError(
+      "Invalid Isaac-like terrain origin range: "
+      f"levels {min_level}..{max_level}, types {min_type}..{max_type}"
+    )
+
+  terrain.terrain_levels[ids] = torch.randint(
+    min_level, max_level + 1, (env.num_envs,), device=env.device
+  )
+  usable_cols = max_type - min_type + 1
+  terrain.terrain_types[ids] = (
+    torch.div(ids, env.num_envs / usable_cols, rounding_mode="floor").to(torch.long)
+    + min_type
+  )
+  terrain.terrain_types.clamp_(min_type, max_type)
+  terrain.env_origins[ids] = terrain.terrain_origins[
+    terrain.terrain_levels[ids], terrain.terrain_types[ids]
+  ]
+  terrain.max_terrain_level = num_rows
+
+
 def _ensure_dr_state(env, domain_rand: dict) -> None:
   defaults = {
     "dreureka_ball_radius": sum(domain_rand["ball_radius_range"]) / 2.0,
@@ -95,39 +141,6 @@ def install_dreureka_action_lag(
   env.action_manager._dreureka_lag_installed = True
 
 
-def assign_isaac_like_terrain_origins(
-  env,
-  env_ids: torch.Tensor | None,
-  min_level: int,
-  max_level: int,
-  min_type: int,
-  max_type: int,
-) -> None:
-  del env_ids
-  terrain = env.scene.terrain
-  if terrain.terrain_origins is None:
-    return
-  num_envs = env.num_envs
-  num_types = int(max_type) - int(min_type) + 1
-  terrain.terrain_levels = torch.randint(
-    int(min_level),
-    int(max_level) + 1,
-    (num_envs,),
-    device=env.device,
-  )
-  terrain.terrain_types = (
-    torch.div(
-      torch.arange(num_envs, device=env.device),
-      num_envs / num_types,
-      rounding_mode="floor",
-    ).to(torch.long)
-    + int(min_type)
-  )
-  terrain.env_origins[:] = terrain.terrain_origins[
-    terrain.terrain_levels, terrain.terrain_types
-  ]
-
-
 def reset_robot_on_ball(
   env,
   env_ids: torch.Tensor | None,
@@ -143,19 +156,23 @@ def reset_robot_on_ball(
 
   radius = _sample(env, env_ids, domain_rand["ball_radius_range"])
   env.dreureka_ball_radius[env_ids] = radius
+  terrain_max_z = 2.0 * env.scene.env_origins[env_ids, 2]
 
   ball_state = ball.data.default_root_state[env_ids].clone()
   ball_state[:, 0:3] += env.scene.env_origins[env_ids]
-  ball_state[:, 2] = env.scene.env_origins[env_ids, 2] + radius + 0.0001
+  ball_state[:, 2] = terrain_max_z + radius + 0.0001
   ball_state[:, 7:13] = 0.0
   ball.write_root_state_to_sim(ball_state, env_ids=env_ids)
 
   robot_state = robot.data.default_root_state[env_ids].clone()
   robot_state[:, 0:3] += env.scene.env_origins[env_ids]
-  robot_state[:, 0:2] += torch.empty(
-    (len(env_ids), 2), device=env.device
-  ).uniform_(-float(xy_init_range), float(xy_init_range))
-  robot_state[:, 2] += 2.0 * radius + 0.0001
+  xy_jitter = torch.empty((len(env_ids), 2), device=env.device).uniform_(
+    -float(xy_init_range), float(xy_init_range)
+  )
+  robot_state[:, 0:2] += xy_jitter
+  robot_state[:, 2] = (
+    terrain_max_z + robot.data.default_root_state[env_ids, 2] + 2.0 * radius + 0.0001
+  )
   yaw = torch.empty(len(env_ids), device=env.device).uniform_(-3.14, 3.14)
   robot_state[:, 3:7] = quat_from_euler_xyz(
     torch.zeros_like(yaw), torch.zeros_like(yaw), yaw

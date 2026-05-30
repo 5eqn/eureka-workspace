@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
+from dataclasses import dataclass, replace
 
 import mujoco
 
@@ -19,7 +19,7 @@ from mjlab.managers.termination_manager import TerminationTermCfg
 from mjlab.scene import SceneCfg
 from mjlab.sensor import ContactMatch, ContactSensorCfg
 from mjlab.sim import MujocoCfg, SimulationCfg
-from mjlab.terrains import HfPerlinNoiseTerrainCfg, TerrainEntityCfg
+from mjlab.terrains import HfRandomUniformTerrainCfg, TerrainEntityCfg
 from mjlab.terrains.terrain_generator import TerrainGeneratorCfg
 from mjlab.viewer import ViewerConfig
 from src.assets.robots.unitree_go2.go2_constants import FULL_COLLISION, get_go2_robot_cfg
@@ -30,18 +30,28 @@ TASK_ID = "DrEureka-Go2-YogaBall"
 
 BALL_RADIUS_RANGE = (0.35, 0.45)
 DEFAULT_BALL_RADIUS = sum(BALL_RADIUS_RANGE) / 2.0
-ISAAC_TERRAIN_TILE_SIZE = (5.0, 5.0)
-ISAAC_TERRAIN_ROWS = 20
-ISAAC_TERRAIN_COLS = 20
-ISAAC_TERRAIN_BORDER_BOXES = 5
-ISAAC_TERRAIN_MIN_INIT_LEVEL = ISAAC_TERRAIN_BORDER_BOXES
-ISAAC_TERRAIN_MAX_INIT_LEVEL = ISAAC_TERRAIN_ROWS - 1 - ISAAC_TERRAIN_BORDER_BOXES
-ISAAC_TERRAIN_MIN_INIT_TYPE = ISAAC_TERRAIN_BORDER_BOXES
-ISAAC_TERRAIN_MAX_INIT_TYPE = ISAAC_TERRAIN_COLS - 1 - ISAAC_TERRAIN_BORDER_BOXES
-ISAAC_TERRAIN_HORIZONTAL_SCALE = 0.25
-ISAAC_TERRAIN_VERTICAL_SCALE = 0.005
-ISAAC_TERRAIN_PERLIN_SCALE = ISAAC_TERRAIN_TILE_SIZE[0] * 4.0
-ISAAC_TERRAIN_XY_INIT_RANGE = 0.05
+TERRAIN_TILE_SIZE = (5.0, 5.0)
+TERRAIN_NUM_ROWS = 20
+TERRAIN_NUM_COLS = 20
+TERRAIN_NUM_BORDER_BOXES = 5
+TERRAIN_INIT_XY_RANGE = 0.05
+PREVIOUS_MJLAB_ROUGHNESS_MAX = 0.08
+MJLAB_TILE_ROUGHNESS_RANGE = (
+  PREVIOUS_MJLAB_ROUGHNESS_MAX / 16.0,
+  PREVIOUS_MJLAB_ROUGHNESS_MAX / 4.0,
+)
+
+
+@dataclass(kw_only=True)
+class HfTileRandomUniformTerrainCfg(HfRandomUniformTerrainCfg):
+  roughness_range: tuple[float, float] = MJLAB_TILE_ROUGHNESS_RANGE
+
+  def function(self, difficulty, spec, rng):
+    min_step = int(round(self.roughness_range[0] / self.vertical_scale))
+    max_step = int(round(self.roughness_range[1] / self.vertical_scale))
+    roughness = float(rng.integers(min_step, max_step + 1) * self.vertical_scale)
+    cfg = replace(self, noise_range=(0.0, roughness))
+    return HfRandomUniformTerrainCfg.function(cfg, difficulty, spec, rng)
 
 PRETRAINED_DOMAIN_RAND = {
   "robot_friction_range": (0.1, 1.0),
@@ -60,7 +70,7 @@ PRETRAINED_DOMAIN_RAND = {
   "ball_drag_range": (0.1, 0.5),
   "terrain_ground_friction_range": (0.2, 0.8),
   "terrain_ground_restitution_range": (0.0, 0.5),
-  "terrain_tile_roughness_range": (0.02, 0.08),
+  "terrain_tile_roughness_range": MJLAB_TILE_ROUGHNESS_RANGE,
   "robot_push_vel_range": (0.1, 0.4),
   "ball_push_vel_range": (0.1, 0.4),
   "gravity_range": (-0.1, 0.1),
@@ -107,23 +117,16 @@ DREUREKA_CONTRACT = {
     "num_observations": 56,
     "num_privileged_obs": 11,
     "num_observation_history": 15,
-    "terrain_mesh_type": "mjlab_builtin_hf_perlin_noise",
-    "terrain_num_rows": ISAAC_TERRAIN_ROWS,
-    "terrain_num_cols": ISAAC_TERRAIN_COLS,
-    "terrain_border_boxes": ISAAC_TERRAIN_BORDER_BOXES,
-    "terrain_min_init_level": ISAAC_TERRAIN_MIN_INIT_LEVEL,
-    "terrain_max_init_level": ISAAC_TERRAIN_MAX_INIT_LEVEL,
-    "terrain_min_init_type": ISAAC_TERRAIN_MIN_INIT_TYPE,
-    "terrain_max_init_type": ISAAC_TERRAIN_MAX_INIT_TYPE,
-    "terrain_tile_size": ISAAC_TERRAIN_TILE_SIZE,
-    "terrain_horizontal_scale": ISAAC_TERRAIN_HORIZONTAL_SCALE,
-    "terrain_vertical_scale": ISAAC_TERRAIN_VERTICAL_SCALE,
-    "terrain_perlin_scale": ISAAC_TERRAIN_PERLIN_SCALE,
-    "terrain_perlin_octaves": 1,
-    "terrain_roughness_range": PRETRAINED_DOMAIN_RAND["terrain_tile_roughness_range"],
+    "terrain_mesh_type": "mjlab_random_rough_hfield",
+    "terrain_num_rows": TERRAIN_NUM_ROWS,
+    "terrain_num_cols": TERRAIN_NUM_COLS,
+    "terrain_tile_size": TERRAIN_TILE_SIZE,
+    "terrain_noise_range": PRETRAINED_DOMAIN_RAND["terrain_tile_roughness_range"],
+    "terrain_noise_step": MJLAB_TILE_ROUGHNESS_RANGE[0],
     "terrain_curriculum": False,
-    "terrain_note": "Uses MJLab built-in HfPerlinNoiseTerrainCfg with 20x20 tiles, 5m tile size, 0.25m grid spacing, single octave, Perlin coordinate scale 20 from terrain_length*4, and height range 0.02..0.08.",
-    "xy_init_range": ISAAC_TERRAIN_XY_INIT_RANGE,
+    "terrain_num_border_boxes": TERRAIN_NUM_BORDER_BOXES,
+    "terrain_init_xy_range": TERRAIN_INIT_XY_RANGE,
+    "terrain_note": "Uses 20x20 MJLab native HfRandomUniformTerrainCfg random_rough hfield tiles. Each 5m tile samples roughness once at terrain generation from previous_MJLab_x/16..x/4 = 0.005..0.02m, quantized to the 0.005m vertical scale so the x/4 endpoint is reachable. Environment tile levels/types and +-0.05m robot XY reset jitter match the Isaac-side boxes_tm training logic.",
     "use_terminal_body_height": True,
     "terminal_body_height": 0.20,
     "terminate_after_contacts_on": (),
@@ -212,22 +215,21 @@ def _terrain_cfg() -> TerrainEntityCfg:
   terrain_generator = TerrainGeneratorCfg(
     seed=42,
     curriculum=False,
-    size=ISAAC_TERRAIN_TILE_SIZE,
+    size=TERRAIN_TILE_SIZE,
     border_width=0.0,
-    num_rows=ISAAC_TERRAIN_ROWS,
-    num_cols=ISAAC_TERRAIN_COLS,
+    num_rows=TERRAIN_NUM_ROWS,
+    num_cols=TERRAIN_NUM_COLS,
     color_scheme="height",
     sub_terrains={
-      "hf_perlin_noise": HfPerlinNoiseTerrainCfg(
+      "random_rough": HfTileRandomUniformTerrainCfg(
         proportion=1.0,
-        height_range=PRETRAINED_DOMAIN_RAND["terrain_tile_roughness_range"],
-        octaves=1,
-        persistence=0.5,
-        lacunarity=2.0,
-        scale=ISAAC_TERRAIN_PERLIN_SCALE,
-        horizontal_scale=ISAAC_TERRAIN_HORIZONTAL_SCALE,
-        resolution=ISAAC_TERRAIN_HORIZONTAL_SCALE,
+        noise_range=PRETRAINED_DOMAIN_RAND["terrain_tile_roughness_range"],
+        noise_step=MJLAB_TILE_ROUGHNESS_RANGE[0],
+        horizontal_scale=0.25,
+        vertical_scale=0.005,
+        downsampled_scale=0.25,
         border_width=0.0,
+        roughness_range=MJLAB_TILE_ROUGHNESS_RANGE,
       ),
     },
     add_lights=True,
@@ -235,7 +237,7 @@ def _terrain_cfg() -> TerrainEntityCfg:
   return TerrainEntityCfg(
     terrain_type="generator",
     terrain_generator=terrain_generator,
-    max_init_terrain_level=ISAAC_TERRAIN_MAX_INIT_LEVEL,
+    max_init_terrain_level=TERRAIN_NUM_ROWS - 1,
   )
 
 
@@ -321,10 +323,9 @@ def make_dreureka_go2_yoga_ball_env_cfg(play: bool = False) -> ManagerBasedRlEnv
         func=mdp.assign_isaac_like_terrain_origins,
         mode="startup",
         params={
-          "min_level": ISAAC_TERRAIN_MIN_INIT_LEVEL,
-          "max_level": ISAAC_TERRAIN_MAX_INIT_LEVEL,
-          "min_type": ISAAC_TERRAIN_MIN_INIT_TYPE,
-          "max_type": ISAAC_TERRAIN_MAX_INIT_TYPE,
+          "num_border_boxes": TERRAIN_NUM_BORDER_BOXES,
+          "center_robots": False,
+          "center_span": 3,
         },
       ),
       "reset_scene_to_default": EventTermCfg(
@@ -336,7 +337,7 @@ def make_dreureka_go2_yoga_ball_env_cfg(play: bool = False) -> ManagerBasedRlEnv
         mode="reset",
         params={
           "domain_rand": PRETRAINED_DOMAIN_RAND,
-          "xy_init_range": ISAAC_TERRAIN_XY_INIT_RANGE,
+          "xy_init_range": TERRAIN_INIT_XY_RANGE,
           "asset_cfg": SceneEntityCfg("robot"),
           "ball_cfg": SceneEntityCfg("ball"),
         },

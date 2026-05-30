@@ -40,6 +40,9 @@ IMPORT_SMOKE_JSON = ARTIFACT_ROOT / "import_smoke.json"
 IMPORT_SMOKE_MD = ARTIFACT_ROOT / "import_smoke.md"
 TASK_CONFIG_SMOKE_JSON = ARTIFACT_ROOT / "task_config_smoke.json"
 TASK_CONFIG_SMOKE_MD = ARTIFACT_ROOT / "task_config_smoke.md"
+TERRAIN_4096_VERIFICATION_JSON = ARTIFACT_ROOT / "terrain_4096_verification.json"
+SCENE_IMAGE = ARTIFACT_ROOT / "mjlab_scene_init_20x20_5m_random_rough.png"
+SCENE_RENDER_JSON = ARTIFACT_ROOT / "mjlab_scene_init_20x20_5m_random_rough.json"
 SMOKE_20MIN_HEALTH_JSON = ARTIFACT_ROOT / "smoke_20min_health.json"
 SMOKE_20MIN_HEALTH_MD = ARTIFACT_ROOT / "smoke_20min_health.md"
 SMOKE_20MIN_CURVE_CSV = ARTIFACT_ROOT / "smoke_20min_reward_curve.csv"
@@ -127,10 +130,6 @@ def conda_python(code: str, cwd: Path | None = None) -> dict[str, Any]:
 
 def conda_python_script(script: Path, *args: str) -> list[str]:
     return ["conda", "run", "--no-capture-output", "-n", CONDA_ENV_NAME, "python", str(script), *args]
-
-
-def has_hfield_overflow_warning(text: str) -> bool:
-    return "height field collision overflow" in text.lower()
 
 
 def git_head(path: Path) -> str | None:
@@ -267,7 +266,7 @@ def source_contract() -> dict[str, Any]:
             "Implement a caller-project MJLab task, not upstream edits.",
             "Use Unitree MJLab Go2 XML/model constants as the robot data source.",
             "Keep DrEureka-derived yoga-ball, observation, reward, and termination constants inline under scripts.",
-            "Use MJLab built-in HfPerlinNoiseTerrainCfg with Isaac tile layout but coarser hfield collision scale: 20x20 tiles, 5m tile size, 0.25m grid spacing, Perlin coordinate scale 20, fixed per-env terrain origin assignment, and 0.02..0.08 height range.",
+            "Use 20x20 MJLab native 5m random_rough heightfield tiles with Isaac-like startup env-origin assignment; flat-plane fallback is invalid for training.",
             "Mirror 4096 envs, 20000 iterations, save interval 1000 for 1/8-budget launch.",
         ],
     }
@@ -491,11 +490,6 @@ actuator_gains = {
   }
   for actuator in actuators
 }
-terrain_entity = env.scene.terrain
-terrain_levels = terrain_entity.terrain_levels.detach().cpu()
-terrain_types = terrain_entity.terrain_types.detach().cpu()
-terrain_level_counts = torch.bincount(terrain_levels, minlength=cfg.scene.terrain.terrain_generator.num_rows)
-terrain_type_counts = torch.bincount(terrain_types, minlength=cfg.scene.terrain.terrain_generator.num_cols)
 
 summary = {
   "registered": registered,
@@ -508,16 +502,7 @@ summary = {
   "terrain_cols": cfg.scene.terrain.terrain_generator.num_cols if cfg.scene.terrain.terrain_generator is not None else None,
   "terrain_size": list(cfg.scene.terrain.terrain_generator.size) if cfg.scene.terrain.terrain_generator is not None else None,
   "terrain_sub_terrains": list(cfg.scene.terrain.terrain_generator.sub_terrains.keys()) if cfg.scene.terrain.terrain_generator is not None else [],
-  "compiled_hfields": int(env.sim.model.hfield_nrow.shape[0]),
-  "compiled_meshes": int(env.sim.model.mesh_vertadr.shape[0]),
   "terrain_origin_shape": list(env.scene.terrain.terrain_origins.shape) if env.scene.terrain.terrain_origins is not None else None,
-  "terrain_max_init_level_cfg": cfg.scene.terrain.max_init_terrain_level,
-  "terrain_level_min": int(terrain_levels.min().item()),
-  "terrain_level_max": int(terrain_levels.max().item()),
-  "terrain_level_counts": terrain_level_counts.tolist(),
-  "terrain_type_min": int(terrain_types.min().item()),
-  "terrain_type_max": int(terrain_types.max().item()),
-  "terrain_type_counts": terrain_type_counts.tolist(),
   "actuator_gains": actuator_gains,
   "episode_length_s": cfg.episode_length_s,
   "max_episode_length_steps": env.max_episode_length,
@@ -588,8 +573,7 @@ print(json.dumps(summary, sort_keys=True))
             "terrain_rows": 20,
             "terrain_cols": 20,
             "terrain_size": [5.0, 5.0],
-            "terrain_sub_terrains": ["hf_perlin_noise"],
-            "terrain_max_init_level_cfg": 14,
+            "terrain_sub_terrains": ["random_rough"],
             "actuator_gains": {
                 ".*hip_joint": {"stiffness": 20.0, "damping": 1.0},
                 ".*thigh_joint": {"stiffness": 20.0, "damping": 1.0},
@@ -618,13 +602,7 @@ print(json.dumps(summary, sort_keys=True))
             "terrain_cols": parsed["terrain_cols"] == expected["terrain_cols"],
             "terrain_size": parsed["terrain_size"] == expected["terrain_size"],
             "terrain_sub_terrains": parsed["terrain_sub_terrains"] == expected["terrain_sub_terrains"],
-            "compiled_hfields": parsed["compiled_hfields"] == 400,
-            "compiled_meshes": parsed["compiled_meshes"] >= 0,
             "terrain_origin_shape": parsed["terrain_origin_shape"] == [20, 20, 3],
-            "terrain_max_init_level_cfg": parsed["terrain_max_init_level_cfg"] == expected["terrain_max_init_level_cfg"],
-            "terrain_level_range": 5 <= parsed["terrain_level_min"] <= parsed["terrain_level_max"] <= 14,
-            "terrain_type_range": 5 <= parsed["terrain_type_min"] <= parsed["terrain_type_max"] <= 14,
-            "terrain_assignment_count": sum(parsed["terrain_type_counts"]) == parsed["num_envs_smoke"],
             "actuator_gains": parsed["actuator_gains"] == expected["actuator_gains"],
             "rl_max_iterations": parsed["rl_max_iterations"] == expected["rl_max_iterations"],
             "rl_save_interval": parsed["rl_save_interval"] == expected["rl_save_interval"],
@@ -668,10 +646,6 @@ print(json.dumps(summary, sort_keys=True))
                 f"- Train env count: `{parsed['num_envs_train']}`",
                 f"- Smoke env count: `{parsed['num_envs_smoke']}`",
                 f"- Terrain: `{parsed['terrain_type']}` `{parsed['terrain_generator_class']}` rows/cols `{parsed['terrain_rows']}`/`{parsed['terrain_cols']}` size `{parsed['terrain_size']}` sub-terrains `{parsed['terrain_sub_terrains']}`",
-                f"- Compiled terrain geoms: hfields `{parsed['compiled_hfields']}`, meshes `{parsed['compiled_meshes']}`",
-                f"- Terrain assignment: level range `{parsed['terrain_level_min']}`..`{parsed['terrain_level_max']}` with max-init `{parsed['terrain_max_init_level_cfg']}`, type range `{parsed['terrain_type_min']}`..`{parsed['terrain_type_max']}`",
-                f"- Terrain type counts: `{parsed['terrain_type_counts']}`",
-                f"- Terrain level counts: `{parsed['terrain_level_counts']}`",
                 f"- Actuator gains: `{parsed['actuator_gains']}`",
                 f"- Actor observation shape: `{parsed['actor_obs_shape']}`",
                 f"- Privileged observation group shape: `{parsed['critic_obs_shape']}`",
@@ -702,6 +676,252 @@ print(json.dumps(summary, sort_keys=True))
         raise SystemExit(f"task config smoke failed; see {TASK_CONFIG_SMOKE_JSON}")
 
 
+def verify_terrain_4096() -> None:
+    ensure_dirs()
+    setup_env_record()
+    code = f"""
+import json
+import os
+import sys
+from pathlib import Path
+
+import torch
+
+sys.path.insert(0, {str(SCRIPT_ROOT)!r})
+import src.tasks  # noqa: F401
+import dreureka_go2_mjlab  # noqa: F401
+
+from dreureka_go2_mjlab.env_cfg import (
+  MJLAB_TILE_ROUGHNESS_RANGE,
+  TASK_ID,
+  TERRAIN_INIT_XY_RANGE,
+  TERRAIN_NUM_BORDER_BOXES,
+  TERRAIN_NUM_COLS,
+  TERRAIN_NUM_ROWS,
+  TERRAIN_TILE_SIZE,
+)
+from mjlab.envs import ManagerBasedRlEnv
+from mjlab.tasks.registry import load_env_cfg
+
+cfg = load_env_cfg(TASK_ID)
+cfg.scene.num_envs = 4096
+env = ManagerBasedRlEnv(cfg=cfg, device="cuda:0" if torch.cuda.is_available() else "cpu")
+obs, extras = env.reset()
+terrain = env.scene.terrain
+robot = env.scene["robot"]
+ball = env.scene["ball"]
+
+levels = terrain.terrain_levels.detach().cpu()
+types = terrain.terrain_types.detach().cpu()
+ids = torch.arange(env.num_envs, device=env.device)
+expected_types = (
+  torch.div(ids, env.num_envs / (TERRAIN_NUM_COLS - 2 * TERRAIN_NUM_BORDER_BOXES), rounding_mode="floor").to(torch.long)
+  + TERRAIN_NUM_BORDER_BOXES
+).cpu()
+expected_origins = terrain.terrain_origins[terrain.terrain_levels, terrain.terrain_types]
+origin_error = torch.max(torch.abs(terrain.env_origins - expected_origins)).item()
+
+hfield_rows = env.sim.model.hfield_nrow.detach().cpu()
+hfield_cols = env.sim.model.hfield_ncol.detach().cpu()
+hfield_size = env.sim.model.hfield_size.detach().cpu()
+height_ranges = hfield_size[:, 2]
+origin_z = terrain.terrain_origins[:, :, 2].detach().cpu()
+
+robot_pos = robot.data.root_link_pos_w.detach()
+ball_pos = ball.data.root_link_pos_w.detach()
+robot_qpos = robot.data.data.qpos[:, robot.data.indexing.free_joint_q_adr].detach()
+origins = env.scene.env_origins.detach()
+robot_default_z = robot.data.default_root_state[:, 2].detach()
+radius = env.dreureka_ball_radius.detach()
+terrain_max_z = 2.0 * origins[:, 2]
+robot_xy_jitter = robot_pos[:, :2] - origins[:, :2]
+ball_xy_error = ball_pos[:, :2] - origins[:, :2]
+ball_bottom_clearance = ball_pos[:, 2] - radius - terrain_max_z
+expected_robot_z = terrain_max_z + robot_default_z + 2.0 * radius + 0.0001
+
+type_counts = torch.bincount(types, minlength=TERRAIN_NUM_COLS)
+level_counts = torch.bincount(levels, minlength=TERRAIN_NUM_ROWS)
+occupied_pairs = torch.stack([levels, types], dim=1).unique(dim=0)
+occupied_middle_pairs = [
+  [int(pair[0]), int(pair[1])]
+  for pair in occupied_pairs
+  if 5 <= int(pair[0]) <= 14 and 5 <= int(pair[1]) <= 14
+]
+tile_counts = torch.zeros((TERRAIN_NUM_ROWS, TERRAIN_NUM_COLS), dtype=torch.long)
+for level, terrain_type in zip(levels.tolist(), types.tolist()):
+  tile_counts[int(level), int(terrain_type)] += 1
+middle_tile_counts = tile_counts[5:15, 5:15]
+checks = {{
+  "num_envs_4096": env.num_envs == 4096,
+  "terrain_shape_20x20": list(terrain.terrain_origins.shape) == [20, 20, 3],
+  "tile_size_5m": list(TERRAIN_TILE_SIZE) == [5.0, 5.0],
+  "hfield_count_400": int(hfield_rows.numel()) == 400,
+  "hfield_resolution_0p25m": sorted(set(int(x) for x in hfield_rows.tolist())) == [20] and sorted(set(int(x) for x in hfield_cols.tolist())) == [20],
+  "roughness_range_m": float(height_ranges.min()) >= MJLAB_TILE_ROUGHNESS_RANGE[0] - 1e-9 and float(height_ranges.max()) <= MJLAB_TILE_ROUGHNESS_RANGE[1] + 1e-9,
+  "roughness_quantized_0p005m": all(abs((float(v) / 0.005) - round(float(v) / 0.005)) < 1e-5 for v in height_ranges.tolist()),
+  "level_range_matches_isaac_boxes_tm_init": int(levels.min()) == 5 and int(levels.max()) == 14,
+  "type_range_matches_isaac_boxes_tm_init": int(types.min()) == 5 and int(types.max()) == 14,
+  "type_sequence_matches_isaac_division": torch.equal(types, expected_types),
+  "all_usable_middle_types_present": all(int(type_counts[i]) > 0 for i in range(5, 15)),
+  "only_middle_types_used": int(type_counts[:5].sum() + type_counts[15:].sum()) == 0,
+  "all_100_middle_tiles_occupied": len(occupied_middle_pairs) == 100 and int(middle_tile_counts.min()) > 0,
+  "only_middle_rows_used": int(level_counts[:5].sum() + level_counts[15:].sum()) == 0,
+  "env_origins_match_level_type_index": origin_error < 1e-6,
+  "xy_jitter_within_pm_0p05": float(robot_xy_jitter.abs().max()) <= TERRAIN_INIT_XY_RANGE + 1e-6,
+  "ball_has_no_xy_jitter": float(ball_xy_error.abs().max()) < 1e-6,
+  "ball_bottom_above_tile_max_height": float(ball_bottom_clearance.min()) >= 9e-5,
+  "robot_qpos_z_matches_reset_formula": float(torch.max(torch.abs(robot_qpos[:, 2] - expected_robot_z)).item()) < 1e-5,
+}}
+
+summary = {{
+  "ok": all(checks.values()),
+  "checks": checks,
+  "num_envs": env.num_envs,
+  "terrain_rows": TERRAIN_NUM_ROWS,
+  "terrain_cols": TERRAIN_NUM_COLS,
+  "tile_size_m": list(TERRAIN_TILE_SIZE),
+  "middle_tile_rows_used": [int(levels.min()), int(levels.max())],
+  "middle_tile_cols_used": [int(types.min()), int(types.max())],
+  "terrain_level_counts": level_counts.tolist(),
+  "terrain_type_counts": type_counts.tolist(),
+  "first_20_terrain_types": types[:20].tolist(),
+  "last_20_terrain_types": types[-20:].tolist(),
+  "isaac_type_formula": "floor(env_id / (4096 / (20 - 2*5))) + 5",
+  "isaac_level_formula": "randint(5, 14), matching stock DrEureka boxes_tm curriculum=False behavior with num_border_boxes=5",
+  "occupied_middle_tile_count": len(occupied_middle_pairs),
+  "middle_tile_env_count_range": [int(middle_tile_counts.min()), int(middle_tile_counts.max())],
+  "middle_tile_counts": middle_tile_counts.tolist(),
+  "hfield_count": int(hfield_rows.numel()),
+  "hfield_nrow_unique": sorted(set(int(x) for x in hfield_rows.tolist())),
+  "hfield_ncol_unique": sorted(set(int(x) for x in hfield_cols.tolist())),
+  "horizontal_unit_m": 0.25,
+  "roughness_previous_x_m": 0.08,
+  "roughness_sample_range_m": list(MJLAB_TILE_ROUGHNESS_RANGE),
+  "roughness_observed_hfield_height_range_m": [float(height_ranges.min()), float(height_ranges.max())],
+  "roughness_unique_hfield_ranges_m": sorted(set(round(float(x), 6) for x in height_ranges.tolist())),
+  "terrain_origin_z_range_m": [float(origin_z.min()), float(origin_z.max())],
+  "robot_xy_jitter_range_m": [
+    float(robot_xy_jitter[:, 0].min()),
+    float(robot_xy_jitter[:, 0].max()),
+    float(robot_xy_jitter[:, 1].min()),
+    float(robot_xy_jitter[:, 1].max()),
+  ],
+  "ball_xy_error_abs_max_m": float(ball_xy_error.abs().max()),
+  "ball_bottom_clearance_range_m": [float(ball_bottom_clearance.min()), float(ball_bottom_clearance.max())],
+  "env_origin_index_error_max_m": float(origin_error),
+  "scene_image": {rel(SCENE_IMAGE)!r},
+}}
+env.close()
+print(json.dumps(summary, sort_keys=True))
+"""
+    log_path = LOG_ROOT / "terrain_4096_verification" / "verify.log"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    result = conda_python(code, cwd=UNITREE_RL_MJLAB_HOME)
+    stdout_lines = [line for line in result["stdout"].splitlines() if line.strip()]
+    parsed = json.loads(stdout_lines[-1]) if result["returncode"] == 0 and stdout_lines else None
+    ok = result["returncode"] == 0 and parsed is not None and parsed["ok"]
+    report = {
+        "generated_at_unix": time.time(),
+        "ok": ok,
+        "command": result["cmd"],
+        "cwd": result["cwd"],
+        "returncode": result["returncode"],
+        "stdout": result["stdout"],
+        "stderr": result["stderr"],
+        "summary": parsed,
+    }
+    TERRAIN_4096_VERIFICATION_JSON.write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    log_path.write_text(result["stdout"] + result["stderr"], encoding="utf-8", errors="replace")
+    if not ok:
+        raise SystemExit(f"terrain 4096 verification failed; see {TERRAIN_4096_VERIFICATION_JSON}")
+
+
+def render_scene() -> None:
+    ensure_dirs()
+    setup_env_record()
+    code = f"""
+import json
+import os
+import sys
+
+os.environ.setdefault("MUJOCO_GL", "egl")
+
+import numpy as np
+import torch
+from PIL import Image
+
+sys.path.insert(0, {str(SCRIPT_ROOT)!r})
+import src.tasks  # noqa: F401
+import dreureka_go2_mjlab  # noqa: F401
+
+from dreureka_go2_mjlab.env_cfg import TASK_ID
+from mjlab.envs import ManagerBasedRlEnv
+from mjlab.tasks.registry import load_env_cfg
+from mjlab.viewer import ViewerConfig
+
+cfg = load_env_cfg(TASK_ID)
+cfg.scene.num_envs = 4096
+cfg.viewer = ViewerConfig(
+  origin_type=ViewerConfig.OriginType.ASSET_BODY,
+  entity_name="robot",
+  body_name="base_link",
+  env_idx=0,
+  max_extra_envs=0,
+  distance=4.0,
+  elevation=-22.0,
+  azimuth=45.0,
+  height=900,
+  width=1200,
+)
+env = ManagerBasedRlEnv(
+  cfg=cfg,
+  device="cuda:0" if torch.cuda.is_available() else "cpu",
+  render_mode="rgb_array",
+)
+env.reset()
+terrain = env.scene.terrain
+frame = env.render()
+image_path = {str(SCENE_IMAGE)!r}
+Image.fromarray(frame).save(image_path)
+summary = {{
+  "ok": bool(frame is not None and np.asarray(frame).std() > 0.0),
+  "image": {rel(SCENE_IMAGE)!r},
+  "shape": list(np.asarray(frame).shape),
+  "pixel_std": float(np.asarray(frame).std()),
+  "num_envs": env.num_envs,
+  "render_mode": "single_actual_training_env_close_camera",
+  "env_idx": cfg.viewer.env_idx,
+  "extra_envs_rendered": cfg.viewer.max_extra_envs,
+  "terrain_shape": list(terrain.terrain_origins.shape),
+  "terrain_level_env0": int(terrain.terrain_levels[0].item()),
+  "terrain_type_env0": int(terrain.terrain_types[0].item()),
+  "env0_origin": [float(v) for v in terrain.env_origins[0].detach().cpu().tolist()],
+}}
+env.close()
+print(json.dumps(summary, sort_keys=True))
+"""
+    result = conda_python(code, cwd=UNITREE_RL_MJLAB_HOME)
+    stdout_lines = [line for line in result["stdout"].splitlines() if line.strip()]
+    parsed = json.loads(stdout_lines[-1]) if result["returncode"] == 0 and stdout_lines else None
+    ok = result["returncode"] == 0 and parsed is not None and parsed["ok"] and SCENE_IMAGE.exists()
+    report = {
+        "generated_at_unix": time.time(),
+        "ok": ok,
+        "command": result["cmd"],
+        "cwd": result["cwd"],
+        "returncode": result["returncode"],
+        "stdout": result["stdout"],
+        "stderr": result["stderr"],
+        "summary": parsed,
+    }
+    SCENE_RENDER_JSON.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    if not ok:
+        raise SystemExit(f"scene render failed; see {SCENE_RENDER_JSON}")
+
+
 def write_training_driver() -> Path:
     return SCRIPT_ROOT / "train_driver.py"
 
@@ -713,8 +933,8 @@ def launch_train(
     iterations: int,
     steps_per_env: int,
     save_interval: int,
-    terrain_rows: int | None,
-    terrain_cols: int | None,
+    terrain_rows: int | None = None,
+    terrain_cols: int | None = None,
     console_log: Path,
     launch_json: Path,
 ) -> None:
@@ -760,8 +980,6 @@ def smoke_20min() -> None:
         iterations=iterations,
         steps_per_env=24,
         save_interval=1000,
-        terrain_rows=20,
-        terrain_cols=20,
         console_log=LOG_ROOT / "smoke_20min" / "train.log",
         launch_json=ARTIFACT_ROOT / "smoke_20min_launch.json",
     )
@@ -788,8 +1006,6 @@ def train_1_8_budget() -> None:
         iterations=20000,
         steps_per_env=24,
         save_interval=1000,
-        terrain_rows=20,
-        terrain_cols=20,
         console_log=LOG_ROOT / "train_1_8_budget" / "train.log",
         launch_json=TRAIN_1_8_LAUNCH_JSON,
     )
@@ -953,7 +1169,6 @@ def report_training_run(
         "process_log_exists": console_log.exists(),
         "no_traceback": "Traceback (most recent call last)" not in text,
         "no_nan_text": "nan" not in text.lower(),
-        "no_hfield_overflow_warning": not has_hfield_overflow_warning(text),
         "curve_points": len(rows) >= min_points,
         "finite_curve": finite,
     }
@@ -1038,6 +1253,8 @@ def main() -> None:
             "setup-env-record",
             "import-smoke",
             "task-config-smoke",
+            "verify-terrain-4096",
+            "render-scene",
             "smoke-20min",
             "report-smoke-20min",
             "train-1-8-budget",
@@ -1055,6 +1272,10 @@ def main() -> None:
         import_smoke()
     elif args.cmd == "task-config-smoke":
         task_config_smoke()
+    elif args.cmd == "verify-terrain-4096":
+        verify_terrain_4096()
+    elif args.cmd == "render-scene":
+        render_scene()
     elif args.cmd == "smoke-20min":
         smoke_20min()
     elif args.cmd == "report-smoke-20min":
