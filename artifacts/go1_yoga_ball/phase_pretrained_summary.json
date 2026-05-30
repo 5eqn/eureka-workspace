@@ -1,9 +1,0 @@
-{
-  "caveat": "Isaac Gym playback was validated headless without video because graphics-enabled headless playback is unstable in this Docker/runtime path.",
-  "ok": true,
-  "pretrained_isaacgym_playback_ok": true,
-  "pretrained_mujoco_control_removal_ok": true,
-  "pretrained_mujoco_raw_replay_video_ok": true,
-  "pretrained_mujoco_repeated_starts_ok": true,
-  "pretrained_mujoco_target_duration_ok": true
-}

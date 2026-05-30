@@ -18,6 +18,10 @@ ROOT = Path(__file__).resolve().parents[2]
 THIRDPARTIES = ROOT / "thirdparties"
 DREUREKA = THIRDPARTIES / "DrEureka"
 GO2_DESCRIPTION = THIRDPARTIES / "go2_description"
+UNITREE_RL_GYM = THIRDPARTIES / "unitree_rl_gym"
+UNITREE_RL_GYM_GO2_URDF = UNITREE_RL_GYM / "resources" / "robots" / "go2" / "urdf" / "go2.urdf"
+UNITREE_RL_GYM_GO2_CONFIG = UNITREE_RL_GYM / "legged_gym" / "envs" / "go2" / "go2_config.py"
+UNITREE_RL_GYM_BASE_CONFIG = UNITREE_RL_GYM / "legged_gym" / "envs" / "base" / "legged_robot_config.py"
 UNITREE_MUJOCO_GO2 = THIRDPARTIES / "unitree_mujoco" / "unitree_robots" / "go2" / "go2.xml"
 UNITREE_MUJOCO_BRIDGE = THIRDPARTIES / "unitree_mujoco" / "simulate" / "src" / "unitree_sdk2_bridge.h"
 UNITREE_MUJOCO_MAIN = THIRDPARTIES / "unitree_mujoco" / "simulate" / "src" / "main.cc"
@@ -208,6 +212,7 @@ def go2_lcm_to_dds_bridge_report() -> dict[str, Any]:
     ensure_tree()
     lcm_agent = DREUREKA / "globe_walking" / "go1_gym_deploy" / "envs" / "lcm_agent.py"
     state_estimator = DREUREKA / "globe_walking" / "go1_gym_deploy" / "utils" / "cheetah_state_estimator.py"
+    deploy_policy = ROOT / "scripts" / "go1_yoga_ball" / "deploy_lcm_policy.py"
     pd_lcm = DREUREKA / "globe_walking" / "go1_gym_deploy" / "lcm_types" / "pd_tau_targets_lcmt.lcm"
     leg_lcm = DREUREKA / "globe_walking" / "go1_gym_deploy" / "lcm_types" / "leg_control_data_lcmt.lcm"
     state_lcm = DREUREKA / "globe_walking" / "go1_gym_deploy" / "lcm_types" / "state_estimator_lcmt.lcm"
@@ -217,6 +222,7 @@ def go2_lcm_to_dds_bridge_report() -> dict[str, Any]:
     evidence = {
         "lcm_policy_command_fields": source_excerpt(pd_lcm, 1, 10),
         "lcm_policy_publisher": source_excerpt(lcm_agent, 194, 222),
+        "deploy_go2_config_sync": source_excerpt(deploy_policy, 88, 121),
         "dr_eureka_state_reorder": source_excerpt(state_estimator, 51, 56),
         "lcm_state_subscriptions": source_excerpt(state_estimator, 111, 113),
         "lcm_leg_state_fields": source_excerpt(leg_lcm, 1, 9),
@@ -233,16 +239,26 @@ def go2_lcm_to_dds_bridge_report() -> dict[str, Any]:
     }
     required = ["rt/lowcmd", "rt/lowstate", "pd_plustau_targets", "leg_control_data", "state_estimator_data"]
     bridge_text = GO2_LCM_DDS_BRIDGE.read_text(encoding="utf-8", errors="replace")
+    deploy_text = deploy_policy.read_text(encoding="utf-8", errors="replace")
     missing_tokens = [token for token in required if token not in bridge_text]
-    ok = not missing_tokens and all(not item.get("missing") for item in evidence.values())
+    unitree_go2_tokens = ["sync_go2_deploy_cfg", '"joint": 20.0', '"hip_scale_reduction": 1.0']
+    missing_go2_deploy_tokens = [token for token in unitree_go2_tokens if token not in deploy_text]
+    zero_action_policy_order = [0.1, 0.8, -1.5, -0.1, 0.8, -1.5, 0.1, 1.0, -1.5, -0.1, 1.0, -1.5]
+    joint_idxs = [3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8]
+    zero_action_unitree_order = [zero_action_policy_order[i] for i in joint_idxs]
+    ok = not missing_tokens and not missing_go2_deploy_tokens and all(not item.get("missing") for item in evidence.values())
     report = {
         "ok": ok,
         "generated_at_unix": time.time(),
         "unitree_sdk2_python_commit": git_head(UNITREE_SDK2_PYTHON),
         "claim": "The Go2 deploy-side bridge preserves DrEureka LCM policy semantics while translating to Unitree SDK2 DDS LowCmd/LowState.",
         "missing_required_tokens": missing_tokens,
+        "missing_go2_deploy_tokens": missing_go2_deploy_tokens,
         "unitree_motor_order": UNITREE_MOTOR_ORDER,
         "drek_lcm_command_is_unitree_order": True,
+        "zero_action_q_des_unitree_order": dict(zip(UNITREE_MOTOR_ORDER, zero_action_unitree_order)),
+        "kp_unitree_order": dict(zip(UNITREE_MOTOR_ORDER, [20.0] * 12)),
+        "kd_unitree_order": dict(zip(UNITREE_MOTOR_ORDER, [0.5] * 12)),
         "evidence": evidence,
     }
     write_json(ARTIFACT_ROOT / "go2_lcm_to_dds_bridge_report.json", report)
@@ -253,7 +269,9 @@ def go2_lcm_to_dds_bridge_report() -> dict[str, Any]:
         f"- Unitree SDK2 Python commit: `{report['unitree_sdk2_python_commit']}`",
         "- Claim: LCM remains an internal DrEureka policy contract. The Go2 deploy bridge owns the conversion to Unitree SDK2 DDS.",
         "- Command order: DrEureka publishes `pd_plustau_targets` in Unitree motor order because `LCMAgent` applies `StateEstimator.joint_idxs` before publishing.",
+        "- Go2 command constants: zero action publishes Unitree RL Gym default pose, `kp=20.0`, `kd=0.5`, `action_scale=0.25`, and `hip_scale_reduction=1.0`.",
         f"- Missing required bridge tokens: `{missing_tokens}`",
+        f"- Missing Go2 deploy tokens: `{missing_go2_deploy_tokens}`",
         "",
     ]
     for title, excerpt in evidence.items():
@@ -274,21 +292,19 @@ def go2_lcm_to_dds_bridge_report() -> dict[str, Any]:
 
 def prepare_isaacgym_urdf() -> dict[str, Any]:
     ensure_tree()
-    src = GO2_DESCRIPTION / "urdf" / "go2_description.urdf"
+    src = UNITREE_RL_GYM_GO2_URDF
     if not src.exists():
-        result = {"ok": False, "error": "missing Go2 URDF", "source": rel(src)}
+        result = {"ok": False, "error": "missing Unitree RL Gym Go2 URDF", "source": rel(src)}
         write_json(ARTIFACT_ROOT / "go2_isaacgym_urdf.json", result)
         return result
     text = src.read_text(encoding="utf-8")
-    mesh_root = Path("/workspace/eureka-workspace/thirdparties/go2_description")
-    text = text.replace("package://go2_description/", f"{mesh_root}/")
     ISAACGYM_URDF.write_text(text, encoding="utf-8")
     result = {
         "ok": True,
         "source": rel(src),
         "output": rel(ISAACGYM_URDF),
-        "mesh_root": rel(mesh_root),
-        "note": "package://go2_description mesh paths replaced with workspace absolute paths for Isaac Gym.",
+        "unitree_rl_gym_commit": git_head(UNITREE_RL_GYM),
+        "note": "Copied Unitree RL Gym Go2 Isaac Gym URDF unchanged for report inspection; training uses the source URDF directly.",
     }
     write_json(ARTIFACT_ROOT / "go2_isaacgym_urdf.json", result)
     return result
@@ -421,6 +437,8 @@ def go2_config_contract() -> dict[str, Any]:
         "hip_scale_reduction": float(cfg.control.hip_scale_reduction),
         "asset_file": cfg.asset.file,
         "foot_name": cfg.asset.foot_name,
+        "self_collisions": cfg.asset.self_collisions,
+        "flip_visual_attachments": cfg.asset.flip_visual_attachments,
     }
 
 
@@ -432,7 +450,7 @@ def go2_isaacgym_consistency_report() -> dict[str, Any]:
     ensure_tree()
     prepare_isaacgym_urdf()
     unitree = parse_unitree_mujoco_contract()
-    urdf = parse_urdf_contract(ISAACGYM_URDF)
+    urdf = parse_urdf_contract(UNITREE_RL_GYM_GO2_URDF)
     cfg = go2_config_contract()
     go2_config_path = DREUREKA / "globe_walking" / "go1_gym" / "envs" / "go2" / "go2_config.py"
     go2_robot_path = DREUREKA / "globe_walking" / "go1_gym" / "robots" / "go2.py"
@@ -489,8 +507,18 @@ def go2_isaacgym_consistency_report() -> dict[str, Any]:
         "claim": "No Go2 actuator network found in fetched DrEureka resources; use SDK2 LowCmd PD semantics with explicit gains, torque limits, and command equation.",
     })
     add("foot_name", cfg["foot_name"] == "foot", {"isaacgym_cfg": cfg["foot_name"], "unitree_mujoco_foot_bodies": ["FL_foot", "FR_foot", "RL_foot", "RR_foot"]})
+    add("unitree_rl_gym_asset_path", Path(cfg["asset_file"]).as_posix().endswith("thirdparties/unitree_rl_gym/resources/robots/go2/urdf/go2.urdf"), {
+        "dr_eureka_asset_file": cfg["asset_file"],
+        "unitree_rl_gym_go2_urdf": rel(UNITREE_RL_GYM_GO2_URDF),
+    })
+    add("unitree_rl_gym_visual_flip", cfg.get("flip_visual_attachments") is True, {
+        "dr_eureka_flip_visual_attachments": cfg.get("flip_visual_attachments"),
+        "unitree_rl_gym_default": True,
+    })
 
     evidence = {
+        "unitree_rl_gym_go2_config": source_excerpt(UNITREE_RL_GYM_GO2_CONFIG, 3, 39),
+        "unitree_rl_gym_asset_options": source_excerpt(UNITREE_RL_GYM_BASE_CONFIG, 76, 83),
         "unitree_mujoco_joint_and_actuator_limits": source_excerpt(UNITREE_MUJOCO_GO2, 7, 24),
         "unitree_mujoco_motor_order": source_excerpt(UNITREE_MUJOCO_GO2, 222, 234),
         "unitree_mujoco_home_keyframe": excerpt_for(UNITREE_MUJOCO_GO2, r'<key name="home"', context_after=2),
@@ -561,7 +589,7 @@ def validate_deps() -> dict[str, Any]:
             for path in [
                 DREUREKA,
                 THIRDPARTIES / "IsaacGym",
-                GO2_DESCRIPTION,
+                UNITREE_RL_GYM,
                 THIRDPARTIES / "unitree_mujoco",
                 UNITREE_SDK2_PYTHON,
                 THIRDPARTIES / "cyclonedds",
@@ -571,6 +599,7 @@ def validate_deps() -> dict[str, Any]:
             "DrEureka": {"path": rel(DREUREKA), "exists": DREUREKA.exists(), "commit": git_head(DREUREKA)},
             "IsaacGym": {"path": rel(THIRDPARTIES / "IsaacGym"), "exists": (THIRDPARTIES / "IsaacGym").exists()},
             "go2_description": {"path": rel(GO2_DESCRIPTION), "exists": GO2_DESCRIPTION.exists(), "commit": git_head(GO2_DESCRIPTION)},
+            "unitree_rl_gym": {"path": rel(UNITREE_RL_GYM), "exists": UNITREE_RL_GYM.exists(), "commit": git_head(UNITREE_RL_GYM)},
             "unitree_mujoco": {
                 "path": rel(THIRDPARTIES / "unitree_mujoco"),
                 "exists": (THIRDPARTIES / "unitree_mujoco").exists(),

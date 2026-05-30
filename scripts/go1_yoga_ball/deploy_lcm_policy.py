@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import copy
 import pickle
 from pathlib import Path
 import sys
@@ -27,6 +28,31 @@ from go1_gym_deploy.utils.command_profile import RCControllerProfile  # noqa: E4
 
 
 EVENT_FIELDS = ["event", "monotonic_s", "wall_time_s", "sim_time_s", "support_active", "detail"]
+
+
+class ZeroClockAgent:
+    def __init__(self, agent):
+        self.agent = agent
+
+    def __getattr__(self, name):
+        return getattr(self.agent, name)
+
+    def _zero_clock(self):
+        self.agent.clock_inputs[:] = 0
+        self.agent.gait_indices[:] = 0
+
+    def reset(self):
+        obs = self.agent.reset()
+        self._zero_clock()
+        return obs
+
+    def step(self, action):
+        obs, rew, done, info = self.agent.step(action)
+        self._zero_clock()
+        obs = self.agent.get_obs()
+        if info is not None:
+            info["clock_inputs"] = self.agent.clock_inputs
+        return obs, rew, done, info
 
 
 def append_event(path: Path, event: str, start_mono: float, *, detail: str = "") -> None:
@@ -65,6 +91,37 @@ def load_policy(run_dir: Path):
     return policy
 
 
+def sync_go2_deploy_cfg(cfg: dict) -> dict:
+    cfg = copy.deepcopy(cfg)
+    if cfg.get("robot", {}).get("name") != "go2":
+        return cfg
+    cfg.setdefault("init_state", {})["default_joint_angles"] = {
+        "FL_hip_joint": 0.1,
+        "FL_thigh_joint": 0.8,
+        "FL_calf_joint": -1.5,
+        "FR_hip_joint": -0.1,
+        "FR_thigh_joint": 0.8,
+        "FR_calf_joint": -1.5,
+        "RL_hip_joint": 0.1,
+        "RL_thigh_joint": 1.0,
+        "RL_calf_joint": -1.5,
+        "RR_hip_joint": -0.1,
+        "RR_thigh_joint": 1.0,
+        "RR_calf_joint": -1.5,
+    }
+    cfg.setdefault("control", {}).update(
+        {
+            "control_type": "P",
+            "stiffness": {"joint": 20.0},
+            "damping": {"joint": 0.5},
+            "action_scale": 0.25,
+            "hip_scale_reduction": 1.0,
+            "decimation": 4,
+        }
+    )
+    return cfg
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", required=True)
@@ -73,6 +130,7 @@ def main() -> int:
     parser.add_argument("--event-log", required=True)
     parser.add_argument("--lcm-url", default="udpm://239.255.76.67:7667?ttl=255")
     parser.add_argument("--startup-timeout-s", type=float, default=5.0)
+    parser.add_argument("--zero-clock", action="store_true")
     args = parser.parse_args()
 
     run_dir = Path(args.run)
@@ -96,6 +154,7 @@ def main() -> int:
 
     with (run_dir / "parameters.pkl").open("rb") as f:
         cfg = pickle.load(f)["Cfg"]
+    cfg = sync_go2_deploy_cfg(cfg)
 
     control_dt = 0.02
     command_profile = RCControllerProfile(
@@ -105,7 +164,10 @@ def main() -> int:
         y_scale=0.6,
         yaw_scale=5.0,
     )
-    agent = HistoryWrapper(LCMAgent(cfg, se, command_profile))
+    base_agent = LCMAgent(cfg, se, command_profile)
+    if args.zero_clock:
+        base_agent = ZeroClockAgent(base_agent)
+    agent = HistoryWrapper(base_agent)
     policy = load_policy(run_dir)
     obs = agent.reset()
 

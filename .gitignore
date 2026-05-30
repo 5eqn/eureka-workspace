@@ -9,8 +9,10 @@ __pycache__/
 .venv/
 venv/
 
-# Runtime logs and generated raw traces
+# Runtime/archive trees
+/artifacts/
 /logs/
+/outdated/
 
 # Heavy fetched dependencies and vendor packages that are not git submodules
 /thirdparties/IsaacGym/
@@ -18,14 +20,13 @@ venv/
 /thirdparties/IsaacGym_Preview_4_Package.tar.gz
 /thirdparties/unitree_mujoco/
 /thirdparties/go2_description/
+/thirdparties/unitree_rl_gym/
 /thirdparties/unitree_rl_mjlab/
 /thirdparties/mujoco_menagerie/
 /thirdparties/unitree_sdk2_python/
 /thirdparties/cyclonedds/
 
-# Generated simulator assets and rendered media
-/artifacts/go1_yoga_ball/build/
-/artifacts/go1_yoga_ball/videos/
+# Generated simulator media
 *.mp4
 
 # Local Docker/build cache material

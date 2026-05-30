@@ -1,7 +1,0 @@
-{
-  "mesh_root": "/workspace/eureka-workspace/thirdparties/go2_description",
-  "note": "package://go2_description mesh paths replaced with workspace absolute paths for Isaac Gym.",
-  "ok": true,
-  "output": "artifacts/go2_yoga_ball/build/go2_description_isaacgym.urdf",
-  "source": "thirdparties/go2_description/urdf/go2_description.urdf"
-}

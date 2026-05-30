@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import math
 from pathlib import Path
 import select
@@ -46,6 +47,27 @@ UNITREE_MOTOR_ORDER = [
     "RL_calf_joint",
 ]
 
+EVENT_FIELDS = ["event", "monotonic_s", "wall_time_s", "detail"]
+
+
+def append_event(path: Path | None, event: str, start_mono: float, detail: str = "") -> None:
+    if path is None:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    write_header = not path.exists()
+    with path.open("a", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=EVENT_FIELDS)
+        if write_header:
+            writer.writeheader()
+        writer.writerow(
+            {
+                "event": event,
+                "monotonic_s": f"{time.monotonic() - start_mono:.6f}",
+                "wall_time_s": f"{time.time():.6f}",
+                "detail": detail,
+            }
+        )
+
 
 def quat_to_rpy(quat: list[float] | tuple[float, ...]) -> list[float]:
     w, x, y, z = [float(v) for v in quat]
@@ -56,7 +78,39 @@ def quat_to_rpy(quat: list[float] | tuple[float, ...]) -> list[float]:
 
 
 class Go2LcmDdsBridge:
-    def __init__(self, *, lcm_url: str, dds_domain: int, network_interface: str | None) -> None:
+    def __init__(
+        self,
+        *,
+        lcm_url: str,
+        dds_domain: int,
+        network_interface: str | None,
+        out_dir: Path | None = None,
+        event_log: Path | None = None,
+    ) -> None:
+        self.start_mono = time.monotonic()
+        self.event_log = event_log
+        self.out_dir = out_dir
+        self.command_count = 0
+        self.lowstate_count = 0
+        self.command_writer = None
+        self.command_file = None
+        self.lowstate_writer = None
+        self.lowstate_file = None
+        if out_dir is not None:
+            out_dir.mkdir(parents=True, exist_ok=True)
+            self.command_file = (out_dir / "bridge_commands.csv").open("w", newline="", encoding="utf-8")
+            self.command_writer = csv.DictWriter(
+                self.command_file,
+                fieldnames=["count", "monotonic_s", "wall_time_s", "q0", "kp0", "kd0", "tau0"],
+            )
+            self.command_writer.writeheader()
+            self.lowstate_file = (out_dir / "bridge_lowstate.csv").open("w", newline="", encoding="utf-8")
+            self.lowstate_writer = csv.DictWriter(
+                self.lowstate_file,
+                fieldnames=["count", "monotonic_s", "wall_time_s", "q0", "dq0", "tau0", "quat_w", "quat_x", "quat_y", "quat_z"],
+            )
+            self.lowstate_writer.writeheader()
+        append_event(self.event_log, "BRIDGE_START", self.start_mono, f"dds_domain={dds_domain},interface={network_interface},lcm_url={lcm_url}")
         ChannelFactoryInitialize(dds_domain, network_interface)
         self.lc = lcm.LCM(lcm_url)
         self.crc = CRC()
@@ -99,10 +153,47 @@ class Go2LcmDdsBridge:
         self.low_cmd.crc = self.crc.Crc(self.low_cmd)
         self.lowcmd_pub.Write(self.low_cmd)
         self.last_cmd_monotonic = time.monotonic()
+        self.command_count += 1
+        if self.command_count == 1:
+            append_event(self.event_log, "BRIDGE_FIRST_LCM_COMMAND", self.start_mono)
+            append_event(self.event_log, "BRIDGE_FIRST_DDS_LOWCMD", self.start_mono)
+        if self.command_writer is not None:
+            self.command_writer.writerow(
+                {
+                    "count": self.command_count,
+                    "monotonic_s": f"{time.monotonic() - self.start_mono:.6f}",
+                    "wall_time_s": f"{time.time():.6f}",
+                    "q0": f"{float(msg.q_des[0]):.9f}",
+                    "kp0": f"{float(msg.kp[0]):.9f}",
+                    "kd0": f"{float(msg.kd[0]):.9f}",
+                    "tau0": f"{float(msg.tau_ff[0]):.9f}",
+                }
+            )
+            self.command_file.flush()
 
     def on_lowstate(self, msg: LowState_) -> None:
         self.last_lowstate = msg
         self.last_lowstate_monotonic = time.monotonic()
+        self.lowstate_count += 1
+        if self.lowstate_count == 1:
+            append_event(self.event_log, "BRIDGE_FIRST_DDS_LOWSTATE", self.start_mono)
+            append_event(self.event_log, "BRIDGE_FIRST_LCM_STATE", self.start_mono)
+        if self.lowstate_writer is not None:
+            self.lowstate_writer.writerow(
+                {
+                    "count": self.lowstate_count,
+                    "monotonic_s": f"{time.monotonic() - self.start_mono:.6f}",
+                    "wall_time_s": f"{time.time():.6f}",
+                    "q0": f"{float(msg.motor_state[0].q):.9f}",
+                    "dq0": f"{float(msg.motor_state[0].dq):.9f}",
+                    "tau0": f"{float(msg.motor_state[0].tau_est):.9f}",
+                    "quat_w": f"{float(msg.imu_state.quaternion[0]):.9f}",
+                    "quat_x": f"{float(msg.imu_state.quaternion[1]):.9f}",
+                    "quat_y": f"{float(msg.imu_state.quaternion[2]):.9f}",
+                    "quat_z": f"{float(msg.imu_state.quaternion[3]):.9f}",
+                }
+            )
+            self.lowstate_file.flush()
         self.publish_lcm_state(msg)
 
     def publish_lcm_state(self, msg: LowState_) -> None:
@@ -158,6 +249,11 @@ class Go2LcmDdsBridge:
             if readable:
                 self.lc.handle()
             time.sleep(0.001)
+        append_event(self.event_log, "BRIDGE_STOP", self.start_mono, f"commands={self.command_count},lowstates={self.lowstate_count}")
+        if self.command_file is not None:
+            self.command_file.close()
+        if self.lowstate_file is not None:
+            self.lowstate_file.close()
         return 0
 
 
@@ -167,11 +263,15 @@ def main() -> int:
     parser.add_argument("--dds-domain", type=int, default=0)
     parser.add_argument("--network-interface", default=None)
     parser.add_argument("--duration-s", type=float, default=None)
+    parser.add_argument("--out-dir", default=None)
+    parser.add_argument("--event-log", default=None)
     args = parser.parse_args()
     bridge = Go2LcmDdsBridge(
         lcm_url=args.lcm_url,
         dds_domain=args.dds_domain,
         network_interface=args.network_interface,
+        out_dir=Path(args.out_dir) if args.out_dir else None,
+        event_log=Path(args.event_log) if args.event_log else None,
     )
     return bridge.spin(args.duration_s)
 

@@ -41,6 +41,20 @@ When your changes create orphans:
 
 The test: Every changed line should trace directly to the user's request.
 
+## Repository Inventory
+
+Before doing repository work, read the root-level `CURRENT_INVENTORY.md` first. It is the concise map of the main-stream project state and the files that still matter.
+
+Keep `CURRENT_INVENTORY.md` and `OUTDATED_INVENTORY.md` synchronized with workspace contents whenever files are added, removed, renamed, moved, or repurposed. `CURRENT_INVENTORY.md` should contain only files directly related to the main stream of this work, with an outline that excludes failed attempts. Move failed attempts, wrong-model artifacts, abandoned goals, superseded reports, and unrelated historical logs under `outdated/`, and record them in `OUTDATED_INVENTORY.md`.
+
+Inventory maintenance must optimize for a reader who hates cognitive load. Treat every entry in `CURRENT_INVENTORY.md` as a cost paid by a future human: keep the visible file structure minimal, keep only mainstream project files in current inventory, and explain each remaining item clearly enough that the reader does not need to reverse-engineer why it exists. Ignored `artifacts/` and `logs/` files still belong in `CURRENT_INVENTORY.md` when they are mainstream evidence; ignoring them in Git is not a reason to hide them from the inventory.
+
+Inventory reasons must be specific to the file or collapsed folder. Generic filler such as "repository governance file", "active workflow source", or "retained for provenance/debugging" is banned because it does not explain why that exact item exists.
+
+## Runnable Scripts and Scenes
+
+`scripts/` and any still-current `docker/` entries must contain self-contained runnable workflows. Put scene files, caller-project files, and script-owned runtime inputs inside the relevant `scripts/...` workflow directory when they are required to run that workflow. Do not put new scenes or runnable inputs under `artifacts/`; `artifacts/` is for outputs and evidence. Some older work violates this rule, but new work must not.
+
 ## 4. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
@@ -95,3 +109,15 @@ wbc-workspace/
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+
+## 5. New version of environment management (Codename: FRESH)
+
+The FRESH environment management is based on the philosophy that, given a base distro, conda configuration, read-only set of thirdparty dependencies, and modern coding agents, an environment is already reproducible without using Docker, while bypassing problem that Docker introduces, for example rendering.
+
+The main principle is, you should install environment in a project-agnostic manner. For example, you install thirdparty dependency inside `$HOME` folder (for example, `~/MJLab`), and install conda environment normally directly on host. You're free to install apt packages on host and do not need to freeze such list, because installing suitable apt packages to make things work is the duty of modern coding agents. Remember: a base distro, a conda conFiguration, and a REad-only Set of tHirdparty dependencies uniquely identifies an environment. Then store scripts, logs and artifacts just like the old way. The difference is just we don't depend on Docker anymore.
+
+Important: If a thirdparty dependency can be installed with conda (for example with pip package), do not install from source. If you have to install from source, put it inside home folder and you are NOT allowed to change any byte inside it. If you have to patch a dependency (for example when reproducing DrEureka), make sure the dependency is inside project thirdparties folder, and name every single byte of change you made inside it in a sibling HTML file. This rule applies only when explicitly asked to use the FRESH way and that exact prompt requires patching thirdparty dependencies. For old changes, you do not need this operation. When using the FRESH way, if any thirdparty dependency should be patched, you must report it to user in the plan phase.
+
+When asked to maintain environment with FRESH, override previous instructions to use Docker, and use the FRESH way instead.
+
+When downloading packages, models, repositories, datasets, or installer payloads, use reachable China mirrors whenever possible for better speed. Test mirror availability before making it the default, especially for CUDA/NVIDIA-related channels.

@@ -11,7 +11,7 @@ usage() {
 isaacgym_env=(
   -e WANDB_MODE=disabled
   -e PYTHONPATH=/workspace/eureka-workspace/thirdparties/DrEureka:/workspace/eureka-workspace/thirdparties/DrEureka/globe_walking:/workspace/eureka-workspace/thirdparties/DrEureka/forward_locomotion
-  -e GO2_DESCRIPTION_URDF=/workspace/eureka-workspace/artifacts/go2_yoga_ball/build/go2_description_isaacgym.urdf
+  -e GO2_URDF=/workspace/eureka-workspace/thirdparties/unitree_rl_gym/resources/robots/go2/urdf/go2.urdf
   -v "$ROOT_DIR:/workspace/eureka-workspace"
   -w /workspace/eureka-workspace/thirdparties/DrEureka
 )
