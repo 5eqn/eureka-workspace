@@ -263,7 +263,7 @@ def source_contract() -> dict[str, Any]:
             "Implement a caller-project MJLab task, not upstream edits.",
             "Use Unitree MJLab Go2 XML/model constants as the robot data source.",
             "Keep DrEureka-derived yoga-ball, observation, reward, and termination constants inline under scripts.",
-            "Use MJLab native single-patch random_rough heightfield terrain with reset-time env-origin randomization; flat-plane fallback is invalid for training.",
+            "Use MJLab built-in HfPerlinNoiseTerrainCfg parameterized to the Isaac boxes_tm rough-terrain scale: 20x20 tiles, 5m tile size, 0.05m grid spacing, single octave, fixed per-env terrain origin assignment, and 0.02..0.08 height range.",
             "Mirror 4096 envs, 20000 iterations, save interval 1000 for 1/8-budget launch.",
         ],
     }
@@ -473,9 +473,6 @@ rl = load_rl_cfg(TASK_ID)
 registered = TASK_ID in list_tasks()
 
 cfg.scene.num_envs = 2
-if cfg.scene.terrain.terrain_generator is not None:
-  cfg.scene.terrain.terrain_generator.num_rows = 1
-  cfg.scene.terrain.terrain_generator.num_cols = 1
 env = ManagerBasedRlEnv(cfg=cfg, device="cuda:0" if torch.cuda.is_available() else "cpu")
 obs, extras = env.reset()
 action = torch.zeros((env.num_envs, env.single_action_space.shape[0]), device=env.device)
@@ -570,10 +567,10 @@ print(json.dumps(summary, sort_keys=True))
                 "penalize_large_actions",
             ],
             "terrain_type": "generator",
-            "terrain_rows": 1,
-            "terrain_cols": 1,
-            "terrain_size": [20.0, 20.0],
-            "terrain_sub_terrains": ["random_rough"],
+            "terrain_rows": 20,
+            "terrain_cols": 20,
+            "terrain_size": [5.0, 5.0],
+            "terrain_sub_terrains": ["hf_perlin_noise"],
             "actuator_gains": {
                 ".*hip_joint": {"stiffness": 20.0, "damping": 1.0},
                 ".*thigh_joint": {"stiffness": 20.0, "damping": 1.0},
@@ -602,7 +599,7 @@ print(json.dumps(summary, sort_keys=True))
             "terrain_cols": parsed["terrain_cols"] == expected["terrain_cols"],
             "terrain_size": parsed["terrain_size"] == expected["terrain_size"],
             "terrain_sub_terrains": parsed["terrain_sub_terrains"] == expected["terrain_sub_terrains"],
-            "terrain_origin_shape": parsed["terrain_origin_shape"] == [1, 1, 3],
+            "terrain_origin_shape": parsed["terrain_origin_shape"] == [20, 20, 3],
             "actuator_gains": parsed["actuator_gains"] == expected["actuator_gains"],
             "rl_max_iterations": parsed["rl_max_iterations"] == expected["rl_max_iterations"],
             "rl_save_interval": parsed["rl_save_interval"] == expected["rl_save_interval"],
@@ -733,8 +730,8 @@ def train_dry_run() -> None:
         iterations=1,
         steps_per_env=2,
         save_interval=100,
-        terrain_rows=1,
-        terrain_cols=1,
+        terrain_rows=20,
+        terrain_cols=20,
         console_log=LOG_ROOT / "train_dry_run" / "train.log",
         launch_json=ARTIFACT_ROOT / "train_dry_run_launch.json",
     )
@@ -758,8 +755,8 @@ def smoke_20min() -> None:
         iterations=iterations,
         steps_per_env=24,
         save_interval=1000,
-        terrain_rows=1,
-        terrain_cols=1,
+        terrain_rows=20,
+        terrain_cols=20,
         console_log=LOG_ROOT / "smoke_20min" / "train.log",
         launch_json=ARTIFACT_ROOT / "smoke_20min_launch.json",
     )
@@ -786,8 +783,8 @@ def train_1_8_budget() -> None:
         iterations=20000,
         steps_per_env=24,
         save_interval=1000,
-        terrain_rows=1,
-        terrain_cols=1,
+        terrain_rows=20,
+        terrain_cols=20,
         console_log=LOG_ROOT / "train_1_8_budget" / "train.log",
         launch_json=TRAIN_1_8_LAUNCH_JSON,
     )

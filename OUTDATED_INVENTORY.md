@@ -2,8 +2,8 @@
 
 This file accounts for everything under `outdated/`. Current files must not be collapsed, but outdated folders may be collapsed when that reduces reader effort without hiding why the archive exists.
 
-- Accounted files under `outdated/`: `526`
-- Inventory rows: `60`
+- Accounted files under `outdated/`: `544`
+- Inventory rows: `62`
 
 | Path Under `outdated/` | Reason |
 | --- | --- |
@@ -22,6 +22,7 @@ This file accounts for everything under `outdated/`. Current files must not be c
 | `artifacts/go1_yoga_ball/phase_mjlab_summary.json` | Machine-readable MJLab Go1 summary from the abandoned MJLab port path. |
 | `artifacts/go2_mjlab_dreureka_port_flat_terrain_invalid_2026-05-29/` | Collapsed folder covering MJLab Go2 smoke/train/dry-run evidence from the flat-terrain attempt that the user rejected as invalid for the baseline. |
 | `artifacts/go2_mjlab_dreureka_port_hfield_contact_spam_2026-05-29/` | Collapsed folder covering the launch record from the 4096-env random_rough smoke attempt that reached PPO but produced pathological hfield collision-overflow warning spam before terrain resolution was coarsened. |
+| `artifacts/go2_mjlab_dreureka_port_interrupted_random_uniform_2026-05-30/` | Collapsed folder covering the launch record for the interrupted MJLab 1/8-budget run that still used the superseded random-uniform terrain instead of MJLab built-in Perlin at Isaac-side scale. |
 | `artifacts/go2_mjlab_dreureka_port_old_pd_terrain_2026-05-30/` | Collapsed folder covering MJLab train/dry-run/smoke artifacts from the superseded small-terrain and old-PD configuration, archived so it cannot be mistaken for the corrected Unitree-PD, 20m-terrain train line. |
 | `artifacts/go2_mjlab_dreureka_port_rough_box_grid_oom_2026-05-29/` | Collapsed folder covering the killed 4096-env rough box-grid smoke launch record; superseded because the primitive-heavy terrain exhausted memory before training. |
 | `artifacts/go2_mjlab_dreureka_port_rough_hfield_overflow_2026-05-29/` | Collapsed folder covering the MJLab heightfield rough-terrain dry-run evidence that failed due to contact-capacity overflow with the yoga-ball scene. |
@@ -52,6 +53,7 @@ This file accounts for everything under `outdated/`. Current files must not be c
 | `logs/go1_yoga_ball/mjlab_train/` | Collapsed folder covering 8 MJLab Go1 smoke/train/playback logs from the abandoned MJLab port path. |
 | `logs/go2_mjlab_dreureka_port_flat_terrain_invalid_2026-05-29/` | Collapsed folder covering flat-terrain MJLab Go2 smoke/train/dry-run logs and TensorBoard process records that must not be mistaken for the rough-terrain baseline. |
 | `logs/go2_mjlab_dreureka_port_hfield_contact_spam_2026-05-29/` | Collapsed folder covering the random_rough smoke log tree whose 0.10 m hfield grid caused multi-gigabyte hfield collision-overflow warning spam with the yoga ball. |
+| `logs/go2_mjlab_dreureka_port_interrupted_random_uniform_2026-05-30/` | Collapsed folder covering the stopped MJLab 1/8-budget run logs and checkpoints from the superseded random-uniform terrain path. |
 | `logs/go2_mjlab_dreureka_port_old_pd_terrain_2026-05-30/` | Collapsed folder covering MJLab dry-run, smoke, and 1/8-budget checkpoint logs from the old-PD/smaller-terrain configuration, including the old `model_19999.pt` now excluded from the active train path. |
 | `logs/go2_mjlab_dreureka_port_rough_box_grid_oom_2026-05-29/` | Collapsed folder covering the rough box-grid full-smoke console log where the 4096-env process was killed after terrain generation. |
 | `logs/go2_mjlab_dreureka_port_rough_hfield_overflow_2026-05-29/` | Collapsed folder covering earlier heightfield rough-terrain logs from the contact-overflow investigation before terrain material DR was removed and the terrain was simplified. |

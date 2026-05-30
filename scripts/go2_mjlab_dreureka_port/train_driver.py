@@ -86,7 +86,7 @@ def main() -> None:
       if cfg.scene.terrain.terrain_generator is not None
       else None
     ),
-    "terrain_runtime": "mjlab_native_single_random_rough_no_terrain_material_dr",
+    "terrain_runtime": "mjlab_builtin_hf_perlin_noise_isaac_scale",
     "actuator_gains": actuator_gains,
     "domain_rand_profile": "pretrained",
     "episode_length_s": cfg.episode_length_s,

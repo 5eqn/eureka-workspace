@@ -99,6 +99,7 @@ def reset_robot_on_ball(
   env,
   env_ids: torch.Tensor | None,
   domain_rand: dict,
+  xy_init_range: float,
   asset_cfg: SceneEntityCfg,
   ball_cfg: SceneEntityCfg,
 ) -> None:
@@ -118,6 +119,9 @@ def reset_robot_on_ball(
 
   robot_state = robot.data.default_root_state[env_ids].clone()
   robot_state[:, 0:3] += env.scene.env_origins[env_ids]
+  robot_state[:, 0:2] += torch.empty(
+    (len(env_ids), 2), device=env.device
+  ).uniform_(-float(xy_init_range), float(xy_init_range))
   robot_state[:, 2] += 2.0 * radius + 0.0001
   yaw = torch.empty(len(env_ids), device=env.device).uniform_(-3.14, 3.14)
   robot_state[:, 3:7] = quat_from_euler_xyz(

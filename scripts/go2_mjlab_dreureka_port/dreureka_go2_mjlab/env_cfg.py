@@ -19,7 +19,7 @@ from mjlab.managers.termination_manager import TerminationTermCfg
 from mjlab.scene import SceneCfg
 from mjlab.sensor import ContactMatch, ContactSensorCfg
 from mjlab.sim import MujocoCfg, SimulationCfg
-from mjlab.terrains import HfRandomUniformTerrainCfg, TerrainEntityCfg
+from mjlab.terrains import HfPerlinNoiseTerrainCfg, TerrainEntityCfg
 from mjlab.terrains.terrain_generator import TerrainGeneratorCfg
 from mjlab.viewer import ViewerConfig
 from src.assets.robots.unitree_go2.go2_constants import FULL_COLLISION, get_go2_robot_cfg
@@ -30,7 +30,13 @@ TASK_ID = "DrEureka-Go2-YogaBall"
 
 BALL_RADIUS_RANGE = (0.35, 0.45)
 DEFAULT_BALL_RADIUS = sum(BALL_RADIUS_RANGE) / 2.0
-TERRAIN_TILE_SIZE = (20.0, 20.0)
+ISAAC_TERRAIN_TILE_SIZE = (5.0, 5.0)
+ISAAC_TERRAIN_ROWS = 20
+ISAAC_TERRAIN_COLS = 20
+ISAAC_TERRAIN_HORIZONTAL_SCALE = 0.05
+ISAAC_TERRAIN_VERTICAL_SCALE = 0.005
+ISAAC_TERRAIN_PERLIN_SCALE = ISAAC_TERRAIN_TILE_SIZE[0] * 4.0
+ISAAC_TERRAIN_XY_INIT_RANGE = 0.05
 
 PRETRAINED_DOMAIN_RAND = {
   "robot_friction_range": (0.1, 1.0),
@@ -96,14 +102,18 @@ DREUREKA_CONTRACT = {
     "num_observations": 56,
     "num_privileged_obs": 11,
     "num_observation_history": 15,
-    "terrain_mesh_type": "mjlab_random_rough_hfield",
-    "terrain_num_rows": 1,
-    "terrain_num_cols": 1,
-    "terrain_tile_size": TERRAIN_TILE_SIZE,
-    "terrain_noise_range": PRETRAINED_DOMAIN_RAND["terrain_tile_roughness_range"],
-    "terrain_noise_step": 0.02,
+    "terrain_mesh_type": "mjlab_hf_perlin_noise_isaac_scale",
+    "terrain_num_rows": ISAAC_TERRAIN_ROWS,
+    "terrain_num_cols": ISAAC_TERRAIN_COLS,
+    "terrain_tile_size": ISAAC_TERRAIN_TILE_SIZE,
+    "terrain_horizontal_scale": ISAAC_TERRAIN_HORIZONTAL_SCALE,
+    "terrain_vertical_scale": ISAAC_TERRAIN_VERTICAL_SCALE,
+    "terrain_perlin_scale": ISAAC_TERRAIN_PERLIN_SCALE,
+    "terrain_perlin_octaves": 1,
+    "terrain_roughness_range": PRETRAINED_DOMAIN_RAND["terrain_tile_roughness_range"],
     "terrain_curriculum": False,
-    "terrain_note": "Uses one MJLab native HfRandomUniformTerrainCfg random_rough patch with reset-time env-origin randomization. Terrain material DR is intentionally disabled to avoid per-world terrain-geom expansion.",
+    "terrain_note": "Uses MJLab built-in HfPerlinNoiseTerrainCfg with Isaac-side dimensions: 20x20 tiles, 5m tile size, 0.05m grid spacing, single octave, Perlin coordinate scale 20 from terrain_length*4, and height/roughness range 0.02..0.08.",
+    "xy_init_range": ISAAC_TERRAIN_XY_INIT_RANGE,
     "use_terminal_body_height": True,
     "terminal_body_height": 0.20,
     "terminate_after_contacts_on": (),
@@ -192,20 +202,22 @@ def _terrain_cfg() -> TerrainEntityCfg:
   terrain_generator = TerrainGeneratorCfg(
     seed=42,
     curriculum=False,
-    size=TERRAIN_TILE_SIZE,
+    size=ISAAC_TERRAIN_TILE_SIZE,
     border_width=0.0,
-    num_rows=1,
-    num_cols=1,
+    num_rows=ISAAC_TERRAIN_ROWS,
+    num_cols=ISAAC_TERRAIN_COLS,
     color_scheme="height",
     sub_terrains={
-      "random_rough": HfRandomUniformTerrainCfg(
+      "hf_perlin_noise": HfPerlinNoiseTerrainCfg(
         proportion=1.0,
-        noise_range=PRETRAINED_DOMAIN_RAND["terrain_tile_roughness_range"],
-        noise_step=0.02,
-        horizontal_scale=0.25,
-        vertical_scale=0.005,
-        downsampled_scale=0.25,
-        border_width=0.5,
+        height_range=PRETRAINED_DOMAIN_RAND["terrain_tile_roughness_range"],
+        octaves=1,
+        persistence=0.5,
+        lacunarity=2.0,
+        scale=ISAAC_TERRAIN_PERLIN_SCALE,
+        horizontal_scale=ISAAC_TERRAIN_HORIZONTAL_SCALE,
+        resolution=ISAAC_TERRAIN_HORIZONTAL_SCALE,
+        border_width=0.0,
       ),
     },
     add_lights=True,
@@ -299,15 +311,12 @@ def make_dreureka_go2_yoga_ball_env_cfg(play: bool = False) -> ManagerBasedRlEnv
         func=envs_mdp.reset_scene_to_default,
         mode="reset",
       ),
-      "randomize_terrain_origin": EventTermCfg(
-        func=envs_mdp.randomize_terrain,
-        mode="reset",
-      ),
       "reset_robot_to_dreureka_ball": EventTermCfg(
         func=mdp.reset_robot_on_ball,
         mode="reset",
         params={
           "domain_rand": PRETRAINED_DOMAIN_RAND,
+          "xy_init_range": ISAAC_TERRAIN_XY_INIT_RANGE,
           "asset_cfg": SceneEntityCfg("robot"),
           "ball_cfg": SceneEntityCfg("ball"),
         },
@@ -412,9 +421,9 @@ def make_dreureka_go2_yoga_ball_env_cfg(play: bool = False) -> ManagerBasedRlEnv
       azimuth=90.0,
     ),
     sim=SimulationCfg(
-      nconmax=128,
+      nconmax=512,
       njmax=1500,
-      contact_sensor_maxmatch=128,
+      contact_sensor_maxmatch=512,
       mujoco=MujocoCfg(
         timestep=0.005,
         iterations=10,
