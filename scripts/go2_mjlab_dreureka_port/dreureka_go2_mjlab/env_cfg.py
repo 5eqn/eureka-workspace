@@ -33,6 +33,11 @@ DEFAULT_BALL_RADIUS = sum(BALL_RADIUS_RANGE) / 2.0
 ISAAC_TERRAIN_TILE_SIZE = (5.0, 5.0)
 ISAAC_TERRAIN_ROWS = 20
 ISAAC_TERRAIN_COLS = 20
+ISAAC_TERRAIN_BORDER_BOXES = 5
+ISAAC_TERRAIN_MIN_INIT_LEVEL = ISAAC_TERRAIN_BORDER_BOXES
+ISAAC_TERRAIN_MAX_INIT_LEVEL = ISAAC_TERRAIN_ROWS - 1 - ISAAC_TERRAIN_BORDER_BOXES
+ISAAC_TERRAIN_MIN_INIT_TYPE = ISAAC_TERRAIN_BORDER_BOXES
+ISAAC_TERRAIN_MAX_INIT_TYPE = ISAAC_TERRAIN_COLS - 1 - ISAAC_TERRAIN_BORDER_BOXES
 ISAAC_TERRAIN_HORIZONTAL_SCALE = 0.05
 ISAAC_TERRAIN_VERTICAL_SCALE = 0.005
 ISAAC_TERRAIN_PERLIN_SCALE = ISAAC_TERRAIN_TILE_SIZE[0] * 4.0
@@ -105,6 +110,11 @@ DREUREKA_CONTRACT = {
     "terrain_mesh_type": "mjlab_hf_perlin_noise_isaac_scale",
     "terrain_num_rows": ISAAC_TERRAIN_ROWS,
     "terrain_num_cols": ISAAC_TERRAIN_COLS,
+    "terrain_border_boxes": ISAAC_TERRAIN_BORDER_BOXES,
+    "terrain_min_init_level": ISAAC_TERRAIN_MIN_INIT_LEVEL,
+    "terrain_max_init_level": ISAAC_TERRAIN_MAX_INIT_LEVEL,
+    "terrain_min_init_type": ISAAC_TERRAIN_MIN_INIT_TYPE,
+    "terrain_max_init_type": ISAAC_TERRAIN_MAX_INIT_TYPE,
     "terrain_tile_size": ISAAC_TERRAIN_TILE_SIZE,
     "terrain_horizontal_scale": ISAAC_TERRAIN_HORIZONTAL_SCALE,
     "terrain_vertical_scale": ISAAC_TERRAIN_VERTICAL_SCALE,
@@ -225,7 +235,7 @@ def _terrain_cfg() -> TerrainEntityCfg:
   return TerrainEntityCfg(
     terrain_type="generator",
     terrain_generator=terrain_generator,
-    max_init_terrain_level=1,
+    max_init_terrain_level=ISAAC_TERRAIN_MAX_INIT_LEVEL,
   )
 
 
@@ -306,6 +316,16 @@ def make_dreureka_go2_yoga_ball_env_cfg(play: bool = False) -> ManagerBasedRlEnv
         func=mdp.install_dreureka_action_lag,
         mode="startup",
         params={"domain_rand": PRETRAINED_DOMAIN_RAND},
+      ),
+      "assign_isaac_like_terrain_origins": EventTermCfg(
+        func=mdp.assign_isaac_like_terrain_origins,
+        mode="startup",
+        params={
+          "min_level": ISAAC_TERRAIN_MIN_INIT_LEVEL,
+          "max_level": ISAAC_TERRAIN_MAX_INIT_LEVEL,
+          "min_type": ISAAC_TERRAIN_MIN_INIT_TYPE,
+          "max_type": ISAAC_TERRAIN_MAX_INIT_TYPE,
+        },
       ),
       "reset_scene_to_default": EventTermCfg(
         func=envs_mdp.reset_scene_to_default,

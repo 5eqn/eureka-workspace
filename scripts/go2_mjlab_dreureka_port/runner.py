@@ -487,6 +487,11 @@ actuator_gains = {
   }
   for actuator in actuators
 }
+terrain_entity = env.scene.terrain
+terrain_levels = terrain_entity.terrain_levels.detach().cpu()
+terrain_types = terrain_entity.terrain_types.detach().cpu()
+terrain_level_counts = torch.bincount(terrain_levels, minlength=cfg.scene.terrain.terrain_generator.num_rows)
+terrain_type_counts = torch.bincount(terrain_types, minlength=cfg.scene.terrain.terrain_generator.num_cols)
 
 summary = {
   "registered": registered,
@@ -500,6 +505,13 @@ summary = {
   "terrain_size": list(cfg.scene.terrain.terrain_generator.size) if cfg.scene.terrain.terrain_generator is not None else None,
   "terrain_sub_terrains": list(cfg.scene.terrain.terrain_generator.sub_terrains.keys()) if cfg.scene.terrain.terrain_generator is not None else [],
   "terrain_origin_shape": list(env.scene.terrain.terrain_origins.shape) if env.scene.terrain.terrain_origins is not None else None,
+  "terrain_max_init_level_cfg": cfg.scene.terrain.max_init_terrain_level,
+  "terrain_level_min": int(terrain_levels.min().item()),
+  "terrain_level_max": int(terrain_levels.max().item()),
+  "terrain_level_counts": terrain_level_counts.tolist(),
+  "terrain_type_min": int(terrain_types.min().item()),
+  "terrain_type_max": int(terrain_types.max().item()),
+  "terrain_type_counts": terrain_type_counts.tolist(),
   "actuator_gains": actuator_gains,
   "episode_length_s": cfg.episode_length_s,
   "max_episode_length_steps": env.max_episode_length,
@@ -571,6 +583,7 @@ print(json.dumps(summary, sort_keys=True))
             "terrain_cols": 20,
             "terrain_size": [5.0, 5.0],
             "terrain_sub_terrains": ["hf_perlin_noise"],
+            "terrain_max_init_level_cfg": 14,
             "actuator_gains": {
                 ".*hip_joint": {"stiffness": 20.0, "damping": 1.0},
                 ".*thigh_joint": {"stiffness": 20.0, "damping": 1.0},
@@ -600,6 +613,10 @@ print(json.dumps(summary, sort_keys=True))
             "terrain_size": parsed["terrain_size"] == expected["terrain_size"],
             "terrain_sub_terrains": parsed["terrain_sub_terrains"] == expected["terrain_sub_terrains"],
             "terrain_origin_shape": parsed["terrain_origin_shape"] == [20, 20, 3],
+            "terrain_max_init_level_cfg": parsed["terrain_max_init_level_cfg"] == expected["terrain_max_init_level_cfg"],
+            "terrain_level_range": 5 <= parsed["terrain_level_min"] <= parsed["terrain_level_max"] <= 14,
+            "terrain_type_range": 5 <= parsed["terrain_type_min"] <= parsed["terrain_type_max"] <= 14,
+            "terrain_assignment_count": sum(parsed["terrain_type_counts"]) == parsed["num_envs_smoke"],
             "actuator_gains": parsed["actuator_gains"] == expected["actuator_gains"],
             "rl_max_iterations": parsed["rl_max_iterations"] == expected["rl_max_iterations"],
             "rl_save_interval": parsed["rl_save_interval"] == expected["rl_save_interval"],
@@ -643,6 +660,9 @@ print(json.dumps(summary, sort_keys=True))
                 f"- Train env count: `{parsed['num_envs_train']}`",
                 f"- Smoke env count: `{parsed['num_envs_smoke']}`",
                 f"- Terrain: `{parsed['terrain_type']}` `{parsed['terrain_generator_class']}` rows/cols `{parsed['terrain_rows']}`/`{parsed['terrain_cols']}` size `{parsed['terrain_size']}` sub-terrains `{parsed['terrain_sub_terrains']}`",
+                f"- Terrain assignment: level range `{parsed['terrain_level_min']}`..`{parsed['terrain_level_max']}` with max-init `{parsed['terrain_max_init_level_cfg']}`, type range `{parsed['terrain_type_min']}`..`{parsed['terrain_type_max']}`",
+                f"- Terrain type counts: `{parsed['terrain_type_counts']}`",
+                f"- Terrain level counts: `{parsed['terrain_level_counts']}`",
                 f"- Actuator gains: `{parsed['actuator_gains']}`",
                 f"- Actor observation shape: `{parsed['actor_obs_shape']}`",
                 f"- Privileged observation group shape: `{parsed['critic_obs_shape']}`",

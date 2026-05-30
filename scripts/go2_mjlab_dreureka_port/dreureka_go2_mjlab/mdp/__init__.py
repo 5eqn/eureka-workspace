@@ -16,6 +16,7 @@ from .rewards import (
   reward_smooth_actions,
 )
 from .terminations import base_below_ball_radius
+from .events import assign_isaac_like_terrain_origins
 from .events import reset_robot_on_ball
 from .events import install_dreureka_action_lag
 from .events import randomize_dreureka_physics
@@ -27,6 +28,7 @@ from .events import randomize_action_lag_like_dreureka
 
 __all__ = [
   "apply_ball_drag",
+  "assign_isaac_like_terrain_origins",
   "ball_friction",
   "ball_restitution",
   "base_below_ball_radius",

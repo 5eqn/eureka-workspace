@@ -95,6 +95,39 @@ def install_dreureka_action_lag(
   env.action_manager._dreureka_lag_installed = True
 
 
+def assign_isaac_like_terrain_origins(
+  env,
+  env_ids: torch.Tensor | None,
+  min_level: int,
+  max_level: int,
+  min_type: int,
+  max_type: int,
+) -> None:
+  del env_ids
+  terrain = env.scene.terrain
+  if terrain.terrain_origins is None:
+    return
+  num_envs = env.num_envs
+  num_types = int(max_type) - int(min_type) + 1
+  terrain.terrain_levels = torch.randint(
+    int(min_level),
+    int(max_level) + 1,
+    (num_envs,),
+    device=env.device,
+  )
+  terrain.terrain_types = (
+    torch.div(
+      torch.arange(num_envs, device=env.device),
+      num_envs / num_types,
+      rounding_mode="floor",
+    ).to(torch.long)
+    + int(min_type)
+  )
+  terrain.env_origins[:] = terrain.terrain_origins[
+    terrain.terrain_levels, terrain.terrain_types
+  ]
+
+
 def reset_robot_on_ball(
   env,
   env_ids: torch.Tensor | None,
