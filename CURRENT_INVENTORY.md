@@ -20,7 +20,7 @@ Read this file first. It is the low-cognitive-load map of the main project line.
 | Stage | File | Reason |
 | --- | --- | --- |
 | `P0` | `.gitignore` | Ignores `/artifacts/`, `/logs/`, `/outdated/`, fetched third-party payloads, and local build caches while keeping workflow scripts trackable. |
-| `P0` | `.gitmodules` | Records the DrEureka submodule mount used as the upstream training code base. |
+| `P0` | `.gitmodules` | Records the DrEureka fork submodule mount so recursive clones fetch the forked training code base. |
 | `P0` | `AGENTS.md` | Defines the required working rules, especially inventory discipline and goal verification standards. |
 | `P0` | `CURRENT_INVENTORY.md` | First-read map of the mainstream project state and every current workspace file. |
 | `G2M` | `GOAL_GO2_MJLAB_DREUREKA_PORT.md` | Goal definition for reproducing DrEureka Go2 yoga-ball training inside MJLab with FRESH home-space dependencies and a 20-minute smoke gate before the 1/8-budget train. |

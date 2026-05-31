@@ -1,6 +1,6 @@
 [submodule "thirdparties/DrEureka"]
 	path = thirdparties/DrEureka
-	url = https://github.com/eureka-research/DrEureka
+	url = https://github.com/5eqn/DrEureka.git
 [submodule "thirdparties/wbc-workspace"]
 	path = thirdparties/wbc-workspace
 	url = https://github.com/5eqn/wbc-workspace
