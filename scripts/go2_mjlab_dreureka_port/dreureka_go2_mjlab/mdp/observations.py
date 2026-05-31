@@ -34,16 +34,6 @@ def object_lin_vel(env) -> torch.Tensor:
   return env.scene["ball"].data.root_link_lin_vel_w
 
 
-def ball_restitution(env) -> torch.Tensor:
-  low, high = 0.4, 0.9
-  value = getattr(
-    env,
-    "dreureka_ball_restitution",
-    torch.full((env.num_envs,), (low + high) / 2.0, device=env.device),
-  )
-  return ((value - (low + high) / 2.0) * (2.0 / (high - low))).unsqueeze(1)
-
-
 def ball_friction(env) -> torch.Tensor:
   low, high = 0.5, 2.5
   value = getattr(

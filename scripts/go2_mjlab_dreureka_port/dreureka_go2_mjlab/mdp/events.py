@@ -77,8 +77,6 @@ def _ensure_dr_state(env, domain_rand: dict) -> None:
     "dreureka_ball_radius": sum(domain_rand["ball_radius_range"]) / 2.0,
     "dreureka_ball_mass": sum(domain_rand["ball_mass_range"]) / 2.0,
     "dreureka_ball_friction": sum(domain_rand["ball_friction_range"]) / 2.0,
-    "dreureka_ball_restitution": sum(domain_rand["ball_restitution_range"]) / 2.0,
-    "dreureka_ball_compliance": sum(domain_rand["ball_compliance_range"]) / 2.0,
     "dreureka_ball_drag": sum(domain_rand["ball_drag_range"]) / 2.0,
     "dreureka_robot_motor_strength": sum(domain_rand["robot_motor_strength_range"]) / 2.0,
     "dreureka_action_lag_timesteps": int(sum(domain_rand["lag_timesteps_range"]) / 2),
@@ -208,15 +206,9 @@ def randomize_dreureka_physics(
   ball = env.scene[ball_cfg.name]
 
   robot_friction = _sample(env, env_ids, domain_rand["robot_friction_range"])
-  robot_restitution = _sample(env, env_ids, domain_rand["robot_restitution_range"])
   ball_friction = _sample(env, env_ids, domain_rand["ball_friction_range"])
-  ball_restitution = _sample(env, env_ids, domain_rand["ball_restitution_range"])
 
   env.dreureka_ball_friction[env_ids] = ball_friction
-  env.dreureka_ball_restitution[env_ids] = ball_restitution
-  env.dreureka_ball_compliance[env_ids] = _sample(
-    env, env_ids, domain_rand["ball_compliance_range"]
-  )
   env.dreureka_ball_mass[env_ids] = _sample(env, env_ids, domain_rand["ball_mass_range"])
   env.dreureka_robot_motor_strength[env_ids] = _sample(
     env, env_ids, domain_rand["robot_motor_strength_range"]
@@ -230,12 +222,6 @@ def randomize_dreureka_physics(
     env_ids, _ids(env, robot.indexing.geom_ids), indexing="ij"
   )
   env.sim.model.geom_friction[env_grid, robot_geom_grid, 0] = robot_friction[:, None]
-  env.dreureka_robot_restitution = getattr(
-    env,
-    "dreureka_robot_restitution",
-    torch.zeros(env.num_envs, device=env.device),
-  )
-  env.dreureka_robot_restitution[env_ids] = robot_restitution
 
   env_grid, ball_geom_grid = torch.meshgrid(
     env_ids, _ids(env, ball.indexing.geom_ids), indexing="ij"

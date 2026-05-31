@@ -2,7 +2,6 @@
 
 from .observations import (
   ball_friction,
-  ball_restitution,
   clock_input,
   object_lin_vel,
   object_local_pos,
@@ -30,7 +29,6 @@ __all__ = [
   "apply_ball_drag",
   "assign_isaac_like_terrain_origins",
   "ball_friction",
-  "ball_restitution",
   "base_below_ball_radius",
   "clock_input",
   "install_dreureka_action_lag",

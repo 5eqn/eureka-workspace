@@ -55,7 +55,6 @@ class HfTileRandomUniformTerrainCfg(HfRandomUniformTerrainCfg):
 
 PRETRAINED_DOMAIN_RAND = {
   "robot_friction_range": (0.1, 1.0),
-  "robot_restitution_range": (0.2, 0.8),
   "robot_payload_mass_range": (0.0, 3.0),
   "robot_com_displacement_range": (-0.05, 0.05),
   "robot_motor_strength_range": (0.95, 1.05),
@@ -63,13 +62,8 @@ PRETRAINED_DOMAIN_RAND = {
   "ball_radius_range": BALL_RADIUS_RANGE,
   "ball_mass_range": (1.0, 3.0),
   "ball_friction_range": (0.5, 2.5),
-  "ball_restitution_range": (0.4, 0.9),
-  "ball_compliance_range": (0.0, 1.0),
   "ball_inertia_multiplier_range": (5.0 / 3.0, 5.0 / 3.0),
-  "ball_spring_coefficient_range": (0.0, 0.0),
   "ball_drag_range": (0.1, 0.5),
-  "terrain_ground_friction_range": (0.2, 0.8),
-  "terrain_ground_restitution_range": (0.0, 0.5),
   "terrain_tile_roughness_range": MJLAB_TILE_ROUGHNESS_RANGE,
   "robot_push_vel_range": (0.1, 0.4),
   "ball_push_vel_range": (0.1, 0.4),
@@ -115,7 +109,7 @@ DREUREKA_CONTRACT = {
     "commands_num_commands": 0,
     "episode_length_s": 40.0,
     "num_observations": 56,
-    "num_privileged_obs": 11,
+    "num_privileged_obs": 10,
     "num_observation_history": 15,
     "terrain_mesh_type": "mjlab_random_rough_hfield",
     "terrain_num_rows": TERRAIN_NUM_ROWS,
@@ -277,7 +271,6 @@ def make_dreureka_go2_yoga_ball_env_cfg(play: bool = False) -> ManagerBasedRlEnv
     "object": ObservationTermCfg(func=mdp.object_local_pos, scale=1.0),
     "body_velocity": ObservationTermCfg(func=envs_mdp.base_lin_vel),
     "object_velocity": ObservationTermCfg(func=mdp.object_lin_vel),
-    "restitution": ObservationTermCfg(func=mdp.ball_restitution),
     "friction": ObservationTermCfg(func=mdp.ball_friction),
   }
   cfg = ManagerBasedRlEnvCfg(
