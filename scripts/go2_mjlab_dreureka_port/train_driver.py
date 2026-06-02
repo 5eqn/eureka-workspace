@@ -72,6 +72,7 @@ def _device_and_seed(seed: int, selected_gpus: list[int] | None) -> tuple[str, i
 
 
 def _run_train(args: argparse.Namespace, selected_gpus: list[int] | None = None) -> None:
+  sys.path.insert(0, str(Path(__file__).resolve().parent))
   import dreureka_go2_mjlab  # noqa: F401,PLC0415
 
   configure_torch_backends()
