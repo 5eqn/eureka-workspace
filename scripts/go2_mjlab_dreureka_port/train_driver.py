@@ -72,6 +72,8 @@ def _device_and_seed(seed: int, selected_gpus: list[int] | None) -> tuple[str, i
 
 
 def _run_train(args: argparse.Namespace, selected_gpus: list[int] | None = None) -> None:
+  import dreureka_go2_mjlab  # noqa: F401,PLC0415
+
   configure_torch_backends()
   cfg = load_env_cfg(TASK_ID)
   rl = load_rl_cfg(TASK_ID)
