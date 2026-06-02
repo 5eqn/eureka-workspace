@@ -13,7 +13,6 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import src.tasks  # noqa: F401,E402
 import dreureka_go2_mjlab  # noqa: F401,E402
 from dreureka_go2_mjlab.env_cfg import TASK_ID  # noqa: E402
 from mjlab.envs import ManagerBasedRlEnv  # noqa: E402

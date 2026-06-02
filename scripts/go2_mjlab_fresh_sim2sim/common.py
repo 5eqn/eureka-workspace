@@ -9,7 +9,7 @@ SCRIPT_ROOT = ROOT / "scripts" / "go2_mjlab_fresh_sim2sim"
 ARTIFACT_ROOT = ROOT / "artifacts" / "go2_mjlab_fresh_sim2sim"
 LOG_ROOT = ROOT / "logs" / "go2_mjlab_fresh_sim2sim"
 MJLAB_PORT = ROOT / "scripts" / "go2_mjlab_dreureka_port"
-CHECKPOINT = ROOT / "logs" / "go2_mjlab_dreureka_port" / "train_1_8_budget" / "rsl_rl" / "model_19999.pt"
+CHECKPOINT = ROOT / "logs" / "go2_mjlab_dreureka_port" / "train_1_8_budget" / "rsl_rl" / "model_10000.pt"
 RUN_LOG_DIR = ROOT / "logs" / "go2_mjlab_dreureka_port" / "train_1_8_budget" / "rsl_rl"
 
 UNITREE_MOTOR_ORDER = [

@@ -9,6 +9,7 @@ import hashlib
 import importlib
 import json
 import os
+from dataclasses import asdict
 from pathlib import Path
 import subprocess
 import sys
@@ -284,6 +285,8 @@ def mjlab_playback(args: argparse.Namespace) -> None:
   device = args.device or ("cuda:0" if torch.cuda.is_available() else "cpu")
   cfg = load_env_cfg(TASK_ID, play=True)
   rl = load_rl_cfg(TASK_ID)
+  if args.seed is not None:
+    cfg.seed = args.seed
   cfg.scene.num_envs = 1
   cfg.auto_reset = False
   log_dir = LOG_ROOT / "mjlab_playback"
@@ -347,6 +350,7 @@ def mjlab_playback(args: argparse.Namespace) -> None:
     "ok": bool(rows and not done),
     "checkpoint": rel(CHECKPOINT),
     "device": device,
+    "seed": args.seed,
     "duration_s_requested": args.duration_s,
     "steps": len(rows),
     "step_dt": env.step_dt,
@@ -370,6 +374,122 @@ def mjlab_playback(args: argparse.Namespace) -> None:
   (ARTIFACT_ROOT / "mjlab_playback_smoke.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
   if not summary["ok"]:
     raise SystemExit(f"MJLab playback failed; see {ARTIFACT_ROOT / 'mjlab_playback_smoke.json'}")
+
+
+def mjlab_playback_video(args: argparse.Namespace) -> None:
+  ensure_tree()
+  sys.path.insert(0, str(ROOT / "scripts" / "go2_mjlab_dreureka_port"))
+  import imageio.v2 as imageio
+  import numpy as np
+  import src.tasks  # noqa: F401
+  import dreureka_go2_mjlab  # noqa: F401
+  import torch
+  from dreureka_go2_mjlab.env_cfg import TASK_ID
+  from mjlab.envs import ManagerBasedRlEnv
+  from mjlab.rl import MjlabOnPolicyRunner, RslRlVecEnvWrapper
+  from mjlab.tasks.registry import load_env_cfg, load_rl_cfg
+  from mjlab.utils.torch import configure_torch_backends
+
+  configure_torch_backends()
+  device = args.device or ("cuda:0" if torch.cuda.is_available() else "cpu")
+  cfg = load_env_cfg(TASK_ID, play=True)
+  rl = load_rl_cfg(TASK_ID)
+  if args.seed is not None:
+    cfg.seed = args.seed
+  cfg.scene.num_envs = 1
+  cfg.auto_reset = False
+  log_dir = LOG_ROOT / "mjlab_playback_video"
+  log_dir.mkdir(parents=True, exist_ok=True)
+  csv_path = log_dir / "playback.csv"
+  seed_suffix = "unseeded" if args.seed is None else f"seed_{args.seed}"
+  video_path = ARTIFACT_ROOT / "videos" / f"go2_mjlab_native_playback_model_10000_{seed_suffix}.mp4"
+  video_path.parent.mkdir(parents=True, exist_ok=True)
+
+  env = ManagerBasedRlEnv(cfg=cfg, device=device, render_mode="rgb_array")
+  wrapped = RslRlVecEnvWrapper(env, clip_actions=rl.clip_actions)
+  runner = MjlabOnPolicyRunner(wrapped, asdict(rl), str(RUN_LOG_DIR), device)
+  runner.load(str(CHECKPOINT), load_cfg={"actor": True}, strict=True, map_location=device)
+  policy = runner.get_inference_policy(device=device)
+  obs = wrapped.get_observations()
+  robot = env.scene["robot"]
+  ball = env.scene["ball"]
+  done = False
+  rows: list[dict[str, str]] = []
+  frame_vars: list[float] = []
+  frames = 0
+  stride = max(1, round((1.0 / env.step_dt) / args.fps))
+  steps = int(args.duration_s / env.step_dt)
+  try:
+    with csv_path.open("w", newline="", encoding="utf-8") as f, imageio.get_writer(
+      video_path, fps=args.fps, codec="libx264", quality=8, macro_block_size=16
+    ) as writer:
+      csv_writer = csv.DictWriter(
+        f,
+        fieldnames=[
+          "step",
+          "sim_time_s",
+          "reward",
+          "done",
+          "base_z",
+          "roll",
+          "pitch",
+          "ball_z",
+          "action_abs_max",
+        ],
+      )
+      csv_writer.writeheader()
+      for step in range(steps):
+        if step % stride == 0:
+          frame = env.render()
+          if frame is not None:
+            writer.append_data(frame)
+            frame_vars.append(float(np.var(frame)))
+            frames += 1
+        with torch.no_grad():
+          action = policy(obs, stochastic_output=False)
+        obs, rew, dones, _extras = wrapped.step(action)
+        root_pos = robot.data.root_link_pos_w[0].detach().cpu().tolist()
+        root_quat = robot.data.root_link_quat_w[0].detach().cpu().tolist()
+        ball_pos = ball.data.root_link_pos_w[0].detach().cpu().tolist()
+        roll, pitch, _ = quat_to_rpy(root_quat)
+        done = bool(dones[0].item())
+        row = {
+          "step": step,
+          "sim_time_s": f"{(step + 1) * env.step_dt:.6f}",
+          "reward": f"{float(rew[0].item()):.9f}",
+          "done": int(done),
+          "base_z": f"{float(root_pos[2]):.9f}",
+          "roll": f"{roll:.9f}",
+          "pitch": f"{pitch:.9f}",
+          "ball_z": f"{float(ball_pos[2]):.9f}",
+          "action_abs_max": f"{float(action.abs().max().item()):.9f}",
+        }
+        csv_writer.writerow(row)
+        rows.append(row)
+        if done:
+          break
+  finally:
+    env.close()
+
+  summary = {
+    "ok": bool(rows and not done and frames > 0 and frame_vars and max(frame_vars) > 1.0),
+    "checkpoint": rel(CHECKPOINT),
+    "device": device,
+    "seed": args.seed,
+    "duration_s_requested": args.duration_s,
+    "steps": len(rows),
+    "step_dt": env.step_dt,
+    "terminated": done,
+    "csv": rel(csv_path),
+    "video": rel(video_path),
+    "frames_written": frames,
+    "fps": args.fps,
+    "file_size_bytes": video_path.stat().st_size if video_path.exists() else 0,
+    "frame_variance_max": max(frame_vars) if frame_vars else None,
+  }
+  write_json(ARTIFACT_ROOT / "mjlab_native_playback_video.json", summary)
+  if not summary["ok"]:
+    raise SystemExit(f"MJLab playback video failed; see {ARTIFACT_ROOT / 'mjlab_native_playback_video.json'}")
 
 
 def stream_process(cmd: list[str], log_path: Path) -> subprocess.Popen:
@@ -430,6 +550,10 @@ def attempt(args: argparse.Namespace) -> None:
     str(args.dds_domain),
     "--network-interface",
     args.network_interface,
+    "--dt",
+    "0.002",
+    "--release-after-command-s",
+    "0.0",
     "--base-z",
     str(args.base_z),
     "--ball-radius",
@@ -521,9 +645,11 @@ def report(summary: dict[str, Any] | None = None) -> None:
 
 def main() -> int:
   parser = argparse.ArgumentParser()
-  parser.add_argument("cmd", choices=["preflight", "joint-order-contract", "deployer-smoke", "mjlab-playback", "attempt", "report"])
+  parser.add_argument("cmd", choices=["preflight", "joint-order-contract", "deployer-smoke", "mjlab-playback", "mjlab-playback-video", "attempt", "report"])
   parser.add_argument("--name", default="attempt_001_faithful_host")
   parser.add_argument("--duration-s", type=float, default=12.0)
+  parser.add_argument("--fps", type=int, default=25)
+  parser.add_argument("--seed", type=int, default=None)
   parser.add_argument("--dds-domain", type=int, default=1)
   parser.add_argument("--network-interface", default="lo")
   parser.add_argument("--device", default=None)
@@ -538,6 +664,8 @@ def main() -> int:
     deployer_smoke()
   elif args.cmd == "mjlab-playback":
     mjlab_playback(args)
+  elif args.cmd == "mjlab-playback-video":
+    mjlab_playback_video(args)
   elif args.cmd == "attempt":
     attempt(args)
   elif args.cmd == "report":

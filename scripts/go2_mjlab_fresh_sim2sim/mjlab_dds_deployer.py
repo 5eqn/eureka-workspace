@@ -52,6 +52,13 @@ def projected_gravity_from_quat(q: list[float]) -> list[float]:
   ]
 
 
+def load_seed_state(path: str | None) -> dict[str, Any]:
+  if not path:
+    return {}
+  with Path(path).open(encoding="utf-8") as f:
+    return json.load(f)
+
+
 class LowStateBuffer:
   def __init__(self) -> None:
     self.msg: LowState_ | None = None
@@ -68,8 +75,9 @@ class LowStateBuffer:
 
 
 class ObservationBuilder:
-  def __init__(self, device: str) -> None:
+  def __init__(self, device: str, clip_actions: float | None) -> None:
     self.device = device
+    self.clip_actions = clip_actions
     self.action = torch.zeros((1, 12), device=device)
     self.prev_action = torch.zeros((1, 12), device=device)
     self.history: dict[str, list[torch.Tensor]] = {}
@@ -119,9 +127,14 @@ class ObservationBuilder:
       dim=1,
     )
 
+  def clip_action(self, action: torch.Tensor) -> torch.Tensor:
+    if self.clip_actions is None:
+      return action
+    return torch.clamp(action, -self.clip_actions, self.clip_actions)
+
   def update_action(self, action: torch.Tensor) -> None:
     self.prev_action[:] = self.action
-    self.action[:] = action
+    self.action[:] = self.clip_action(action)
 
 
 def load_policy(checkpoint: Path, log_dir: Path, device: str) -> tuple[Any, list[str], list[str]]:
@@ -158,12 +171,12 @@ def init_lowcmd() -> Any:
   return cmd
 
 
-def write_lowcmd(cmd: Any, action_mjlab: torch.Tensor, action_order: list[str], crc: CRC) -> list[float]:
+def write_lowcmd(cmd: Any, action_mjlab: torch.Tensor, action_order: list[str], crc: CRC, motor_offset_by_name: dict[str, float]) -> list[float]:
   action_by_name = {name: float(action_mjlab[0, i].item()) for i, name in enumerate(action_order)}
   q_des = []
   for i, name in enumerate(UNITREE_MOTOR_ORDER):
     motor = cmd.motor_cmd[i]
-    q = DEFAULT_JOINT_ANGLES[name] + ACTION_SCALE * action_by_name[name]
+    q = DEFAULT_JOINT_ANGLES[name] + motor_offset_by_name.get(name, 0.0) + ACTION_SCALE * action_by_name[name]
     motor.mode = 0x01
     motor.q = float(q)
     motor.dq = 0.0
@@ -179,13 +192,26 @@ def run(args: argparse.Namespace) -> int:
   out_dir.mkdir(parents=True, exist_ok=True)
   device = args.device or ("cuda:0" if torch.cuda.is_available() else "cpu")
   policy, action_order, obs_terms = load_policy(Path(args.checkpoint), Path(args.log_dir), device)
-  builder = ObservationBuilder(device)
+  rl = load_rl_cfg(TASK_ID)
+  builder = ObservationBuilder(device, rl.clip_actions)
+  seed_state = load_seed_state(args.seed_state)
+  offset_values = seed_state.get("robot_motor_offset_mjlab_order", [0.0] * 12)
+  motor_offset_by_name = {
+    name: float(offset_values[i])
+    for i, name in enumerate(MJLAB_CONTRACT_ORDER)
+  }
 
   if args.smoke_only:
     obs = builder.actor_obs(None)
     with torch.no_grad():
       action = policy(TensorDict({"actor": obs}, batch_size=[1]), stochastic_output=False)
-    q_des = [DEFAULT_JOINT_ANGLES[name] + ACTION_SCALE * float(action[0, action_order.index(name)].item()) for name in UNITREE_MOTOR_ORDER]
+    action = builder.clip_action(action)
+    q_des = [
+      DEFAULT_JOINT_ANGLES[name]
+      + motor_offset_by_name.get(name, 0.0)
+      + ACTION_SCALE * float(action[0, action_order.index(name)].item())
+      for name in UNITREE_MOTOR_ORDER
+    ]
     result = {
       "ok": bool(torch.isfinite(action).all().item() and obs.shape == (1, 840)),
       "checkpoint": str(args.checkpoint),
@@ -197,6 +223,8 @@ def run(args: argparse.Namespace) -> int:
       "actor_observation_terms": obs_terms,
       "unitree_motor_order": UNITREE_MOTOR_ORDER,
       "q_des_unitree_order": dict(zip(UNITREE_MOTOR_ORDER, q_des)),
+      "seed_state": args.seed_state,
+      "motor_offset_by_name": motor_offset_by_name,
     }
     Path(args.summary).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return 0 if result["ok"] else 1
@@ -211,7 +239,28 @@ def run(args: argparse.Namespace) -> int:
   crc = CRC()
   timing_path = out_dir / "deployer_timing.csv"
   with timing_path.open("w", newline="", encoding="utf-8") as f:
-    writer = csv.DictWriter(f, fieldnames=["step", "monotonic_s", "wall_time_s", "lowstate_count", "inference_s", "loop_s", "action_abs_max", "q_des_0"])
+    writer = csv.DictWriter(
+      f,
+      fieldnames=[
+        "step",
+        "monotonic_s",
+        "wall_time_s",
+        "lowstate_count",
+        "inference_s",
+        "loop_s",
+        "obs_abs_max",
+        "action_abs_max",
+        "q_des_0",
+        "q_des_1",
+        "q_des_2",
+        "lowstate_q0",
+        "lowstate_dq0",
+        "quat_w",
+        "quat_x",
+        "quat_y",
+        "quat_z",
+      ],
+    )
     writer.writeheader()
     start = time.monotonic()
     step = 0
@@ -222,10 +271,19 @@ def run(args: argparse.Namespace) -> int:
       infer_start = time.monotonic()
       with torch.no_grad():
         action = policy(TensorDict({"actor": obs}, batch_size=[1]), stochastic_output=False)
+      action = builder.clip_action(action)
       infer_s = time.monotonic() - infer_start
       builder.update_action(action)
-      q_des = write_lowcmd(cmd, action, action_order, crc)
+      q_des = write_lowcmd(cmd, action, action_order, crc, motor_offset_by_name)
       pub.Write(cmd)
+      if lowstate.msg is None:
+        lowstate_q0 = ""
+        lowstate_dq0 = ""
+        quat = ["", "", "", ""]
+      else:
+        lowstate_q0 = f"{float(lowstate.msg.motor_state[0].q):.9f}"
+        lowstate_dq0 = f"{float(lowstate.msg.motor_state[0].dq):.9f}"
+        quat = [f"{float(v):.9f}" for v in lowstate.msg.imu_state.quaternion]
       writer.writerow(
         {
           "step": step,
@@ -234,8 +292,17 @@ def run(args: argparse.Namespace) -> int:
           "lowstate_count": lowstate.count,
           "inference_s": f"{infer_s:.9f}",
           "loop_s": f"{time.monotonic() - loop_start:.9f}",
+          "obs_abs_max": f"{float(obs.abs().max().item()):.9f}",
           "action_abs_max": f"{float(action.abs().max().item()):.9f}",
           "q_des_0": f"{q_des[0]:.9f}",
+          "q_des_1": f"{q_des[1]:.9f}",
+          "q_des_2": f"{q_des[2]:.9f}",
+          "lowstate_q0": lowstate_q0,
+          "lowstate_dq0": lowstate_dq0,
+          "quat_w": quat[0],
+          "quat_x": quat[1],
+          "quat_y": quat[2],
+          "quat_z": quat[3],
         }
       )
       f.flush()
@@ -252,6 +319,8 @@ def run(args: argparse.Namespace) -> int:
     "action_order": action_order,
     "unitree_motor_order": UNITREE_MOTOR_ORDER,
     "timing": str(timing_path),
+    "seed_state": args.seed_state,
+    "motor_offset_by_name": motor_offset_by_name,
   }
   Path(args.summary).write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
   return 0 if summary["ok"] else 1
@@ -269,6 +338,7 @@ def main() -> int:
   parser.add_argument("--duration-s", type=float, default=12.0)
   parser.add_argument("--policy-hz", type=float, default=50.0)
   parser.add_argument("--smoke-only", action="store_true")
+  parser.add_argument("--seed-state", default=None)
   return run(parser.parse_args())
 
 

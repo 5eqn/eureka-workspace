@@ -70,6 +70,8 @@ This file accounts for everything under `outdated/`. Current files must not be c
 | `logs/go2_mjlab_fresh_sim2sim_old_checkpoint_2026-05-30/` | Collapsed folder covering host FRESH DDS deployer, MuJoCo endpoint, playback, timing, telemetry, and replay logs generated from the archived old MJLab checkpoint before the corrected train contract. |
 | `logs/go2_yoga_ball/debug_segfault/` | Collapsed folder covering 10 logs from diagnosing the old Go2 training segfault. |
 | `logs/go2_yoga_ball/post_training_sim2sim/` | Collapsed folder covering 236 wrong-model or unsuccessful Go2 Sim2Sim attempt logs. |
+| `logs/go2_yoga_ball/final_train_sim2sim/rerun_isaac_trained_20260531/` | Failed 2026-05-31 Sim2Sim rerun with a nondefault LCM URL; the policy ran, but the bridge never forwarded any commands, so it does not qualify as the successful baseline rerun. |
+| `logs/go2_yoga_ball/final_train_sim2sim/host_mujoco_docker_policy_20260531/` | Failed mixed-topology launch where the Docker bridge created `events.csv` as root before the host endpoint started, causing the host MuJoCo process to fail with a permission error before simulation evidence existed. |
 | `logs/go2_yoga_ball/train_1_8_budget/` | Collapsed folder covering 2 logs from the first failed/wrong-asset Go2 1/8 training attempt. |
 | `logs/go2_yoga_ball/train_1_8_budget_resume/` | Collapsed folder covering 1 resume log from the first failed/wrong-asset Go2 1/8 training attempt. |
 | `logs/go2_yoga_ball/train_smoke/` | Collapsed folder covering 4 smoke logs from the superseded Go2 setup. |

@@ -99,15 +99,19 @@ def quat_to_rpy(q: Any) -> tuple[float, float, float]:
     return roll, pitch, yaw
 
 
-def write_scene(ball_radius: float) -> Path:
+def write_scene(
+    ball_radius: float,
+    ball_mass: float = 1.0,
+    ball_inertia: float = 0.108,
+    ball_friction: tuple[float, float, float] = (1.0, 0.02, 0.001),
+    floor_z: float = 0.0,
+) -> Path:
     BUILD_ROOT.mkdir(parents=True, exist_ok=True)
     sanitized_go2 = BUILD_ROOT / "go2_unitree_sanitized.xml"
     go2_text = UNITREE_MUJOCO_GO2.read_text(encoding="utf-8")
     meshdir = UNITREE_MUJOCO_GO2.parent / "assets"
     go2_text = go2_text.replace('meshdir="assets"', f'meshdir="{meshdir}"')
     sanitized_go2.write_text(go2_text, encoding="utf-8")
-    ball_mass = 1.0
-    inertia = 0.108
     scene = BUILD_ROOT / "go2_yoga_ball_scene.xml"
     scene.write_text(
         f"""<mujoco model="go2 yoga ball scene">
@@ -122,11 +126,11 @@ def write_scene(ball_radius: float) -> Path:
   </asset>
   <worldbody>
     <light pos="0 0 3" dir="0 0 -1" directional="true"/>
-    <geom name="floor" type="plane" size="0 0 0.05"/>
+    <geom name="floor" type="plane" pos="0 0 {floor_z:.9f}" size="0 0 0.05"/>
     <body name="yoga_ball" pos="0 0 {ball_radius}">
       <freejoint name="yoga_ball_free"/>
-      <inertial pos="0 0 0" mass="{ball_mass:.9f}" diaginertia="{inertia:.9f} {inertia:.9f} {inertia:.9f}"/>
-      <geom name="yoga_ball_geom" type="sphere" size="{ball_radius}" material="ballmat" friction="1.0 0.02 0.001" condim="3"/>
+      <inertial pos="0 0 0" mass="{ball_mass:.9f}" diaginertia="{ball_inertia:.9f} {ball_inertia:.9f} {ball_inertia:.9f}"/>
+      <geom name="yoga_ball_geom" type="sphere" size="{ball_radius}" material="ballmat" friction="{ball_friction[0]:.9f} {ball_friction[1]:.9f} {ball_friction[2]:.9f}" condim="3"/>
     </body>
   </worldbody>
 </mujoco>
@@ -134,6 +138,20 @@ def write_scene(ball_radius: float) -> Path:
         encoding="utf-8",
     )
     return scene
+
+
+def parse_vec(text: str, n: int) -> list[float]:
+    values = [float(x) for x in text.split(",")]
+    if len(values) != n:
+        raise ValueError(f"expected {n} comma-separated values, got {len(values)}: {text}")
+    return values
+
+
+def load_seed_state(path: str | None) -> dict[str, Any]:
+    if not path:
+        return {}
+    with Path(path).open(encoding="utf-8") as f:
+        return json.load(f)
 
 
 def joint_addresses(model: Any) -> tuple[list[int], list[int], list[int], list[tuple[float, float]]]:
@@ -156,19 +174,47 @@ def default_angles(run_dir: Path) -> dict[str, float]:
     return {name: float(cfg["init_state"]["default_joint_angles"][name]) for name in POLICY_JOINT_ORDER}
 
 
-def set_initial_state(model: Any, data: Any, qpos_addr: list[int], *, run_dir: Path, base_z: float, ball_radius: float) -> None:
+def set_initial_state(
+    model: Any,
+    data: Any,
+    qpos_addr: list[int],
+    *,
+    run_dir: Path,
+    base_pos: list[float],
+    base_quat: list[float],
+    base_lin_vel: list[float],
+    base_ang_vel: list[float],
+    ball_pos: list[float],
+    ball_quat: list[float],
+) -> None:
     angles = default_angles(run_dir)
     data.qpos[:] = 0.0
     data.qvel[:] = 0.0
-    data.qpos[0:3] = [0.0, 0.0, base_z]
-    data.qpos[3:7] = [1.0, 0.0, 0.0, 0.0]
+    data.qpos[0:3] = base_pos
+    data.qpos[3:7] = base_quat
+    data.qvel[0:3] = base_lin_vel
+    data.qvel[3:6] = base_ang_vel
     for i, name in enumerate(UNITREE_MOTOR_ORDER):
         data.qpos[qpos_addr[i]] = angles[name]
     ball_jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "yoga_ball_free")
     if ball_jid >= 0:
         ball_qpos = int(model.jnt_qposadr[ball_jid])
-        data.qpos[ball_qpos : ball_qpos + 7] = [0.0, 0.0, ball_radius, 1.0, 0.0, 0.0, 0.0]
+        data.qpos[ball_qpos : ball_qpos + 7] = ball_pos + ball_quat
     mujoco.mj_forward(model, data)
+
+
+def apply_scene_overrides(model: Any, *, robot_friction: float | None, base_mass: float | None, base_ipos: list[float] | None) -> None:
+    ball_body = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "yoga_ball")
+    base_body = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "base_link")
+    if robot_friction is not None:
+        for geom_id in range(model.ngeom):
+            body_id = int(model.geom_bodyid[geom_id])
+            if body_id not in (0, ball_body):
+                model.geom_friction[geom_id, 0] = robot_friction
+    if base_mass is not None and base_body >= 0:
+        model.body_mass[base_body] = base_mass
+    if base_ipos is not None and base_body >= 0:
+        model.body_ipos[base_body, :] = base_ipos
 
 
 def pin_supported_pose(data: Any, support_qpos: np.ndarray, support_qvel: np.ndarray, ball_qpos: int, ball_qvel: int, support_ball_qpos: np.ndarray, support_ball_qvel: np.ndarray) -> None:
@@ -189,13 +235,14 @@ def compute_command_torques(command: LowCmd_ | None, q: list[float], dq: list[fl
     return torques
 
 
-def apply_command(data: Any, command: LowCmd_ | None, qpos_addr: list[int], qvel_addr: list[int], actuator_ids: list[int]) -> tuple[bool, list[float]]:
+def apply_command(data: Any, command: LowCmd_ | None, qpos_addr: list[int], qvel_addr: list[int], actuator_ids: list[int], motor_strength: float) -> tuple[bool, list[float]]:
     data.ctrl[:] = 0.0
     q = [float(data.qpos[i]) for i in qpos_addr]
     dq = [float(data.qvel[i]) for i in qvel_addr]
     raw_torques = compute_command_torques(command, q, dq)
     if command is None:
         return False, [0.0] * 12
+    raw_torques = [motor_strength * value for value in raw_torques]
     for i in range(12):
         data.ctrl[actuator_ids[i]] = raw_torques[i]
     return True, raw_torques
@@ -237,7 +284,22 @@ def main() -> int:
     parser.add_argument("--dt", type=float, default=0.002)
     parser.add_argument("--log-hz", type=float, default=50.0)
     parser.add_argument("--ball-radius", type=float, default=0.45)
+    parser.add_argument("--ball-mass", type=float, default=None)
+    parser.add_argument("--ball-inertia", type=float, default=None)
+    parser.add_argument("--ball-friction", default=None)
+    parser.add_argument("--floor-z", type=float, default=0.0)
     parser.add_argument("--base-z", type=float, default=0.95)
+    parser.add_argument("--base-pos", default=None)
+    parser.add_argument("--base-quat", default=None)
+    parser.add_argument("--base-lin-vel", default=None)
+    parser.add_argument("--base-ang-vel", default=None)
+    parser.add_argument("--ball-pos", default=None)
+    parser.add_argument("--ball-quat", default=None)
+    parser.add_argument("--robot-friction", type=float, default=None)
+    parser.add_argument("--robot-base-mass", type=float, default=None)
+    parser.add_argument("--robot-base-ipos", default=None)
+    parser.add_argument("--motor-strength", type=float, default=1.0)
+    parser.add_argument("--seed-state", default=None)
     parser.add_argument("--fall-base-z", type=float, default=0.75)
     parser.add_argument("--cmd-timeout-s", type=float, default=0.1)
     parser.add_argument("--disable-motor-limits", action="store_true")
@@ -248,9 +310,25 @@ def main() -> int:
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     event_log = Path(args.event_log)
-    scene = write_scene(args.ball_radius)
+    seed_state = load_seed_state(args.seed_state)
+    ball_radius = float(seed_state.get("ball_radius", args.ball_radius))
+    ball_mass = float(seed_state.get("ball_mass", args.ball_mass if args.ball_mass is not None else 1.0))
+    ball_inertia = float(seed_state.get("ball_inertia", args.ball_inertia if args.ball_inertia is not None else 0.108))
+    ball_friction_value = seed_state.get("ball_friction", args.ball_friction)
+    ball_friction = (float(ball_friction_value), 0.02, 0.001) if ball_friction_value is not None else (1.0, 0.02, 0.001)
+    floor_z = float(seed_state.get("floor_z", args.floor_z))
+    scene = write_scene(ball_radius, ball_mass=ball_mass, ball_inertia=ball_inertia, ball_friction=ball_friction, floor_z=floor_z)
     model = mujoco.MjModel.from_xml_path(str(scene))
     model.opt.timestep = args.dt
+    robot_base_ipos = seed_state.get("robot_base_ipos")
+    if args.robot_base_ipos is not None:
+        robot_base_ipos = parse_vec(args.robot_base_ipos, 3)
+    apply_scene_overrides(
+        model,
+        robot_friction=seed_state.get("robot_friction", args.robot_friction),
+        base_mass=seed_state.get("robot_base_mass", args.robot_base_mass),
+        base_ipos=robot_base_ipos,
+    )
     if args.disable_motor_limits:
         model.actuator_ctrllimited[:] = 0
         model.actuator_ctrlrange[:, 0] = -1.0e9
@@ -267,7 +345,25 @@ def main() -> int:
                 model.dof_frictionloss[dof_id] = 0.0
     data = mujoco.MjData(model)
     qpos_addr, qvel_addr, actuator_ids, joint_limits = joint_addresses(model)
-    set_initial_state(model, data, qpos_addr, run_dir=Path(args.run), base_z=args.base_z, ball_radius=args.ball_radius)
+    base_pos = seed_state.get("robot_root_pos", parse_vec(args.base_pos, 3) if args.base_pos else [0.0, 0.0, args.base_z])
+    base_quat = seed_state.get("robot_root_quat", parse_vec(args.base_quat, 4) if args.base_quat else [1.0, 0.0, 0.0, 0.0])
+    base_lin_vel = seed_state.get("robot_root_lin_vel", parse_vec(args.base_lin_vel, 3) if args.base_lin_vel else [0.0, 0.0, 0.0])
+    base_ang_vel = seed_state.get("robot_root_ang_vel", parse_vec(args.base_ang_vel, 3) if args.base_ang_vel else [0.0, 0.0, 0.0])
+    ball_pos = seed_state.get("ball_root_pos", parse_vec(args.ball_pos, 3) if args.ball_pos else [0.0, 0.0, ball_radius])
+    ball_quat = seed_state.get("ball_root_quat", parse_vec(args.ball_quat, 4) if args.ball_quat else [1.0, 0.0, 0.0, 0.0])
+    motor_strength = float(seed_state.get("robot_motor_strength", args.motor_strength))
+    set_initial_state(
+        model,
+        data,
+        qpos_addr,
+        run_dir=Path(args.run),
+        base_pos=base_pos,
+        base_quat=base_quat,
+        base_lin_vel=base_lin_vel,
+        base_ang_vel=base_ang_vel,
+        ball_pos=ball_pos,
+        ball_quat=ball_quat,
+    )
     support_qpos = data.qpos[:7].copy()
     support_qvel = data.qvel[:6].copy()
     ball_jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "yoga_ball_free")
@@ -374,7 +470,7 @@ def main() -> int:
                 append_event(event_log, "SUPPORT_RELEASE_CONFIRMED", start_mono, sim_time=float(data.time), support=False)
                 append_event(event_log, "BALANCE_WINDOW_START", start_mono, sim_time=float(data.time), support=False)
 
-            _, raw_torques = apply_command(data, command.msg if cmd_active else None, qpos_addr, qvel_addr, actuator_ids)
+            _, raw_torques = apply_command(data, command.msg if cmd_active else None, qpos_addr, qvel_addr, actuator_ids, motor_strength)
             for i, raw_torque in enumerate(raw_torques):
                 raw_torque_abs_max[i] = max(raw_torque_abs_max[i], abs(raw_torque))
                 if model.actuator_ctrllimited[actuator_ids[i]]:
@@ -494,6 +590,24 @@ def main() -> int:
         "disable_motor_limits": args.disable_motor_limits,
         "torque_limit_scale": args.torque_limit_scale,
         "zero_passive_joint_forces": args.zero_passive_joint_forces,
+        "seed_state": args.seed_state,
+        "scene_overrides": {
+            "ball_radius": ball_radius,
+            "ball_mass": ball_mass,
+            "ball_inertia": ball_inertia,
+            "ball_friction": ball_friction[0],
+            "floor_z": floor_z,
+            "robot_friction": seed_state.get("robot_friction", args.robot_friction),
+            "robot_base_mass": seed_state.get("robot_base_mass", args.robot_base_mass),
+            "robot_base_ipos": robot_base_ipos,
+            "robot_motor_strength": motor_strength,
+            "robot_root_pos": base_pos,
+            "robot_root_quat": base_quat,
+            "robot_root_lin_vel": base_lin_vel,
+            "robot_root_ang_vel": base_ang_vel,
+            "ball_root_pos": ball_pos,
+            "ball_root_quat": ball_quat,
+        },
         "torque_clip_counts": torque_clip_counts,
         "raw_torque_abs_max": raw_torque_abs_max,
         "actuator_force_abs_max": actuator_force_abs_max,

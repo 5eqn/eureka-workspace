@@ -22,9 +22,9 @@ from mjlab.sim import MujocoCfg, SimulationCfg
 from mjlab.terrains import HfRandomUniformTerrainCfg, TerrainEntityCfg
 from mjlab.terrains.terrain_generator import TerrainGeneratorCfg
 from mjlab.viewer import ViewerConfig
-from src.assets.robots.unitree_go2.go2_constants import FULL_COLLISION, get_go2_robot_cfg
 
 from . import mdp
+from .go2_robot import FULL_COLLISION, GO2_XML, get_go2_robot_cfg
 
 TASK_ID = "DrEureka-Go2-YogaBall"
 
@@ -102,7 +102,7 @@ DREUREKA_CONTRACT = {
     "action_scale": 0.25,
     "decimation": 4,
     "soft_dof_pos_limit": 0.9,
-    "unitree_data_source": "/home/seqn/unitree_rl_mjlab/src/assets/robots/unitree_go2",
+    "unitree_data_source": str(GO2_XML.parent),
   },
   "task": {
     "add_balls": True,

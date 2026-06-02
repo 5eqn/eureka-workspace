@@ -2,15 +2,15 @@
 
 ## Outcome
 
-Reproduce the corrected DrEureka Go2 yoga-ball baseline inside MJLab using the FRESH host workflow. The result must be a faithful baseline port, not a tuned MJLab variant: Go2 model data comes from `unitree_rl_mjlab`, reward/observation/reset/training logic mirrors DrEureka, and only reproduction fixes are allowed.
+Reproduce the corrected DrEureka Go2 yoga-ball baseline inside MJLab using the FRESH host workflow. The result must be a faithful baseline port, not a tuned MJLab variant: Go2 model data is vendored from `unitree_rl_mjlab` into the caller project, reward/observation/reset/training logic mirrors DrEureka, and only reproduction fixes are allowed.
 
 Both Claude Opus 4.6 and human experts in embodied intelligence should be able to review the source contract, smoke evidence, reward curve, and final 1/8-budget train and agree that this is a defensible MJLab reproduction of the existing DrEureka Go2 baseline.
 
 ## Source Baseline
 
 - DrEureka source: `/home/seqn/eureka-workspace/thirdparties/DrEureka`, read-only for this goal.
-- MJLab source: `/home/seqn/MJLab`, project-agnostic FRESH home-space checkout.
-- Unitree MJLab source: `/home/seqn/unitree_rl_mjlab`, project-agnostic FRESH home-space checkout.
+- MJLab runtime: installed `mjlab==1.2.0` package in the FRESH conda environment.
+- Unitree MJLab Go2 data: vendored XML, meshes, collision config, and robot factory under `scripts/go2_mjlab_dreureka_port/dreureka_go2_mjlab/`; a new machine does not need to clone `unitree_rl_mjlab` for training.
 - Reward-health baseline: `logs/go2_yoga_ball/train_original_settings_1_8_budget/train.log`.
 - Existing launch baseline: `artifacts/go2_yoga_ball/train_original_settings_1_8_budget_launch.json`, with 4096 envs and 20000 iterations on one RTX3090.
 
@@ -54,7 +54,7 @@ The source contract must explicitly account for DrEureka Go2 robot configuration
 ## Plan
 
 1. Establish the source contract.
-   - Verify: `scripts/go2_mjlab_dreureka_port/run.sh preflight` writes `artifacts/go2_mjlab_dreureka_port/source_contract.{json,md}` and confirms home-space MJLab and Unitree MJLab are available.
+   - Verify: `scripts/go2_mjlab_dreureka_port/run.sh preflight` writes `artifacts/go2_mjlab_dreureka_port/source_contract.{json,md}` and confirms the installed MJLab runtime plus vendored Go2 data are available.
 
 2. Build the MJLab caller project.
    - Verify: an import/config smoke instantiates the MJLab Go2 DrEureka task at small env count without editing upstream repositories.

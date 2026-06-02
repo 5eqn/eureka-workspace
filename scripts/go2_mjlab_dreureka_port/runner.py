@@ -25,12 +25,10 @@ MJLAB_HOME = Path(os.environ.get("MJLAB_HOME", str(Path.home() / "MJLab")))
 UNITREE_RL_MJLAB_HOME = Path(
     os.environ.get("UNITREE_RL_MJLAB_HOME", str(Path.home() / "unitree_rl_mjlab"))
 )
-
-UNITREE_GO2_ENV = UNITREE_RL_MJLAB_HOME / "src/tasks/velocity/config/go2/env_cfgs.py"
-UNITREE_GO2_RL = UNITREE_RL_MJLAB_HOME / "src/tasks/velocity/config/go2/rl_cfg.py"
-UNITREE_GO2_XML = UNITREE_RL_MJLAB_HOME / "src/assets/robots/unitree_go2/xmls/go2.xml"
-UNITREE_GO2_SCENE = UNITREE_RL_MJLAB_HOME / "src/assets/robots/unitree_go2/xmls/scene_go2.xml"
-MJLAB_PYPROJECT = MJLAB_HOME / "pyproject.toml"
+VENDORED_GO2_ROOT = SCRIPT_ROOT / "dreureka_go2_mjlab" / "assets" / "unitree_go2"
+VENDORED_GO2_XML = VENDORED_GO2_ROOT / "xmls" / "go2.xml"
+VENDORED_GO2_SCENE = VENDORED_GO2_ROOT / "xmls" / "scene_go2.xml"
+VENDORED_GO2_ASSETS = VENDORED_GO2_ROOT / "xmls" / "assets"
 
 BASELINE_LOG = ROOT / "logs/go2_yoga_ball/train_original_settings_1_8_budget/train.log"
 BASELINE_LAUNCH = ROOT / "artifacts/go2_yoga_ball/train_original_settings_1_8_budget_launch.json"
@@ -160,6 +158,12 @@ def excerpt(path: Path, start: int, end: int) -> dict[str, Any]:
     }
 
 
+def optional_excerpt(path: Path, start: int, end: int) -> dict[str, Any]:
+    if not path.exists():
+        return {"path": rel(path), "missing": True}
+    return excerpt(path, start, end)
+
+
 def find_excerpt(path: Path, pattern: str, context_before: int = 0, context_after: int = 0) -> dict[str, Any]:
     regex = re.compile(pattern)
     for index, line in enumerate(read_lines(path), start=1):
@@ -185,7 +189,7 @@ def package_versions() -> dict[str, str | None]:
 def conda_package_versions() -> dict[str, Any]:
     code = (
         "import importlib.metadata as m, torch, json; "
-        "pkgs=['mjlab','mujoco','mujoco-warp','warp-lang','torch','rsl-rl-lib','unitree-rl-mjlab','scipy']; "
+        "pkgs=['mjlab','mujoco','mujoco-warp','warp-lang','torch','rsl-rl-lib','scipy']; "
         "data={p:m.version(p) for p in pkgs}; "
         "data['torch_cuda_available']=torch.cuda.is_available(); "
         "data['torch_cuda_version']=torch.version.cuda; "
@@ -217,13 +221,9 @@ def baseline_tail_metrics() -> dict[str, Any]:
 
 def source_contract() -> dict[str, Any]:
     required = [
-        MJLAB_HOME,
-        UNITREE_RL_MJLAB_HOME,
-        UNITREE_GO2_ENV,
-        UNITREE_GO2_RL,
-        UNITREE_GO2_XML,
-        UNITREE_GO2_SCENE,
-        MJLAB_PYPROJECT,
+        VENDORED_GO2_XML,
+        VENDORED_GO2_SCENE,
+        VENDORED_GO2_ASSETS,
         BASELINE_LOG,
         BASELINE_LAUNCH,
     ]
@@ -233,13 +233,16 @@ def source_contract() -> dict[str, Any]:
         "generated_at_unix": time.time(),
         "ok": not missing,
         "missing": missing,
-        "fresh_sources": {
-            "mjlab_home": str(MJLAB_HOME),
-            "mjlab_head": git_head(MJLAB_HOME),
-            "mjlab_status_short": git_status(MJLAB_HOME),
-            "unitree_rl_mjlab_home": str(UNITREE_RL_MJLAB_HOME),
-            "unitree_rl_mjlab_head": git_head(UNITREE_RL_MJLAB_HOME),
-            "unitree_rl_mjlab_status_short": git_status(UNITREE_RL_MJLAB_HOME),
+        "runtime_sources": {
+            "mjlab_runtime": "installed Python package",
+            "unitree_go2_runtime": "vendored XML/mesh/model constants under scripts/go2_mjlab_dreureka_port",
+            "thirdparty_checkouts_required_for_training": [],
+            "optional_reference_mjlab_home": str(MJLAB_HOME),
+            "optional_reference_mjlab_head": git_head(MJLAB_HOME),
+            "optional_reference_mjlab_status_short": git_status(MJLAB_HOME),
+            "optional_reference_unitree_rl_mjlab_home": str(UNITREE_RL_MJLAB_HOME),
+            "optional_reference_unitree_rl_mjlab_head": git_head(UNITREE_RL_MJLAB_HOME),
+            "optional_reference_unitree_rl_mjlab_status_short": git_status(UNITREE_RL_MJLAB_HOME),
         },
         "installed_package_versions": package_versions(),
         "baseline_launch": json.loads(BASELINE_LAUNCH.read_text()) if BASELINE_LAUNCH.exists() else None,
@@ -250,21 +253,26 @@ def source_contract() -> dict[str, Any]:
             "observations": excerpt(SCRIPT_ROOT / "dreureka_go2_mjlab/mdp/observations.py", 1, 220),
             "rewards": excerpt(SCRIPT_ROOT / "dreureka_go2_mjlab/mdp/rewards.py", 1, 80),
             "terminations": excerpt(SCRIPT_ROOT / "dreureka_go2_mjlab/mdp/terminations.py", 1, 80),
+            "go2_robot": excerpt(SCRIPT_ROOT / "dreureka_go2_mjlab/go2_robot.py", 1, 120),
         },
-        "unitree_rl_mjlab_go2_data": {
-            "go2_env_config": excerpt(UNITREE_GO2_ENV, 1, 158),
-            "go2_rl_config": excerpt(UNITREE_GO2_RL, 1, 43),
-            "go2_xml": rel(UNITREE_GO2_XML),
-            "go2_scene_xml": rel(UNITREE_GO2_SCENE),
+        "vendored_unitree_go2_data": {
+            "go2_xml": rel(VENDORED_GO2_XML),
+            "go2_scene_xml": rel(VENDORED_GO2_SCENE),
+            "asset_count": len(list(VENDORED_GO2_ASSETS.glob("*"))) if VENDORED_GO2_ASSETS.exists() else 0,
+            "source_note": "Vendored from unitree_rl_mjlab/src/assets/robots/unitree_go2 so new-machine training does not require cloning unitree_rl_mjlab.",
         },
-        "mjlab_runtime_contract": {
-            "pyproject": excerpt(MJLAB_PYPROJECT, 1, 80),
-            "unitree_setup_dependency_pin": excerpt(UNITREE_RL_MJLAB_HOME / "setup.py", 1, 17),
-            "train_entrypoint": excerpt(UNITREE_RL_MJLAB_HOME / "scripts/train.py", 1, 180),
+        "optional_reference_excerpts": {
+            "mjlab_pyproject": optional_excerpt(MJLAB_HOME / "pyproject.toml", 1, 80),
+            "unitree_setup_dependency_pin": optional_excerpt(UNITREE_RL_MJLAB_HOME / "setup.py", 1, 17),
+            "unitree_go2_constants": optional_excerpt(
+                UNITREE_RL_MJLAB_HOME / "src/assets/robots/unitree_go2/go2_constants.py",
+                1,
+                120,
+            ),
         },
         "port_requirements": [
             "Implement a caller-project MJLab task, not upstream edits.",
-            "Use Unitree MJLab Go2 XML/model constants as the robot data source.",
+            "Use the script-local vendored Unitree MJLab Go2 XML/model constants as the robot data source.",
             "Keep DrEureka-derived yoga-ball, observation, reward, and termination constants inline under scripts.",
             "Use 20x20 MJLab native 5m random_rough heightfield tiles with Isaac-like startup env-origin assignment; flat-plane fallback is invalid for training.",
             "Mirror 4096 envs, 20000 iterations, save interval 1000 for 1/8-budget launch.",
@@ -282,8 +290,9 @@ def write_source_contract() -> None:
         "# Go2 MJLab DrEureka Source Contract",
         "",
         f"- Status: {'PASS' if contract['ok'] else 'FAIL'}",
-        f"- MJLab home: `{contract['fresh_sources']['mjlab_home']}`",
-        f"- Unitree RL MJLab home: `{contract['fresh_sources']['unitree_rl_mjlab_home']}`",
+        f"- MJLab runtime: `{contract['runtime_sources']['mjlab_runtime']}`",
+        f"- Go2 runtime data: `{contract['runtime_sources']['unitree_go2_runtime']}`",
+        f"- Third-party checkouts required for training: `{contract['runtime_sources']['thirdparty_checkouts_required_for_training']}`",
         f"- Baseline log: `{contract['baseline_tail_metrics'].get('path')}`",
         f"- Baseline last iteration: `{contract['baseline_tail_metrics'].get('last_iteration')}`",
         "",
@@ -297,8 +306,8 @@ def write_source_contract() -> None:
     lines.extend(["", "## Source Excerpts", ""])
     for section, items in [
         ("Script-local MJLab Port", contract["script_local_contract"]),
-        ("Unitree RL MJLab", contract["unitree_rl_mjlab_go2_data"]),
-        ("MJLab Runtime", contract["mjlab_runtime_contract"]),
+        ("Vendored Unitree Go2 Data", contract["vendored_unitree_go2_data"]),
+        ("Optional Reference Excerpts", contract["optional_reference_excerpts"]),
     ]:
         lines.extend([f"### {section}", ""])
         for name, value in items.items():
@@ -328,8 +337,8 @@ def preflight() -> None:
     with log_path.open("w", encoding="utf-8") as log:
         log.write("go2_mjlab_dreureka_port preflight\n")
         log.write(f"root={ROOT}\n")
-        log.write(f"mjlab_home={MJLAB_HOME}\n")
-        log.write(f"unitree_rl_mjlab_home={UNITREE_RL_MJLAB_HOME}\n")
+        log.write("mjlab_runtime=installed Python package\n")
+        log.write(f"vendored_go2_xml={VENDORED_GO2_XML}\n")
     write_source_contract()
 
 
@@ -354,20 +363,18 @@ def setup_env_record() -> None:
         "generated_at_unix": time.time(),
         "ok": all(item["returncode"] == 0 for item in apt_status.values()) and versions.get("ok") is True,
         "conda_env_name": CONDA_ENV_NAME,
-        "fresh_sources": {
-            "mjlab_home": str(MJLAB_HOME),
-            "unitree_rl_mjlab_home": str(UNITREE_RL_MJLAB_HOME),
+        "runtime_sources": {
+            "mjlab_runtime": "installed Python package",
+            "unitree_go2_runtime": rel(VENDORED_GO2_ROOT),
         },
         "reproduction_commands": [
             "sudo apt-get install -y libyaml-cpp-dev libboost-all-dev libeigen3-dev libspdlog-dev libfmt-dev",
             f"conda create -y -n {CONDA_ENV_NAME} python=3.11 pip",
-            f"conda run -n {CONDA_ENV_NAME} python -m pip install -e /home/seqn/unitree_rl_mjlab",
-            f"conda run -n {CONDA_ENV_NAME} python -m pip install mujoco==3.5.0 scipy",
-            f"conda run -n {CONDA_ENV_NAME} python -m pip install warp-lang==1.12.1",
+            f"conda run -n {CONDA_ENV_NAME} python -m pip install mjlab==1.2.0 mujoco==3.5.0 mujoco-warp==3.5.0 scipy warp-lang==1.12.1",
         ],
         "why_extra_pins_exist": [
-            "unitree_rl_mjlab pins mujoco-warp==3.5.0 but lets mujoco float; mujoco==3.9.0 broke import because mjENBL_MULTICCD is absent for that pair.",
-            "mjlab==1.2.0 imports scipy terrain helpers but scipy was not installed by unitree_rl_mjlab's dependency set.",
+            "mujoco==3.5.0 and mujoco-warp==3.5.0 are the proven pair for the existing MJLab train evidence; newer MuJoCo/MJWarp combinations have different API expectations.",
+            "mjlab==1.2.0 imports scipy terrain helpers but scipy was not installed by MJLab's dependency set in the proven environment.",
             "mjlab==1.2.0 declares warp-lang>=1.12.0 but its CUDA-graph driver check expects wp.context.runtime.driver_version; warp-lang==1.13.0 removed that path, so warp-lang==1.12.1 is pinned.",
         ],
         "apt_status": apt_status,
@@ -384,26 +391,27 @@ def import_smoke() -> None:
     setup_env_record()
     checks = {
         "runtime_versions": conda_package_versions(),
-        "unitree_go2_task": conda_python(
-            "import json, mjlab, src.tasks; "
+        "caller_project_task": conda_python(
+            f"import json, sys; sys.path.insert(0, {str(SCRIPT_ROOT)!r}); "
+            "import mjlab, dreureka_go2_mjlab; "
             "from mjlab.tasks.registry import list_tasks, load_env_cfg, load_rl_cfg; "
-            "cfg=load_env_cfg('Unitree-Go2-Flat'); rl=load_rl_cfg('Unitree-Go2-Flat'); "
+            f"cfg=load_env_cfg({TASK_ID!r}); rl=load_rl_cfg({TASK_ID!r}); "
             "data={'mjlab_file': mjlab.__file__, 'task_count': len(list_tasks()), "
-            "'has_unitree_go2_flat': 'Unitree-Go2-Flat' in list_tasks(), "
-            "'has_unitree_go2_rough': 'Unitree-Go2-Rough' in list_tasks(), "
+            f"'has_caller_task': {TASK_ID!r} in list_tasks(), "
             "'num_envs': cfg.scene.num_envs, 'episode_length_s': cfg.episode_length_s, "
             "'agent_iterations': rl.max_iterations, 'experiment_name': rl.experiment_name}; "
             "print(json.dumps(data, sort_keys=True))",
-            cwd=UNITREE_RL_MJLAB_HOME,
+            cwd=ROOT,
         ),
-        "unitree_go2_robot_data": conda_python(
-            "import json; "
-            "from src.assets.robots.unitree_go2.go2_constants import get_go2_robot_cfg, GO2_XML; "
+        "vendored_go2_robot_data": conda_python(
+            f"import json, sys; sys.path.insert(0, {str(SCRIPT_ROOT)!r}); "
+            "from dreureka_go2_mjlab.go2_robot import GO2_XML, get_go2_robot_cfg; "
             "cfg=get_go2_robot_cfg(); "
             "data={'go2_xml': str(GO2_XML), 'init_pos': list(cfg.init_state.pos), "
+            "'go2_xml_exists': GO2_XML.exists(), "
             "'collision_count': len(cfg.collisions), 'actuator_group_count': len(cfg.articulation.actuators)}; "
             "print(json.dumps(data, sort_keys=True))",
-            cwd=UNITREE_RL_MJLAB_HOME,
+            cwd=ROOT,
         ),
     }
     parsed: dict[str, Any] = {}
@@ -421,7 +429,7 @@ def import_smoke() -> None:
         "generated_at_unix": time.time(),
         "ok": ok,
         "checks": parsed,
-        "next_port_step": "Implement a caller-project MJLab task that uses Unitree Go2 robot data but replaces velocity-task semantics with DrEureka yoga-ball reward/object/observation semantics.",
+        "next_port_step": "Run task-config-smoke or training; the caller-project task uses vendored Unitree Go2 data and no Unitree checkout import.",
     }
     IMPORT_SMOKE_JSON.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     lines = [
@@ -438,7 +446,7 @@ def import_smoke() -> None:
         for key, value in sorted(parsed["runtime_versions"]["versions"].items()):
             lines.append(f"- `{key}`: `{value}`")
         lines.append("")
-    for name in ["unitree_go2_task", "unitree_go2_robot_data"]:
+    for name in ["caller_project_task", "vendored_go2_robot_data"]:
         result = parsed[name]
         lines.extend([f"## {name}", "", f"- Return code: `{result['returncode']}`", ""])
         if "json" in result:
@@ -463,7 +471,6 @@ from dataclasses import asdict
 import torch
 
 sys.path.insert(0, "/home/seqn/eureka-workspace/scripts/go2_mjlab_dreureka_port")
-import src.tasks  # noqa: F401
 import dreureka_go2_mjlab  # noqa: F401
 
 from dreureka_go2_mjlab.env_cfg import DREUREKA_CONTRACT, TASK_ID
@@ -542,7 +549,7 @@ summary = {
 env.close()
 print(json.dumps(summary, sort_keys=True))
 """
-    result = conda_python(code, cwd=UNITREE_RL_MJLAB_HOME)
+    result = conda_python(code, cwd=ROOT)
     ok = result["returncode"] == 0
     parsed: dict[str, Any] | None = None
     if ok:
@@ -684,7 +691,6 @@ from pathlib import Path
 import torch
 
 sys.path.insert(0, {str(SCRIPT_ROOT)!r})
-import src.tasks  # noqa: F401
 import dreureka_go2_mjlab  # noqa: F401
 
 from dreureka_go2_mjlab.env_cfg import (
@@ -812,7 +818,7 @@ print(json.dumps(summary, sort_keys=True))
 """
     log_path = LOG_ROOT / "terrain_4096_verification" / "verify.log"
     log_path.parent.mkdir(parents=True, exist_ok=True)
-    result = conda_python(code, cwd=UNITREE_RL_MJLAB_HOME)
+    result = conda_python(code, cwd=ROOT)
     stdout_lines = [line for line in result["stdout"].splitlines() if line.strip()]
     parsed = json.loads(stdout_lines[-1]) if result["returncode"] == 0 and stdout_lines else None
     ok = result["returncode"] == 0 and parsed is not None and parsed["ok"]
@@ -850,7 +856,6 @@ import torch
 from PIL import Image
 
 sys.path.insert(0, {str(SCRIPT_ROOT)!r})
-import src.tasks  # noqa: F401
 import dreureka_go2_mjlab  # noqa: F401
 
 from dreureka_go2_mjlab.env_cfg import TASK_ID
@@ -899,7 +904,7 @@ summary = {{
 env.close()
 print(json.dumps(summary, sort_keys=True))
 """
-    result = conda_python(code, cwd=UNITREE_RL_MJLAB_HOME)
+    result = conda_python(code, cwd=ROOT)
     stdout_lines = [line for line in result["stdout"].splitlines() if line.strip()]
     parsed = json.loads(stdout_lines[-1]) if result["returncode"] == 0 and stdout_lines else None
     ok = result["returncode"] == 0 and parsed is not None and parsed["ok"] and SCENE_IMAGE.exists()
@@ -963,7 +968,7 @@ def launch_train(
         cmd.extend(["--terrain-rows", str(terrain_rows)])
     if terrain_cols is not None:
         cmd.extend(["--terrain-cols", str(terrain_cols)])
-    rc = run_stream_to_log(cmd, console_log, cwd=UNITREE_RL_MJLAB_HOME)
+    rc = run_stream_to_log(cmd, console_log, cwd=ROOT)
     if rc != 0:
         raise SystemExit(f"{run_name} training failed with exit code {rc}; see {console_log}")
 

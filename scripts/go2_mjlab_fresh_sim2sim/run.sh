@@ -9,12 +9,12 @@ export CMAKE_PREFIX_PATH="${CMAKE_PREFIX_PATH:-$CONDA_PREFIX_DEFAULT}"
 export LD_LIBRARY_PATH="$CONDA_PREFIX_DEFAULT/lib:${LD_LIBRARY_PATH:-}"
 
 usage() {
-  echo "Usage: $0 [preflight|joint-order-contract|deployer-smoke|mjlab-playback|attempt|report]"
+  echo "Usage: $0 [preflight|joint-order-contract|deployer-smoke|mjlab-playback|mjlab-playback-video|attempt|report]"
 }
 
 cmd="${1:-preflight}"
 case "$cmd" in
-  preflight|joint-order-contract|deployer-smoke|mjlab-playback|attempt|report)
+  preflight|joint-order-contract|deployer-smoke|mjlab-playback|mjlab-playback-video|attempt|report)
     conda run --no-capture-output -n "$CONDA_ENV_NAME" python "$ROOT_DIR/scripts/go2_mjlab_fresh_sim2sim/runner.py" "$cmd" "${@:2}"
     ;;
   -h|--help|help)
