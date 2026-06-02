@@ -162,7 +162,7 @@ def _make_ball_spec() -> mujoco.MjSpec:
   body.add_geom(
     name="ball_collision",
     type=mujoco.mjtGeom.mjGEOM_SPHERE,
-    size=(DEFAULT_BALL_RADIUS,),
+    size=(DEFAULT_BALL_RADIUS, 0.0, 0.0),
     mass=1.0,
     friction=(1.0, 0.005, 0.0001),
     rgba=(0.1, 0.45, 0.9, 1.0),
