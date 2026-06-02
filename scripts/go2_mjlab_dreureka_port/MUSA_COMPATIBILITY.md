@@ -47,12 +47,17 @@ Only these parts are MUSA-port-specific:
 - Worker device selection uses `musa:{selected_gpus[LOCAL_RANK]}` when
   `MUSA_VISIBLE_DEVICES` is nonempty; otherwise the same code uses CUDA or CPU.
 
-## MuJoCo Spec Shape Compatibility
+## MuJoCo Spec Size Compatibility
 
-The lambdalab/MUSA runtime may reject one-element `size` sequences passed to
-`MjSpec.add_geom`, even for sphere geoms. It may also reject zero values in the
-unused sphere slots during compile. Use MuJoCo's internal three-slot `geom_size`
-shape with positive values when authoring Python specs:
+The lambdalab/MUSA runtime may reject `MjSpec.add_geom` sizes that compile under
+the CUDA/MuJoCo stack:
+
+- `size` sequences may need MuJoCo's full internal three-slot `geom_size` shape.
+- Every authored `size` element may need to be positive, even slots that MuJoCo
+  treats as unused for the geom type.
+- Avoid zero-width generated terrain boxes; for example, keep
+  `TerrainGeneratorCfg.border_width` positive when the generator still emits
+  border geoms.
 
 ```python
 body.add_geom(

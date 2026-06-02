@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-import importlib.metadata
 
 import mujoco
-from packaging.version import Version
 
 from mjlab.actuator import BuiltinPositionActuatorCfg
 from mjlab.envs import ManagerBasedRlEnvCfg
@@ -46,13 +44,6 @@ MJLAB_TILE_ROUGHNESS_RANGE = (
   PREVIOUS_MJLAB_ROUGHNESS_MAX / 16.0,
   PREVIOUS_MJLAB_ROUGHNESS_MAX / 4.0,
 )
-
-
-def _legacy_mjlab() -> bool:
-  try:
-    return Version(importlib.metadata.version("mjlab")) < Version("1.2.0")
-  except importlib.metadata.PackageNotFoundError:
-    return False
 
 
 @dataclass(kw_only=True)
@@ -223,7 +214,7 @@ def _terrain_cfg() -> TerrainEntityCfg:
     seed=42,
     curriculum=False,
     size=TERRAIN_TILE_SIZE,
-    border_width=0.25 if _legacy_mjlab() else 0.0,
+    border_width=0.25,
     num_rows=TERRAIN_NUM_ROWS,
     num_cols=TERRAIN_NUM_COLS,
     color_scheme="height",
