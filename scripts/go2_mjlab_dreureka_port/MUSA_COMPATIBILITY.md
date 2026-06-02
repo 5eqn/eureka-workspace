@@ -50,19 +50,20 @@ Only these parts are MUSA-port-specific:
 ## MuJoCo Spec Shape Compatibility
 
 The lambdalab/MUSA runtime may reject one-element `size` sequences passed to
-`MjSpec.add_geom`, even for sphere geoms. Use MuJoCo's internal three-slot
-`geom_size` shape when authoring Python specs:
+`MjSpec.add_geom`, even for sphere geoms. It may also reject zero values in the
+unused sphere slots during compile. Use MuJoCo's internal three-slot `geom_size`
+shape with positive values when authoring Python specs:
 
 ```python
 body.add_geom(
   type=mujoco.mjtGeom.mjGEOM_SPHERE,
-  size=(radius, 0.0, 0.0),
+  size=(radius,) * 3,
 )
 ```
 
-For `mjGEOM_SPHERE`, `size[0]` is the radius and `size[1:3]` are unused. These
-three slots are not x/y/z axis radii; use `mjGEOM_ELLIPSOID` for axis-specific
-radii.
+For `mjGEOM_SPHERE`, MuJoCo uses `size[0]` as the radius. The repeated values
+are a compiler-compatibility representation, not x/y/z axis radii; use
+`mjGEOM_ELLIPSOID` for axis-specific radii.
 
 The source should stay minimal and explicit:
 
