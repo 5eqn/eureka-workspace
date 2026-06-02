@@ -4,6 +4,21 @@ This repo keeps the source in MJLab form. The MUSA server carries the same API
 under the package name `lambdalab`, so package-name edits happen only on the
 server and are not committed here.
 
+This port is server-first. Local MJLab runs are only a debugging aid for the
+MUSA/lambdalab deployment path, not the environment contract this port optimizes
+for.
+
+## Runtime Versions
+
+The intended server runtime is:
+
+- lambdalab port corresponding to MJLab `v1.0.0`
+- `rsl-rl-lib==3.1.0`
+
+Keep the runner config in the legacy `policy=RslRlPpoActorCriticCfg(...)`
+schema expected by `rsl-rl-lib==3.1.0`. Do not convert this port to the newer
+RSL-RL `actor`/`critic` config shape for local convenience.
+
 ## Assumption: Multi-GPU Training
 
 `select_gpus("all")` and `torchrunx` are not MUSA-specific. Treat them as the

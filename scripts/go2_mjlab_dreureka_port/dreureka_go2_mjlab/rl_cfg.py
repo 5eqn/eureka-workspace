@@ -2,68 +2,23 @@
 
 from __future__ import annotations
 
-try:
-  from mjlab.rl import RslRlModelCfg, RslRlOnPolicyRunnerCfg, RslRlPpoAlgorithmCfg
-except ImportError:
-  from mjlab.rl import (
-    RslRlOnPolicyRunnerCfg,
-    RslRlPpoActorCriticCfg,
-    RslRlPpoAlgorithmCfg,
-  )
-
-  RslRlModelCfg = None
+from mjlab.rl import (
+  RslRlOnPolicyRunnerCfg,
+  RslRlPpoActorCriticCfg,
+  RslRlPpoAlgorithmCfg,
+)
 
 
 def make_dreureka_go2_ppo_runner_cfg() -> RslRlOnPolicyRunnerCfg:
-  if RslRlModelCfg is None:
-    return RslRlOnPolicyRunnerCfg(
-      policy=RslRlPpoActorCriticCfg(
-        actor_hidden_dims=(512, 256, 128),
-        critic_hidden_dims=(512, 256, 128),
-        activation="elu",
-        actor_obs_normalization=True,
-        critic_obs_normalization=True,
-        init_noise_std=1.0,
-        noise_std_type="scalar",
-      ),
-      algorithm=RslRlPpoAlgorithmCfg(
-        value_loss_coef=1.0,
-        use_clipped_value_loss=True,
-        clip_param=0.2,
-        entropy_coef=0.01,
-        num_learning_epochs=5,
-        num_mini_batches=4,
-        learning_rate=1.0e-3,
-        schedule="adaptive",
-        gamma=0.99,
-        lam=0.95,
-        desired_kl=0.01,
-        max_grad_norm=1.0,
-      ),
-      experiment_name="dreureka_go2_yoga_ball_mjlab",
-      run_name="baseline",
-      obs_groups={"actor": ("actor",), "critic": ("actor", "critic")},
-      logger="tensorboard",
-      save_interval=1000,
-      num_steps_per_env=24,
-      max_iterations=20000,
-    )
-
   return RslRlOnPolicyRunnerCfg(
-    actor=RslRlModelCfg(
-      hidden_dims=(512, 256, 128),
+    policy=RslRlPpoActorCriticCfg(
+      actor_hidden_dims=(512, 256, 128),
+      critic_hidden_dims=(512, 256, 128),
       activation="elu",
-      obs_normalization=True,
-      distribution_cfg={
-        "class_name": "GaussianDistribution",
-        "init_std": 1.0,
-        "std_type": "scalar",
-      },
-    ),
-    critic=RslRlModelCfg(
-      hidden_dims=(512, 256, 128),
-      activation="elu",
-      obs_normalization=True,
+      actor_obs_normalization=True,
+      critic_obs_normalization=True,
+      init_noise_std=1.0,
+      noise_std_type="scalar",
     ),
     algorithm=RslRlPpoAlgorithmCfg(
       value_loss_coef=1.0,
@@ -81,9 +36,8 @@ def make_dreureka_go2_ppo_runner_cfg() -> RslRlOnPolicyRunnerCfg:
     ),
     experiment_name="dreureka_go2_yoga_ball_mjlab",
     run_name="baseline",
-    obs_groups={"actor": ("actor",), "critic": ("actor", "critic")},
+    obs_groups={"policy": ("actor",), "critic": ("actor", "critic")},
     logger="tensorboard",
-    upload_model=False,
     save_interval=1000,
     num_steps_per_env=24,
     max_iterations=20000,

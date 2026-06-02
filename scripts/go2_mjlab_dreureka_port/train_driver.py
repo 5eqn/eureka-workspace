@@ -26,32 +26,7 @@ from mjlab.utils.torch import configure_torch_backends  # noqa: E402
 
 
 def _runner_cfg_dict(rl) -> dict:
-  cfg = asdict(rl)
-  if "actor" in cfg and "critic" in cfg:
-    return cfg
-
-  policy = cfg.pop("policy")
-  distribution_cfg = {
-    "class_name": "GaussianDistribution",
-    "init_std": policy.pop("init_noise_std", 1.0),
-    "std_type": policy.pop("noise_std_type", "scalar"),
-  }
-  cfg["actor"] = {
-    "class_name": "MLPModel",
-    "hidden_dims": policy.pop("actor_hidden_dims"),
-    "activation": policy["activation"],
-    "obs_normalization": policy.pop("actor_obs_normalization", False),
-    "distribution_cfg": distribution_cfg,
-  }
-  cfg["critic"] = {
-    "class_name": "MLPModel",
-    "hidden_dims": policy.pop("critic_hidden_dims"),
-    "activation": policy["activation"],
-    "obs_normalization": policy.pop("critic_obs_normalization", False),
-  }
-  cfg["algorithm"].setdefault("share_cnn_encoders", False)
-  cfg.setdefault("multi_gpu", None)
-  return cfg
+  return asdict(rl)
 
 
 def _device_and_seed(seed: int, selected_gpus: list[int] | None) -> tuple[str, int, int]:
