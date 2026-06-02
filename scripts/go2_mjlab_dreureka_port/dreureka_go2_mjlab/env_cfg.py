@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+import importlib.metadata
 
 import mujoco
+from packaging.version import Version
 
 from mjlab.actuator import BuiltinPositionActuatorCfg
 from mjlab.envs import ManagerBasedRlEnvCfg
@@ -19,7 +21,11 @@ from mjlab.managers.termination_manager import TerminationTermCfg
 from mjlab.scene import SceneCfg
 from mjlab.sensor import ContactMatch, ContactSensorCfg
 from mjlab.sim import MujocoCfg, SimulationCfg
-from mjlab.terrains import HfRandomUniformTerrainCfg, TerrainEntityCfg
+from mjlab.terrains import HfRandomUniformTerrainCfg
+try:
+  from mjlab.terrains import TerrainEntityCfg
+except ImportError:
+  from mjlab.terrains import TerrainImporterCfg as TerrainEntityCfg
 from mjlab.terrains.terrain_generator import TerrainGeneratorCfg
 from mjlab.viewer import ViewerConfig
 
@@ -40,6 +46,13 @@ MJLAB_TILE_ROUGHNESS_RANGE = (
   PREVIOUS_MJLAB_ROUGHNESS_MAX / 16.0,
   PREVIOUS_MJLAB_ROUGHNESS_MAX / 4.0,
 )
+
+
+def _legacy_mjlab() -> bool:
+  try:
+    return Version(importlib.metadata.version("mjlab")) < Version("1.2.0")
+  except importlib.metadata.PackageNotFoundError:
+    return False
 
 
 @dataclass(kw_only=True)
@@ -210,7 +223,7 @@ def _terrain_cfg() -> TerrainEntityCfg:
     seed=42,
     curriculum=False,
     size=TERRAIN_TILE_SIZE,
-    border_width=0.0,
+    border_width=0.25 if _legacy_mjlab() else 0.0,
     num_rows=TERRAIN_NUM_ROWS,
     num_cols=TERRAIN_NUM_COLS,
     color_scheme="height",
@@ -387,11 +400,6 @@ def make_dreureka_go2_yoga_ball_env_cfg(play: bool = False) -> ManagerBasedRlEnv
         ),
         params={"drag_range": PRETRAINED_DOMAIN_RAND["ball_drag_range"]},
       ),
-      "apply_ball_drag": EventTermCfg(
-        func=mdp.apply_ball_drag,
-        mode="step",
-        params={"ball_cfg": SceneEntityCfg("ball")},
-      ),
       "randomize_action_lag": EventTermCfg(
         func=mdp.randomize_action_lag_like_dreureka,
         mode="interval",
@@ -425,7 +433,6 @@ def make_dreureka_go2_yoga_ball_env_cfg(play: bool = False) -> ManagerBasedRlEnv
     },
     commands={},
     curriculum={},
-    metrics={},
     viewer=ViewerConfig(
       origin_type=ViewerConfig.OriginType.ASSET_BODY,
       entity_name="robot",

@@ -6,7 +6,17 @@ from types import MethodType
 
 import torch
 
-from mjlab.managers.event_manager import RecomputeLevel, requires_model_fields
+try:
+  from mjlab.managers.event_manager import RecomputeLevel, requires_model_fields
+except ImportError:
+  RecomputeLevel = None
+
+  def requires_model_fields(*fields):
+    def decorator(func):
+      func.model_fields = fields
+      return func
+
+    return decorator
 from mjlab.managers.scene_entity_config import SceneEntityCfg
 from mjlab.utils.lab_api.math import quat_from_euler_xyz
 
@@ -181,7 +191,13 @@ def reset_robot_on_ball(
   robot.write_root_state_to_sim(robot_state, env_ids=env_ids)
 
 
-@requires_model_fields(
+def _requires_model_fields_compat(*fields):
+  if RecomputeLevel is None:
+    return requires_model_fields(*fields)
+  return requires_model_fields(*fields, recompute=RecomputeLevel.set_const)
+
+
+@_requires_model_fields_compat(
   "geom_friction",
   "geom_size",
   "geom_rbound",
@@ -191,7 +207,6 @@ def reset_robot_on_ball(
   "body_ipos",
   "actuator_gainprm",
   "actuator_biasprm",
-  recompute=RecomputeLevel.set_const,
 )
 def randomize_dreureka_physics(
   env,
@@ -201,6 +216,9 @@ def randomize_dreureka_physics(
   ball_cfg: SceneEntityCfg,
 ) -> None:
   env_ids = _resolve_env_ids(env, env_ids)
+  if not getattr(env, "_dreureka_physics_fields_expanded", False):
+    env.sim.expand_model_fields(randomize_dreureka_physics.model_fields)
+    env._dreureka_physics_fields_expanded = True
   _ensure_dr_state(env, domain_rand)
   robot = env.scene[asset_cfg.name]
   ball = env.scene[ball_cfg.name]

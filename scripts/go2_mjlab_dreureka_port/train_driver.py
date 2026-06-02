@@ -21,6 +21,36 @@ from mjlab.tasks.registry import load_env_cfg, load_rl_cfg  # noqa: E402
 from mjlab.utils.torch import configure_torch_backends  # noqa: E402
 
 
+def _runner_cfg_dict(rl) -> dict:
+  cfg = asdict(rl)
+  if "actor" in cfg and "critic" in cfg:
+    return cfg
+
+  policy = cfg.pop("policy")
+  distribution_cfg = {
+    "class_name": "GaussianDistribution",
+    "init_std": policy.pop("init_noise_std", 1.0),
+    "std_type": policy.pop("noise_std_type", "scalar"),
+  }
+  cfg["actor"] = {
+    "class_name": "MLPModel",
+    "hidden_dims": policy.pop("actor_hidden_dims"),
+    "activation": policy["activation"],
+    "obs_normalization": policy.pop("actor_obs_normalization", False),
+    "distribution_cfg": distribution_cfg,
+  }
+  cfg["critic"] = {
+    "class_name": "MLPModel",
+    "hidden_dims": policy.pop("critic_hidden_dims"),
+    "activation": policy["activation"],
+    "obs_normalization": policy.pop("critic_obs_normalization", False),
+  }
+  cfg["algorithm"].setdefault("share_cnn_encoders", False)
+  cfg.setdefault("multi_gpu", None)
+  cfg.setdefault("upload_model", False)
+  return cfg
+
+
 def main() -> None:
   parser = argparse.ArgumentParser()
   parser.add_argument("--log-dir", required=True)
@@ -104,7 +134,7 @@ def main() -> None:
 
   env = ManagerBasedRlEnv(cfg=cfg, device=device)
   wrapped = RslRlVecEnvWrapper(env, clip_actions=rl.clip_actions)
-  runner = MjlabOnPolicyRunner(wrapped, asdict(rl), args.log_dir, device)
+  runner = MjlabOnPolicyRunner(wrapped, _runner_cfg_dict(rl), args.log_dir, device)
   runner.add_git_repo_to_log(__file__)
   runner.learn(num_learning_iterations=args.iterations, init_at_random_ep_len=True)
   env.close()
