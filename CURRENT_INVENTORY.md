@@ -56,8 +56,8 @@ Read this file first. It is the low-cognitive-load map of the main project line.
 | `G1T` | `artifacts/go1_yoga_ball/videos/default_train_mujoco.mp4` | Follow-camera video for local Go1 trained-policy MuJoCo Sim2Sim behavior. |
 | `G1P` | `artifacts/go1_yoga_ball/videos/pretrained_mujoco.mp4` | Follow-camera video for working pretrained Go1 MuJoCo Sim2Sim behavior. |
 | `G1T` | `artifacts/dr_eureka_rapp_checkpoint_review/` | Self-contained review bundle for three stock-DrEureka phase-1 globe-walking checkpoints under RAPP playback: MP4 videos, reward code, copied deployable JIT/full checkpoints, and a manifest tying each item to train success and RAPP height results. |
-| `G2C` | `artifacts/go2_yoga_ball/build/go2_unitree_sanitized.xml` | Sanitized Unitree-derived Go2 MuJoCo model used for current Go2 scene generation. |
-| `G2C` | `artifacts/go2_yoga_ball/build/go2_yoga_ball_scene.xml` | Current Go2 yoga-ball MuJoCo scene built from the Unitree-derived Go2 model. |
+| `G2C` | `artifacts/go2_yoga_ball/build/go2_unitree_sanitized.xml` | Sanitized Unitree-derived Go2 MuJoCo model with a workspace-relative mesh directory so replay rendering works from the host checkout and the Docker workspace mount. |
+| `G2C` | `artifacts/go2_yoga_ball/build/go2_yoga_ball_scene.xml` | Current Go2 yoga-ball MuJoCo scene with a relative include of `go2_unitree_sanitized.xml`, used by the raw replay renderer for Go2 Sim2Sim videos. |
 | `G2P` | `artifacts/go2_yoga_ball/final_train_isaacgym_playback_no_video/playback.csv` | Raw per-step Isaac playback data for the corrected Go2 policy without video overhead. |
 | `G2P` | `artifacts/go2_yoga_ball/final_train_isaacgym_playback_no_video/report.md` | Human-readable corrected Go2 no-video playback result, including survival count. |
 | `G2P` | `artifacts/go2_yoga_ball/final_train_isaacgym_playback_no_video/summary.json` | Machine-readable corrected Go2 no-video playback summary. |
@@ -71,6 +71,7 @@ Read this file first. It is the low-cognitive-load map of the main project line.
 | `G2S` | `artifacts/go2_yoga_ball/final_train_sim2sim/summary.json` | Machine-readable metrics for corrected Go2 Sim2Sim release, timing, command path, torque, and joint-limit checks. |
 | `G2S` | `artifacts/go2_yoga_ball/final_train_sim2sim/videos/go2_final_train_sim2sim_success.mp4` | Follow-camera video rendered from raw MuJoCo replay for the successful corrected Go2 Sim2Sim run. |
 | `G2S` | `artifacts/go2_yoga_ball/final_train_sim2sim/videos/rerun_isaac_trained_default_lcm_20260531.mp4` | Follow-camera video rendered from the 2026-05-31 rerun raw MuJoCo replay. |
+| `G2S` | `artifacts/go2_yoga_ball/latest_dr_eureka_8_sim2sim/` | Review bundle for the eight newest DrEureka Go2 training run directories from 2026-06-03: raw-replay-rendered MP4s, per-video render metadata, `manifest.json`, and `report.md` showing transport/release succeeded for all eight but every checkpoint fell between about 1.94s and 3.18s. |
 | `G2C` | `artifacts/go2_yoga_ball/go2_isaacgym_consistency_report.json` | Structured proof that Isaac-side Go2 config follows the Unitree RL Gym source model. |
 | `G2C` | `artifacts/go2_yoga_ball/go2_isaacgym_consistency_report.md` | Human-readable proof of Go2 Isaac model, actuator, joint order, and default pose consistency. |
 | `G2C` | `artifacts/go2_yoga_ball/go2_isaacgym_urdf.json` | Parsed Go2 URDF facts used to audit Isaac-side model consistency. |
@@ -192,6 +193,7 @@ Read this file first. It is the low-cognitive-load map of the main project line.
 | `G2S` | `logs/go2_yoga_ball/final_train_sim2sim/host_mujoco_docker_policy_20260531_retry/replay.csv` | Raw host MuJoCo trajectory from the mixed-topology run. |
 | `G2S` | `logs/go2_yoga_ball/final_train_sim2sim/host_mujoco_docker_policy_20260531_retry/summary.json` | Host MuJoCo endpoint summary for the mixed-topology run with release, command count, torque clipping, and no-fall result. |
 | `G2S` | `logs/go2_yoga_ball/final_train_sim2sim/host_mujoco_docker_policy_20260531_retry/telemetry.csv` | Per-step host MuJoCo timing, support, base-height, and joint-limit telemetry for the mixed-topology run. |
+| `G2S` | `logs/go2_yoga_ball/latest_dr_eureka_8_sim2sim/` | Raw Sim2Sim logs for the eight newest 2026-06-03 DrEureka Go2 run directories, each containing endpoint/bridge/policy console logs, process status, release/fall event timeline, command transport records, telemetry, and `replay.csv` used for the MP4 render. |
 | `G2T` | `logs/go2_yoga_ball/train_original_settings_1_8_budget/train.log` | Console log for corrected Go2 original-settings 20k/4096 training run. |
 | `G2M` | `logs/go2_mjlab_dreureka_port/preflight.log` | Preflight record confirming the MJLab port caller project resolved the workspace root and vendored Go2 XML path for new-machine training. |
 | `G2M` | `logs/go2_mjlab_dreureka_port/terrain_4096_verification/verify.log` | Raw console log from the 4096-env terrain verification run that built the 20x20 hfield grid and emitted all terrain/origin/jitter checks as passing. |
