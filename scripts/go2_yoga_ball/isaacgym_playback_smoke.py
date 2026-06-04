@@ -129,6 +129,8 @@ def main() -> int:
     parser.add_argument("--record-video", action="store_true")
     parser.add_argument("--video-fps", type=int, default=25)
     parser.add_argument("--visual-only-plane", action="store_true")
+    parser.add_argument("--preserve-domain-rand", action="store_true")
+    parser.add_argument("--use-saved-contract", action="store_true")
     args = parser.parse_args()
 
     run_dir = Path(args.run)
@@ -140,9 +142,11 @@ def main() -> int:
     Cfg.terrain = Cfg.terrain_mini
     Cfg.domain_rand = Cfg.domain_rand_off
     Cfg.sim.physx = Cfg.sim.physx_mini
-    config_go2(Cfg)
+    if not args.use_saved_contract:
+        config_go2(Cfg)
     set_cfg_recursive(Cfg, saved_cfg)
-    Cfg.robot.name = "go2"
+    if not args.use_saved_contract:
+        Cfg.robot.name = "go2"
     if args.visual_only_plane:
         Cfg.env.num_observations = int(saved_cfg["env"]["num_observations"])
         Cfg.env.num_observation_history = int(saved_cfg["env"]["num_observation_history"])
@@ -164,7 +168,8 @@ def main() -> int:
         Cfg.terrain.mesh_type = "plane"
         Cfg.terrain.teleport_robots = False
     Cfg.multi_gpu = False
-    midpoint_domain_rand(Cfg)
+    if not args.preserve_domain_rand:
+        midpoint_domain_rand(Cfg)
 
     contract = {
         "run": str(run_dir),
@@ -178,10 +183,13 @@ def main() -> int:
         "num_envs": Cfg.env.num_envs,
         "num_observations": Cfg.env.num_observations,
         "num_observation_history": Cfg.env.num_observation_history,
+        "domain_rand_randomize": bool(Cfg.domain_rand.randomize),
+        "domain_rand_mode": "saved_ranges" if args.preserve_domain_rand else "midpoint_deterministic",
         "ball_radius_range": list(Cfg.domain_rand.ball_radius_range),
         "ball_mass_range": list(Cfg.domain_rand.ball_mass_range),
+        "playback_contract_mode": "saved" if args.use_saved_contract else "go2_pd",
     }
-    if Cfg.robot.name != "go2" or Cfg.control.control_type != "P":
+    if not args.use_saved_contract and (Cfg.robot.name != "go2" or Cfg.control.control_type != "P"):
         (out_dir / "summary.json").write_text(json.dumps({"ok": False, "contract": contract}, indent=2) + "\n")
         raise SystemExit(f"not a Go2 PD run: {contract}")
 
@@ -311,6 +319,7 @@ def main() -> int:
         f"- OK: `{summary['ok']}`",
         f"- Run: `{run_dir}`",
         f"- Robot/control: `{Cfg.robot.name}` / `{Cfg.control.control_type}`",
+        f"- Playback contract mode: `{contract['playback_contract_mode']}`",
         f"- Survived envs without reset: `{summary['survived_envs']}/{summary['num_envs']}`",
         f"- Total resets: `{summary['reset_count_total']}`",
         f"- Min base z: `{base_z_min:.6f}`",
