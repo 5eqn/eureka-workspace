@@ -89,6 +89,16 @@ def load_saved_cfg(run_dir: Path) -> dict:
     return payload["Cfg"]
 
 
+def normalize_legacy_workspace_paths(saved_cfg: dict) -> None:
+    asset = saved_cfg.get("asset")
+    if not isinstance(asset, dict):
+        return
+    asset_file = asset.get("file")
+    legacy_prefix = "/workspace/eureka-workspace/"
+    if isinstance(asset_file, str) and asset_file.startswith(legacy_prefix):
+        asset["file"] = "/workspace/" + asset_file[len(legacy_prefix):]
+
+
 def load_policy(run_dir: Path, device: str):
     body = torch.jit.load(str(run_dir / "checkpoints" / "body_latest.jit"), map_location=device)
     adaptation_module = torch.jit.load(str(run_dir / "checkpoints" / "adaptation_module_latest.jit"), map_location=device)
@@ -144,6 +154,7 @@ def main() -> int:
     Cfg.sim.physx = Cfg.sim.physx_mini
     if not args.use_saved_contract:
         config_go2(Cfg)
+    normalize_legacy_workspace_paths(saved_cfg)
     set_cfg_recursive(Cfg, saved_cfg)
     if not args.use_saved_contract:
         Cfg.robot.name = "go2"

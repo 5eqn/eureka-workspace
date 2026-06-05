@@ -1,8 +1,12 @@
-FROM pytorch/pytorch:1.10.0-cuda11.3-cudnn8-runtime
+FROM docker.1ms.run/pytorch/pytorch:1.10.0-cuda11.3-cudnn8-runtime
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 ENV LD_LIBRARY_PATH=/opt/conda/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+
+# USTC Ubuntu mirror
+RUN sed -i 's|http://archive.ubuntu.com/ubuntu|https://mirrors.ustc.edu.cn/ubuntu|g' /etc/apt/sources.list && \
+    sed -i 's|http://security.ubuntu.com/ubuntu|https://mirrors.ustc.edu.cn/ubuntu|g' /etc/apt/sources.list
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
@@ -25,13 +29,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxrandr2 \
     && rm -rf /var/lib/apt/lists/*
 
+# pip USTC mirror
+RUN mkdir -p /root/.pip && \
+    printf '%s\n' \
+    '[global]' \
+    'index-url = https://pypi.mirrors.ustc.edu.cn/simple' \
+    'trusted-host = pypi.mirrors.ustc.edu.cn' \
+    'timeout = 120' \
+    > /root/.pip/pip.conf
+
 RUN python -m pip install --no-cache-dir \
     pip==23.3.2 \
     setuptools==58.0.4 \
     wheel==0.37.1
-RUN python -m pip install --no-cache-dir --timeout 120 --retries 10 \
-    --trusted-host pypi.org \
-    --trusted-host files.pythonhosted.org \
+
+RUN python -m pip install --no-cache-dir \
     gym==0.18.0 \
     hydra-core \
     matplotlib==3.5.3 \
@@ -57,7 +69,7 @@ RUN if [ -d /workspace/thirdparties/IsaacGym/python ]; then \
       exit 1; \
     fi
 
-RUN python -m pip install --no-deps -e /workspace/thirdparties/DrEureka \
-    && python -m pip install --no-deps -e /workspace/thirdparties/DrEureka/globe_walking \
-    && python -m pip install --no-deps -e /workspace/thirdparties/DrEureka/forward_locomotion \
-    && python -m pip install --no-deps -e /workspace/thirdparties/DrEureka/globe_walking/go1_gym_deploy
+RUN python -m pip install --no-deps -e /workspace/thirdparties/DrEureka && \
+    python -m pip install --no-deps -e /workspace/thirdparties/DrEureka/globe_walking && \
+    python -m pip install --no-deps -e /workspace/thirdparties/DrEureka/forward_locomotion && \
+    python -m pip install --no-deps -e /workspace/thirdparties/DrEureka/globe_walking/go1_gym_deploy
