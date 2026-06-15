@@ -9,9 +9,10 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="${ROOT:-$(cd -- "${SCRIPT_DIR}/.." && pwd)}"
 
 if [[ -n "${CUDA_VISIBLE_DEVICES:-}" && "${CUDA_VISIBLE_DEVICES}" != "all" ]]; then
-  IFS=',' read -r -a GPU_IDS <<<"${CUDA_VISIBLE_DEVICES}"
+  CUDA_DEVICE_LIST="${CUDA_VISIBLE_DEVICES//[[:space:]]/}"
+  IFS=',' read -r -a GPU_IDS <<<"${CUDA_DEVICE_LIST}"
   GPU_COUNT="${#GPU_IDS[@]}"
-  DOCKER_GPUS="device=${CUDA_VISIBLE_DEVICES}"
+  DOCKER_GPUS="\"device=${CUDA_DEVICE_LIST}\""
 else
   if ! command -v nvidia-smi >/dev/null 2>&1; then
     echo "nvidia-smi not found and CUDA_VISIBLE_DEVICES is unset; cannot detect GPU count." >&2
