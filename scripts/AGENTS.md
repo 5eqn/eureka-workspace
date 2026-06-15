@@ -41,6 +41,23 @@ DURATION=12 \
 /home/seqn/eureka-workspace/scripts/go2_yoga_ball/run_sim2sim.sh
 ```
 
+`deploy_lcm_policy.py` loads `checkpoints/body_latest.jit` and
+`checkpoints/adaptation_module_latest.jit` from `RUN`. For a normal last-checkpoint
+run, point `RUN` at the original DrEureka run directory because those JITs already
+live under `checkpoints/`. For a non-final checkpoint such as `ac_weights_016000.pt`,
+first export deployable JITs into a staging directory and then point `RUN` there:
+
+```bash
+conda run -n go2-mjlab python /home/seqn/eureka-workspace/scripts/go2_yoga_ball/export_iter_jit.py \
+  --run /home/seqn/eureka-workspace/thirdparties/DrEureka/globe_walking/runs/globe_walking/YYYY-MM-DD/train/RUN_ID \
+  --ckpt ac_weights_016000.pt \
+  --out /tmp/go2_iter16000_deploy
+```
+
+The staging directory contains `parameters.pkl`,
+`checkpoints/body_latest.jit`, `checkpoints/adaptation_module_latest.jit`, and
+`export_jit_selfcheck.json`. Then run Sim2Sim with `RUN=/tmp/go2_iter16000_deploy`.
+
 The wrapper runs:
 
 - host MuJoCo DDS endpoint in conda env `go2-mjlab`
@@ -60,7 +77,8 @@ Useful wrapper overrides:
 
 - `BASE_Z=1.0` sets the robot release height through `go2_mujoco_dds_endpoint.py --base-z`.
 - `ROBOT_FRICTION=0.7` sets whole-robot MuJoCo geom primary friction through `--robot-friction`.
-- `BALL_MASS`, `BALL_FRICTION`, and `BALL_INERTIA` pass through to the endpoint when explicitly set.
+- `BALL_MASS`, `BALL_FRICTION`, `BALL_INERTIA`, and `BALL_DRAG` pass through to the endpoint when explicitly set.
+- `BALL_DRAG=3.0` applies the same horizontal quadratic ball-drag force used by DrEureka training (`-drag * v_xy^2 * sign(v_xy)`), which is the closest Sim2Sim analogue to “larger ball damping”.
 - `VIDEO_NAME=RUN_ID_sim2sim.mp4` controls the rendered output name under `$ART_DIR/videos`.
 
 Use existing scripts and endpoint flags for experiments; do not edit policy code, gains, physics, or scene parameters unless the task explicitly asks for that change.

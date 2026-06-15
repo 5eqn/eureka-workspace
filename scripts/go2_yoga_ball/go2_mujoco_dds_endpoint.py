@@ -287,6 +287,7 @@ def main() -> int:
     parser.add_argument("--ball-mass", type=float, default=None)
     parser.add_argument("--ball-inertia", type=float, default=None)
     parser.add_argument("--ball-friction", default=None)
+    parser.add_argument("--ball-drag", type=float, default=None)
     parser.add_argument("--floor-z", type=float, default=0.0)
     parser.add_argument("--base-z", type=float, default=0.95)
     parser.add_argument("--base-pos", default=None)
@@ -315,6 +316,7 @@ def main() -> int:
     ball_mass = float(seed_state.get("ball_mass", args.ball_mass if args.ball_mass is not None else 1.0))
     ball_inertia = float(seed_state.get("ball_inertia", args.ball_inertia if args.ball_inertia is not None else 0.108))
     ball_friction_value = seed_state.get("ball_friction", args.ball_friction)
+    ball_drag = float(seed_state.get("ball_drag", args.ball_drag if args.ball_drag is not None else 0.0))
     ball_friction = (float(ball_friction_value), 0.02, 0.001) if ball_friction_value is not None else (1.0, 0.02, 0.001)
     floor_z = float(seed_state.get("floor_z", args.floor_z))
     scene = write_scene(ball_radius, ball_mass=ball_mass, ball_inertia=ball_inertia, ball_friction=ball_friction, floor_z=floor_z)
@@ -369,6 +371,7 @@ def main() -> int:
     ball_jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "yoga_ball_free")
     ball_qpos = int(model.jnt_qposadr[ball_jid]) if ball_jid >= 0 else -1
     ball_qvel = int(model.jnt_dofadr[ball_jid]) if ball_jid >= 0 else -1
+    ball_body = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "yoga_ball")
     support_ball_qpos = data.qpos[ball_qpos : ball_qpos + 7].copy() if ball_qpos >= 0 else np.zeros(7)
     support_ball_qvel = data.qvel[ball_qvel : ball_qvel + 6].copy() if ball_qvel >= 0 else np.zeros(6)
 
@@ -471,6 +474,11 @@ def main() -> int:
                 append_event(event_log, "BALANCE_WINDOW_START", start_mono, sim_time=float(data.time), support=False)
 
             _, raw_torques = apply_command(data, command.msg if cmd_active else None, qpos_addr, qvel_addr, actuator_ids, motor_strength)
+            data.xfrc_applied[:] = 0.0
+            if ball_drag != 0.0 and ball_body >= 0 and ball_qvel >= 0:
+                ball_lin_vel = np.asarray(data.qvel[ball_qvel : ball_qvel + 3], dtype=float)
+                data.xfrc_applied[ball_body, 0] = -ball_drag * ball_lin_vel[0] * abs(ball_lin_vel[0])
+                data.xfrc_applied[ball_body, 1] = -ball_drag * ball_lin_vel[1] * abs(ball_lin_vel[1])
             for i, raw_torque in enumerate(raw_torques):
                 raw_torque_abs_max[i] = max(raw_torque_abs_max[i], abs(raw_torque))
                 if model.actuator_ctrllimited[actuator_ids[i]]:
@@ -594,8 +602,9 @@ def main() -> int:
         "scene_overrides": {
             "ball_radius": ball_radius,
             "ball_mass": ball_mass,
-            "ball_inertia": ball_inertia,
-            "ball_friction": ball_friction[0],
+                "ball_inertia": ball_inertia,
+                "ball_drag": ball_drag,
+                "ball_friction": ball_friction[0],
             "floor_z": floor_z,
             "robot_friction": seed_state.get("robot_friction", args.robot_friction),
             "robot_base_mass": seed_state.get("robot_base_mass", args.robot_base_mass),

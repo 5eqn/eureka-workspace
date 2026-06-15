@@ -11,6 +11,9 @@ from .observations import (
 from .rewards import (
   reward_balance,
   reward_height,
+  reward_joint_limit_barrier,
+  reward_keep_ball_stationary,
+  reward_penalize_action_jerk,
   reward_penalize_large_actions,
   reward_smooth_actions,
 )
@@ -43,6 +46,9 @@ __all__ = [
   "reset_robot_on_ball",
   "reward_balance",
   "reward_height",
+  "reward_joint_limit_barrier",
+  "reward_keep_ball_stationary",
+  "reward_penalize_action_jerk",
   "reward_penalize_large_actions",
   "reward_smooth_actions",
   "yaw",

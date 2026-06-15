@@ -14,6 +14,10 @@ BALL_RADIUS="${BALL_RADIUS:-0.45}"
 DT="${DT:-0.002}"
 RELEASE_AFTER_COMMAND_S="${RELEASE_AFTER_COMMAND_S:-0.0}"
 VIDEO_NAME="${VIDEO_NAME:-sim2sim.mp4}"
+# The render step runs on the host `go2-mjlab` conda env (not inside Docker), so it
+# needs an explicit headless GL backend. EGL works on this NVIDIA host; override with
+# MUJOCO_GL=osmesa if no EGL device is available.
+MUJOCO_GL="${MUJOCO_GL:-egl}"
 
 case "$RUN" in
   /workspace/*)
@@ -58,6 +62,9 @@ if [[ -n "${BALL_FRICTION:-}" ]]; then
 fi
 if [[ -n "${BALL_INERTIA:-}" ]]; then
   endpoint_args+=(--ball-inertia "$BALL_INERTIA")
+fi
+if [[ -n "${BALL_DRAG:-}" ]]; then
+  endpoint_args+=(--ball-drag "$BALL_DRAG")
 fi
 if [[ -n "${FALL_BASE_Z:-}" ]]; then
   endpoint_args+=(--fall-base-z "$FALL_BASE_Z")
@@ -106,7 +113,7 @@ wait "$policy_pid"; policy_rc=$?
 wait "$bridge_pid"; bridge_rc=$?
 wait "$endpoint_pid"; endpoint_rc=$?
 
-conda run --no-capture-output -n go2-mjlab \
+MUJOCO_GL="$MUJOCO_GL" conda run --no-capture-output -n go2-mjlab \
   python "$ROOT/scripts/go2_yoga_ball/render_mujoco_replay_video.py" \
   --replay "$LOG_DIR/replay.csv" \
   --events "$LOG_DIR/events.csv" \
@@ -114,7 +121,7 @@ conda run --no-capture-output -n go2-mjlab \
   --artifact "$ART_DIR/${VIDEO_NAME%.mp4}_video.json" > "$LOG_DIR/render.log" 2>&1
 render_rc=$?
 
-ROBOT_FRICTION_VALUE="${ROBOT_FRICTION:-}" python - <<PY
+ROBOT_FRICTION_VALUE="${ROBOT_FRICTION:-}" BALL_DRAG_VALUE="${BALL_DRAG:-}" python - <<PY
 import json
 import os
 from pathlib import Path
@@ -122,6 +129,7 @@ from pathlib import Path
 log_dir = Path("$LOG_DIR")
 art_dir = Path("$ART_DIR")
 robot_friction_env = os.environ.get("ROBOT_FRICTION_VALUE", "")
+ball_drag_env = os.environ.get("BALL_DRAG_VALUE", "")
 status = {
     "endpoint_returncode": $endpoint_rc,
     "bridge_returncode": $bridge_rc,
@@ -134,6 +142,7 @@ status = {
     "lcm_url": "$LCM_URL",
     "base_z": float("$BASE_Z"),
     "robot_friction": float(robot_friction_env) if robot_friction_env else None,
+    "ball_drag": float(ball_drag_env) if ball_drag_env else None,
 }
 summary_path = log_dir / "summary.json"
 video_path = art_dir / "videos" / "$VIDEO_NAME"

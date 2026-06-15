@@ -48,3 +48,30 @@ def reward_smooth_actions(env) -> torch.Tensor:
 def reward_penalize_large_actions(env) -> torch.Tensor:
   return -0.3 * torch.mean(torch.abs(env.action_manager.action), dim=-1)
 
+
+def reward_joint_limit_barrier(env) -> torch.Tensor:
+  robot = env.scene["robot"]
+  lower = robot.data.soft_joint_pos_limits[..., 0]
+  upper = robot.data.soft_joint_pos_limits[..., 1]
+  span = torch.clamp(upper - lower, min=1e-3)
+  clearance = torch.minimum(robot.data.joint_pos - lower, upper - robot.data.joint_pos) / span
+
+  margin = 0.15
+  distance_to_margin = clearance.clamp(min=0.0, max=margin)
+  proximity_penalty = -4.0 * (1.0 - distance_to_margin / margin).pow(2)
+  return torch.mean(proximity_penalty, dim=-1)
+
+
+def reward_keep_ball_stationary(env) -> torch.Tensor:
+  ball = env.scene["ball"]
+  ball_speed = torch.norm(ball.data.root_link_lin_vel_w, dim=-1)
+  return -2.0 * ball_speed
+
+
+def reward_penalize_action_jerk(env) -> torch.Tensor:
+  jerk = (
+    env.action_manager.action
+    - 2.0 * env.action_manager.prev_action
+    + env.action_manager.prev_prev_action
+  )
+  return -0.15 * torch.mean(torch.abs(jerk), dim=-1)

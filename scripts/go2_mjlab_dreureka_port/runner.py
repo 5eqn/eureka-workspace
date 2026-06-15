@@ -573,6 +573,9 @@ print(json.dumps(summary, sort_keys=True))
                 "balance",
                 "smooth_actions",
                 "penalize_large_actions",
+                "joint_limit_barrier",
+                "keep_ball_stationary",
+                "penalize_action_jerk",
             ],
             "terrain_type": "generator",
             "terrain_rows": 20,
@@ -1024,6 +1027,9 @@ def _extract_baseline_curve() -> list[dict[str, float]]:
         "train/episode/rew balance/mean": "balance",
         "train/episode/rew smooth actions/mean": "smooth_actions",
         "train/episode/rew penalize large actions/mean": "penalize_large_actions",
+        "train/episode/rew joint limit barrier/mean": "joint_limit_barrier",
+        "train/episode/rew keep ball stationary/mean": "keep_ball_stationary",
+        "train/episode/rew penalize action jerk/mean": "penalize_action_jerk",
         "iterations": "iteration",
     }
     row_re = re.compile(r"│\s*(.*?)\s*│\s*([-+0-9.eE]+)\s*│")
@@ -1068,6 +1074,9 @@ def _build_curve(log_dir: Path) -> list[dict[str, float]]:
         "balance": "Episode_Reward/balance",
         "smooth_actions": "Episode_Reward/smooth_actions",
         "penalize_large_actions": "Episode_Reward/penalize_large_actions",
+        "joint_limit_barrier": "Episode_Reward/joint_limit_barrier",
+        "keep_ball_stationary": "Episode_Reward/keep_ball_stationary",
+        "penalize_action_jerk": "Episode_Reward/penalize_action_jerk",
     }
     by_step: dict[int, dict[str, float]] = {}
     for name, tag in terms.items():
@@ -1084,7 +1093,18 @@ def _build_curve(log_dir: Path) -> list[dict[str, float]]:
 
 
 def _write_curve_csv(rows: list[dict[str, float]], path: Path) -> None:
-    fields = ["iteration", "total", "height", "balance", "smooth_actions", "penalize_large_actions", "episode_length"]
+    fields = [
+        "iteration",
+        "total",
+        "height",
+        "balance",
+        "smooth_actions",
+        "penalize_large_actions",
+        "joint_limit_barrier",
+        "keep_ball_stationary",
+        "penalize_action_jerk",
+        "episode_length",
+    ]
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fields)

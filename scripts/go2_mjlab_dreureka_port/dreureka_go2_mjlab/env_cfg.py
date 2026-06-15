@@ -142,6 +142,9 @@ DREUREKA_CONTRACT = {
     "balance": {"weight": 1.0, "internal_scale": 2.0},
     "smooth_actions": {"weight": 1.0, "internal_scale": 1.0},
     "penalize_large_actions": {"weight": 1.0, "internal_scale": 0.3},
+    "joint_limit_barrier": {"weight": 1.0, "internal_scale": 1.0},
+    "keep_ball_stationary": {"weight": 1.0, "internal_scale": 1.0},
+    "penalize_action_jerk": {"weight": 1.0, "internal_scale": 1.0},
   },
 }
 
@@ -411,6 +414,18 @@ def make_dreureka_go2_yoga_ball_env_cfg(play: bool = False) -> ManagerBasedRlEnv
       "smooth_actions": RewardTermCfg(func=mdp.reward_smooth_actions, weight=1.0),
       "penalize_large_actions": RewardTermCfg(
         func=mdp.reward_penalize_large_actions,
+        weight=1.0,
+      ),
+      "joint_limit_barrier": RewardTermCfg(
+        func=mdp.reward_joint_limit_barrier,
+        weight=1.0,
+      ),
+      "keep_ball_stationary": RewardTermCfg(
+        func=mdp.reward_keep_ball_stationary,
+        weight=1.0,
+      ),
+      "penalize_action_jerk": RewardTermCfg(
+        func=mdp.reward_penalize_action_jerk,
         weight=1.0,
       ),
     },
