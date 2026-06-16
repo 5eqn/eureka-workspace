@@ -120,7 +120,7 @@ train_mod.MINI_GYM_ROOT_DIR = MINI_GYM_ROOT_DIR
 
 train_mod.train_go1(
     iterations=20000,
-    dr_config="off",
+    dr_config="eureka",
     robot="go2",
     headless=True,
     no_wandb=True,

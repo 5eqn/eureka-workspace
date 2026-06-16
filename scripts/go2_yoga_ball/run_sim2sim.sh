@@ -9,8 +9,13 @@ DDS_DOMAIN="${DDS_DOMAIN:-191}"
 DURATION="${DURATION:-12}"
 LCM_URL="${LCM_URL:-udpm://239.255.76.67:7667?ttl=255}"
 NETWORK_INTERFACE="${NETWORK_INTERFACE:-lo}"
-BASE_Z="${BASE_Z:-0.95}"
+BASE_Z="${BASE_Z:-1.2}"
 BALL_RADIUS="${BALL_RADIUS:-0.45}"
+BALL_DRAG="${BALL_DRAG:-0.3}"
+GROUND_FRICTION="${GROUND_FRICTION:-0.5}"
+GROUND_MODE="${GROUND_MODE:-plane}"
+GROUND_SEED="${GROUND_SEED:-17}"
+ACTION_LAG_STEPS="${ACTION_LAG_STEPS:-6}"
 DT="${DT:-0.002}"
 RELEASE_AFTER_COMMAND_S="${RELEASE_AFTER_COMMAND_S:-0.0}"
 VIDEO_NAME="${VIDEO_NAME:-sim2sim.mp4}"
@@ -49,6 +54,11 @@ endpoint_args=(
   --release-after-command-s "$RELEASE_AFTER_COMMAND_S"
   --base-z "$BASE_Z"
   --ball-radius "$BALL_RADIUS"
+  --ball-drag "$BALL_DRAG"
+  --ground-friction "$GROUND_FRICTION"
+  --ground-mode "$GROUND_MODE"
+  --ground-seed "$GROUND_SEED"
+  --action-lag-steps "$ACTION_LAG_STEPS"
 )
 
 if [[ -n "${ROBOT_FRICTION:-}" ]]; then
@@ -62,9 +72,6 @@ if [[ -n "${BALL_FRICTION:-}" ]]; then
 fi
 if [[ -n "${BALL_INERTIA:-}" ]]; then
   endpoint_args+=(--ball-inertia "$BALL_INERTIA")
-fi
-if [[ -n "${BALL_DRAG:-}" ]]; then
-  endpoint_args+=(--ball-drag "$BALL_DRAG")
 fi
 if [[ -n "${FALL_BASE_Z:-}" ]]; then
   endpoint_args+=(--fall-base-z "$FALL_BASE_Z")
@@ -121,7 +128,7 @@ MUJOCO_GL="$MUJOCO_GL" conda run --no-capture-output -n go2-mjlab \
   --artifact "$ART_DIR/${VIDEO_NAME%.mp4}_video.json" > "$LOG_DIR/render.log" 2>&1
 render_rc=$?
 
-ROBOT_FRICTION_VALUE="${ROBOT_FRICTION:-}" BALL_DRAG_VALUE="${BALL_DRAG:-}" python - <<PY
+ROBOT_FRICTION_VALUE="${ROBOT_FRICTION:-}" BALL_DRAG_VALUE="${BALL_DRAG:-}" GROUND_MODE_VALUE="${GROUND_MODE:-}" GROUND_SEED_VALUE="${GROUND_SEED:-}" GROUND_FRICTION_VALUE="${GROUND_FRICTION:-}" ACTION_LAG_STEPS_VALUE="${ACTION_LAG_STEPS:-}" python - <<PY
 import json
 import os
 from pathlib import Path
@@ -130,6 +137,10 @@ log_dir = Path("$LOG_DIR")
 art_dir = Path("$ART_DIR")
 robot_friction_env = os.environ.get("ROBOT_FRICTION_VALUE", "")
 ball_drag_env = os.environ.get("BALL_DRAG_VALUE", "")
+ground_mode_env = os.environ.get("GROUND_MODE_VALUE", "")
+ground_seed_env = os.environ.get("GROUND_SEED_VALUE", "")
+ground_friction_env = os.environ.get("GROUND_FRICTION_VALUE", "")
+action_lag_steps_env = os.environ.get("ACTION_LAG_STEPS_VALUE", "")
 status = {
     "endpoint_returncode": $endpoint_rc,
     "bridge_returncode": $bridge_rc,
@@ -143,6 +154,10 @@ status = {
     "base_z": float("$BASE_Z"),
     "robot_friction": float(robot_friction_env) if robot_friction_env else None,
     "ball_drag": float(ball_drag_env) if ball_drag_env else None,
+    "ground_friction": float(ground_friction_env) if ground_friction_env else None,
+    "ground_mode": ground_mode_env or None,
+    "ground_seed": int(ground_seed_env) if ground_seed_env else None,
+    "action_lag_steps": int(action_lag_steps_env) if action_lag_steps_env else None,
 }
 summary_path = log_dir / "summary.json"
 video_path = art_dir / "videos" / "$VIDEO_NAME"

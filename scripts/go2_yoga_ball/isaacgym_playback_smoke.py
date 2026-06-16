@@ -8,10 +8,12 @@ import csv
 import json
 import pickle
 from pathlib import Path
+import random
 import sys
 import time
 
 import isaacgym  # noqa: F401
+from isaacgym import gymapi
 import imageio
 import numpy as np
 import torch
@@ -129,6 +131,53 @@ def frame_to_rgb(frame: np.ndarray) -> np.ndarray:
     return np.ascontiguousarray(image[:, :, :3].astype(np.uint8))
 
 
+def set_global_seed(seed: int) -> None:
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+
+class PlaybackCamera:
+    def __init__(self, env, env_id: int, width: int, height: int):
+        self.env = env
+        self.env_id = env_id
+        camera_props = gymapi.CameraProperties()
+        camera_props.width = width
+        camera_props.height = height
+        self.camera = self.env.gym.create_camera_sensor(self.env.envs[self.env_id], camera_props)
+        self.set_position()
+
+    def set_position(self, target_loc=None, cam_distance=None):
+        if cam_distance is None:
+            cam_distance = [0.0, -1.0, 1.0]
+        if target_loc is None:
+            target_loc = self.env.base_pos[self.env_id].detach().cpu().tolist()
+        self.env.gym.set_camera_location(
+            self.camera,
+            self.env.envs[self.env_id],
+            gymapi.Vec3(
+                float(target_loc[0] + cam_distance[0]),
+                float(target_loc[1] + cam_distance[1]),
+                float(target_loc[2] + cam_distance[2]),
+            ),
+            gymapi.Vec3(float(target_loc[0]), float(target_loc[1]), float(target_loc[2])),
+        )
+
+    def get_observation(self) -> np.ndarray:
+        self.env.gym.step_graphics(self.env.sim)
+        self.env.gym.render_all_camera_sensors(self.env.sim)
+        img = self.env.gym.get_camera_image(
+            self.env.sim,
+            self.env.envs[self.env_id],
+            self.camera,
+            gymapi.IMAGE_COLOR,
+        )
+        w, h = img.shape
+        return img.reshape([w, h // 4, 4])
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", required=True)
@@ -138,9 +187,15 @@ def main() -> int:
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--record-video", action="store_true")
     parser.add_argument("--video-fps", type=int, default=25)
+    parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--camera-env-id", type=int, default=0)
+    parser.add_argument("--hold-failed-env", action="store_true")
+    parser.add_argument("--stop-on-target-reset", action="store_true")
     parser.add_argument("--visual-only-plane", action="store_true")
     parser.add_argument("--preserve-domain-rand", action="store_true")
     parser.add_argument("--use-saved-contract", action="store_true")
+    parser.add_argument("--override-init-z", type=float, default=0.3)
+    parser.add_argument("--override-xy-init-range", type=float, default=0.1)
     args = parser.parse_args()
 
     run_dir = Path(args.run)
@@ -158,11 +213,20 @@ def main() -> int:
     set_cfg_recursive(Cfg, saved_cfg)
     if not args.use_saved_contract:
         Cfg.robot.name = "go2"
+    if args.override_init_z is not None:
+        init_pos = list(Cfg.init_state.pos)
+        init_pos[2] = float(args.override_init_z)
+        Cfg.init_state.pos = init_pos
+    if args.override_xy_init_range is not None:
+        xy_init_range = float(args.override_xy_init_range)
+        Cfg.terrain.x_init_range = xy_init_range
+        Cfg.terrain.y_init_range = xy_init_range
     if args.visual_only_plane:
         Cfg.env.num_observations = int(saved_cfg["env"]["num_observations"])
         Cfg.env.num_observation_history = int(saved_cfg["env"]["num_observation_history"])
         Cfg.env.num_privileged_obs = int(saved_cfg["env"]["num_privileged_obs"])
 
+    set_global_seed(args.seed)
     Cfg.env.num_envs = int(args.num_envs)
     Cfg.env.record_video = bool(args.record_video)
     Cfg.env.num_recording_envs = 1 if args.record_video else 0
@@ -194,6 +258,9 @@ def main() -> int:
         "num_envs": Cfg.env.num_envs,
         "num_observations": Cfg.env.num_observations,
         "num_observation_history": Cfg.env.num_observation_history,
+        "init_z": float(Cfg.init_state.pos[2]),
+        "x_init_range": float(Cfg.terrain.x_init_range),
+        "y_init_range": float(Cfg.terrain.y_init_range),
         "domain_rand_randomize": bool(Cfg.domain_rand.randomize),
         "domain_rand_mode": "saved_ranges" if args.preserve_domain_rand else "midpoint_deterministic",
         "ball_radius_range": list(Cfg.domain_rand.ball_radius_range),
@@ -208,6 +275,10 @@ def main() -> int:
     wrapped = HistoryWrapper(env)
     policy = load_policy(run_dir, args.device)
     obs = wrapped.reset()
+
+    target_env_id = int(args.camera_env_id)
+    if target_env_id < 0 or target_env_id >= env.num_envs:
+        raise ValueError(f"--camera-env-id must be in [0, {env.num_envs - 1}], got {target_env_id}")
 
     dt = float(env.dt)
     steps = int(args.duration_s / dt)
@@ -240,19 +311,47 @@ def main() -> int:
     action_delta_abs_max = 0.0
     action_delta_abs_means = []
     prev_actions: torch.Tensor | None = None
+    first_reset_step = torch.full((env.num_envs,), -1, dtype=torch.int64, device=env.device)
+    target_env_first_reset_step: int | None = None
+    current_step = -1
+
+    orig_reset_idx = env.reset_idx
+
+    def tracked_reset_idx(env_ids):
+        nonlocal target_env_first_reset_step
+        if len(env_ids) == 0:
+            return orig_reset_idx(env_ids)
+        env_ids = env_ids.to(dtype=torch.long)
+        first_time_mask = first_reset_step[env_ids] < 0
+        if torch.any(first_time_mask):
+            first_reset_step[env_ids[first_time_mask]] = current_step
+        if torch.any(env_ids == target_env_id) and target_env_first_reset_step is None:
+            target_env_first_reset_step = current_step
+        if args.hold_failed_env:
+            env_ids = env_ids[env_ids != target_env_id]
+        return orig_reset_idx(env_ids)
+
+    env.reset_idx = tracked_reset_idx
     video_path = out_dir / "isaacgym_playback.mp4"
     video_writer = imageio.get_writer(str(video_path), fps=args.video_fps) if args.record_video else None
+    playback_camera = PlaybackCamera(env, target_env_id, Cfg.env.recording_width_px, Cfg.env.recording_height_px) if args.record_video else None
+    executed_steps = 0
+    stopped_on_target_reset = False
 
     try:
       with csv_path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         for step in range(steps):
+            current_step = step
             with torch.no_grad():
                 actions = policy(obs)
                 obs, reward, done, _ = wrapped.step(actions)
+            target_done = bool(done[target_env_id].item())
             if args.record_video:
-                frame = env.render(mode="rgb_array")
+                target_loc = env.base_pos[target_env_id].detach().cpu().tolist()
+                playback_camera.set_position(target_loc=target_loc)
+                frame = playback_camera.get_observation()
                 video_writer.append_data(frame_to_rgb(frame))
             reset_counts += done.to(env.device).float()
             limits_low = env.dof_pos_limits[:, 0].unsqueeze(0)
@@ -275,7 +374,8 @@ def main() -> int:
             torque_abs_max = max(torque_abs_max, float(torque_abs.max().item()))
             base_z_min = min(base_z_min, float(base_z.min().item()))
             reward_means.append(float(reward.mean().item()))
-            if step % 25 == 0 or step == steps - 1:
+            executed_steps = step + 1
+            if step % 25 == 0 or step == steps - 1 or (args.stop_on_target_reset and target_done):
                 writer.writerow(
                     {
                         "step": step,
@@ -296,21 +396,51 @@ def main() -> int:
                     }
                 )
                 f.flush()
+            if args.stop_on_target_reset and target_done:
+                stopped_on_target_reset = True
+                break
     finally:
         if video_writer is not None:
             video_writer.close()
+    wall_duration_s = time.time() - start_wall
+
+    failed_env_ids = torch.nonzero(first_reset_step >= 0, as_tuple=False).flatten().detach().cpu().tolist()
+    first_reset_step_map = {
+        str(env_id): int(first_reset_step[env_id].item())
+        for env_id in failed_env_ids
+    }
+    first_failed_env_id = None
+    first_failed_step = None
+    if failed_env_ids:
+        first_failed_env_id = min(failed_env_ids, key=lambda env_id: first_reset_step_map[str(env_id)])
+        first_failed_step = first_reset_step_map[str(first_failed_env_id)]
 
     summary = {
         "ok": bool(int((reset_counts == 0).sum().item()) > 0),
         "contract": contract,
+        "seed": int(args.seed),
+        "camera_env_id": target_env_id,
+        "target_env_first_reset_step": target_env_first_reset_step,
+        "target_env_first_reset_time_s": None if target_env_first_reset_step is None else target_env_first_reset_step * dt,
+        "hold_failed_env": bool(args.hold_failed_env),
+        "stop_on_target_reset": bool(args.stop_on_target_reset),
+        "stopped_on_target_reset": stopped_on_target_reset,
         "dof_names": list(env.dof_names),
-        "num_steps": steps,
+        "num_steps_requested": steps,
+        "num_steps_executed": executed_steps,
         "sim_dt_s": dt,
-        "sim_duration_s": steps * dt,
-        "wall_duration_s": time.time() - start_wall,
+        "sim_hz": 1.0 / dt,
+        "sim_duration_s": executed_steps * dt,
+        "wall_duration_s": wall_duration_s,
+        "sim_to_wall_rate_x_realtime": None if wall_duration_s <= 0 else (executed_steps * dt) / wall_duration_s,
         "survived_envs": int((reset_counts == 0).sum().item()),
         "num_envs": int(env.num_envs),
         "reset_count_total": int(reset_counts.sum().item()),
+        "failed_env_ids": failed_env_ids,
+        "first_reset_step_by_env": first_reset_step_map,
+        "first_failed_env_id": first_failed_env_id,
+        "first_failed_step": first_failed_step,
+        "first_failed_time_s": None if first_failed_step is None else first_failed_step * dt,
         "base_z": {"min": base_z_min},
         "reward_mean_over_steps": float(np.mean(reward_means)) if reward_means else None,
         "action_abs_max": action_abs_max,
@@ -321,6 +451,9 @@ def main() -> int:
         "torque_limit_values": [float(x) for x in env.torque_limits[: env.num_actuated_dof].detach().cpu().tolist()],
         "joint_limit_rows": joint_limit_rows,
         "csv": str(csv_path),
+        "video_fps": int(args.video_fps) if args.record_video else None,
+        "video_duration_s": (executed_steps / args.video_fps) if args.record_video and args.video_fps > 0 else None,
+        "video_playback_rate_x_realtime": (args.video_fps * dt) if args.record_video else None,
         "video": str(video_path) if args.record_video else None,
     }
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -331,8 +464,14 @@ def main() -> int:
         f"- Run: `{run_dir}`",
         f"- Robot/control: `{Cfg.robot.name}` / `{Cfg.control.control_type}`",
         f"- Playback contract mode: `{contract['playback_contract_mode']}`",
+        f"- Init z / x_init_range / y_init_range: `{contract['init_z']}` / `{contract['x_init_range']}` / `{contract['y_init_range']}`",
+        f"- Seed: `{args.seed}`",
+        f"- Camera env id: `{target_env_id}`",
         f"- Survived envs without reset: `{summary['survived_envs']}/{summary['num_envs']}`",
         f"- Total resets: `{summary['reset_count_total']}`",
+        f"- Failed env ids: `{failed_env_ids}`",
+        f"- First failed env / step: `{first_failed_env_id}` / `{first_failed_step}`",
+        f"- Target env first reset step: `{target_env_first_reset_step}`",
         f"- Min base z: `{base_z_min:.6f}`",
         f"- Max action abs: `{action_abs_max:.6f}`",
         f"- Max action delta abs: `{action_delta_abs_max:.6f}`",

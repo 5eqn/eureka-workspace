@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import argparse
+from collections import deque
 import csv
+from dataclasses import dataclass
 import json
 import math
 from pathlib import Path
@@ -24,6 +26,17 @@ ROOT = Path(__file__).resolve().parents[2]
 UNITREE_MUJOCO_GO2 = ROOT / "thirdparties" / "unitree_mujoco" / "unitree_robots" / "go2" / "go2.xml"
 BALL_URDF = ROOT / "thirdparties" / "DrEureka" / "globe_walking" / "resources" / "objects" / "ball.urdf"
 BUILD_ROOT = ROOT / "artifacts" / "go2_yoga_ball" / "build"
+ROUGH_GROUND_IMAGE = BUILD_ROOT / "go2_yoga_ball_rough_ground.png"
+ROUGH_GROUND_EXTENT = 12.0
+ROUGH_GROUND_HEIGHT_SCALE = 0.06
+ROUGH_GROUND_IMAGE_SIZE = 257
+ROUGH_GROUND_CONTROL_POINTS = 17
+ROUGH_GROUND_RELIEF = 0.38
+ROUGH_GROUND_SEED = 17
+DEFAULT_GROUND_FRICTION = 0.5
+DEFAULT_BALL_DRAG = 0.3
+DEFAULT_BASE_Z = 1.2
+DEFAULT_ACTION_LAG_STEPS = 6
 
 UNITREE_MOTOR_ORDER = [
     "FR_hip_joint",
@@ -56,15 +69,24 @@ POLICY_JOINT_ORDER = [
 EVENT_FIELDS = ["event", "monotonic_s", "wall_time_s", "sim_time_s", "support_active", "detail"]
 
 
+@dataclass
+class CommandPacket:
+    q_des: list[float]
+    dq_des: list[float]
+    kp: list[float]
+    kd: list[float]
+    tau_ff: list[float]
+
+
 class Command:
     def __init__(self) -> None:
-        self.msg: LowCmd_ | None = None
+        self.packet: CommandPacket | None = None
         self.count = 0
         self.last_monotonic: float | None = None
         self.first_monotonic: float | None = None
 
     def callback(self, msg: LowCmd_) -> None:
-        self.msg = msg
+        self.packet = snapshot_command(msg)
         self.count += 1
         self.last_monotonic = time.monotonic()
         if self.first_monotonic is None:
@@ -99,13 +121,77 @@ def quat_to_rpy(q: Any) -> tuple[float, float, float]:
     return roll, pitch, yaw
 
 
+def blur3x3(field: np.ndarray) -> np.ndarray:
+    padded = np.pad(field, 1, mode="edge")
+    return (
+        padded[:-2, :-2]
+        + 2.0 * padded[:-2, 1:-1]
+        + padded[:-2, 2:]
+        + 2.0 * padded[1:-1, :-2]
+        + 4.0 * padded[1:-1, 1:-1]
+        + 2.0 * padded[1:-1, 2:]
+        + padded[2:, :-2]
+        + 2.0 * padded[2:, 1:-1]
+        + padded[2:, 2:]
+    ) / 16.0
+
+
+def generate_rough_ground_image(*, image_size: int, control_points: int, seed: int) -> np.ndarray:
+    rng = np.random.default_rng(seed)
+    control = rng.standard_normal((control_points, control_points))
+    control -= control.mean()
+    coarse_axis = np.linspace(-1.0, 1.0, control_points)
+    fine_axis = np.linspace(-1.0, 1.0, image_size)
+    interp_x = np.stack([np.interp(fine_axis, coarse_axis, row) for row in control], axis=0)
+    field = np.stack([np.interp(fine_axis, coarse_axis, interp_x[:, col]) for col in range(image_size)], axis=1)
+    for _ in range(3):
+        field = blur3x3(field)
+    yy, xx = np.meshgrid(fine_axis, fine_axis, indexing="ij")
+    edge_fade = np.clip((1.12 - np.sqrt(xx * xx + yy * yy)) / 0.18, 0.0, 1.0)
+    field *= edge_fade
+    center = image_size // 2
+    field -= field[center, center]
+    max_abs = max(abs(float(field.min())), abs(float(field.max())), 1.0e-6)
+    normalized = np.clip(field / max_abs, -1.0, 1.0)
+    image = np.clip(0.5 + ROUGH_GROUND_RELIEF * normalized, 0.0, 1.0)
+    image[center, center] = 0.5
+    return image
+
+
+def write_rough_ground_asset(path: Path, *, seed: int) -> dict[str, Any]:
+    from PIL import Image
+
+    BUILD_ROOT.mkdir(parents=True, exist_ok=True)
+    image = generate_rough_ground_image(
+        image_size=ROUGH_GROUND_IMAGE_SIZE,
+        control_points=ROUGH_GROUND_CONTROL_POINTS,
+        seed=seed,
+    )
+    Image.fromarray(np.round(image * 255.0).astype(np.uint8), mode="L").save(path)
+    return {
+        "mode": "rough",
+        "seed": seed,
+        "image": str(path),
+        "extent": ROUGH_GROUND_EXTENT,
+        "height_scale": ROUGH_GROUND_HEIGHT_SCALE,
+        "image_size": ROUGH_GROUND_IMAGE_SIZE,
+        "control_points": ROUGH_GROUND_CONTROL_POINTS,
+        "relief_fraction": ROUGH_GROUND_RELIEF,
+        # Position the hfield so a center pixel value of 0.5 lands at z=0.
+        "geom_z_offset": -0.5 * ROUGH_GROUND_HEIGHT_SCALE,
+    }
+
+
 def write_scene(
     ball_radius: float,
     ball_mass: float = 1.0,
     ball_inertia: float = 0.108,
     ball_friction: tuple[float, float, float] = (1.0, 0.02, 0.001),
+    ground_friction: float = DEFAULT_GROUND_FRICTION,
     floor_z: float = 0.0,
-) -> Path:
+    ground_mode: str = "plane",
+    ground_seed: int = ROUGH_GROUND_SEED,
+) -> tuple[Path, dict[str, Any]]:
     BUILD_ROOT.mkdir(parents=True, exist_ok=True)
     sanitized_go2 = BUILD_ROOT / "go2_unitree_sanitized.xml"
     go2_text = UNITREE_MUJOCO_GO2.read_text(encoding="utf-8")
@@ -113,21 +199,42 @@ def write_scene(
     go2_text = go2_text.replace('meshdir="assets"', f'meshdir="{meshdir}"')
     sanitized_go2.write_text(go2_text, encoding="utf-8")
     scene = BUILD_ROOT / "go2_yoga_ball_scene.xml"
+    if ground_mode == "rough":
+        ground = write_rough_ground_asset(ROUGH_GROUND_IMAGE, seed=ground_seed)
+        ground_asset = (
+            f'    <hfield name="rough_ground" size="{ground["extent"] / 2:.9f} {ground["extent"] / 2:.9f} '
+            f'{ground["height_scale"]:.9f} {ground["height_scale"]:.9f}" file="{ground["image"]}"/>\n'
+        )
+        ground_geom = (
+            f'    <geom name="ground" type="hfield" hfield="rough_ground" pos="0 0 {floor_z + ground["geom_z_offset"]:.9f}" '
+            f'material="groundplane" friction="{ground_friction:.9f} 0.02 0.001"/>\n'
+        )
+    else:
+        ground = {"mode": "plane", "seed": None, "friction": ground_friction}
+        ground_asset = ""
+        ground_geom = (
+            f'    <geom name="floor" type="plane" pos="0 0 {floor_z:.9f}" size="0 0 0.05" '
+            f'material="groundplane" friction="{ground_friction:.9f} 0.02 0.001"/>\n'
+        )
+    ground["friction"] = ground_friction
     scene.write_text(
         f"""<mujoco model="go2 yoga ball scene">
   <include file="{sanitized_go2}"/>
   <statistic center="0 0 0.5" extent="1.2"/>
   <visual>
     <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
     <global azimuth="-130" elevation="-20"/>
   </visual>
   <asset>
-    <material name="ballmat" rgba="0.05 0.35 0.75 1"/>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8" width="300" height="300"/>
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
+{ground_asset}    <material name="ballmat" rgba="0.05 0.35 0.75 1"/>
   </asset>
   <worldbody>
     <light pos="0 0 3" dir="0 0 -1" directional="true"/>
-    <geom name="floor" type="plane" pos="0 0 {floor_z:.9f}" size="0 0 0.05"/>
-    <body name="yoga_ball" pos="0 0 {ball_radius}">
+{ground_geom}    <body name="yoga_ball" pos="0 0 {ball_radius}">
       <freejoint name="yoga_ball_free"/>
       <inertial pos="0 0 0" mass="{ball_mass:.9f}" diaginertia="{ball_inertia:.9f} {ball_inertia:.9f} {ball_inertia:.9f}"/>
       <geom name="yoga_ball_geom" type="sphere" size="{ball_radius}" material="ballmat" friction="{ball_friction[0]:.9f} {ball_friction[1]:.9f} {ball_friction[2]:.9f}" condim="3"/>
@@ -137,7 +244,7 @@ def write_scene(
 """,
         encoding="utf-8",
     )
-    return scene
+    return scene, ground
 
 
 def parse_vec(text: str, n: int) -> list[float]:
@@ -152,6 +259,16 @@ def load_seed_state(path: str | None) -> dict[str, Any]:
         return {}
     with Path(path).open(encoding="utf-8") as f:
         return json.load(f)
+
+
+def snapshot_command(msg: LowCmd_) -> CommandPacket:
+    return CommandPacket(
+        q_des=[float(msg.motor_cmd[i].q) for i in range(12)],
+        dq_des=[float(msg.motor_cmd[i].dq) for i in range(12)],
+        kp=[float(msg.motor_cmd[i].kp) for i in range(12)],
+        kd=[float(msg.motor_cmd[i].kd) for i in range(12)],
+        tau_ff=[float(msg.motor_cmd[i].tau) for i in range(12)],
+    )
 
 
 def joint_addresses(model: Any) -> tuple[list[int], list[int], list[int], list[tuple[float, float]]]:
@@ -172,6 +289,21 @@ def default_angles(run_dir: Path) -> dict[str, float]:
     with (run_dir / "parameters.pkl").open("rb") as f:
         cfg = pickle.load(f)["Cfg"]
     return {name: float(cfg["init_state"]["default_joint_angles"][name]) for name in POLICY_JOINT_ORDER}
+
+
+def default_command_packet(run_dir: Path) -> CommandPacket:
+    with (run_dir / "parameters.pkl").open("rb") as f:
+        cfg = pickle.load(f)["Cfg"]
+    angles = cfg["init_state"]["default_joint_angles"]
+    stiffness = float(cfg.get("control", {}).get("stiffness", {}).get("joint", 20.0))
+    damping = float(cfg.get("control", {}).get("damping", {}).get("joint", 0.5))
+    return CommandPacket(
+        q_des=[float(angles[name]) for name in UNITREE_MOTOR_ORDER],
+        dq_des=[0.0] * 12,
+        kp=[stiffness] * 12,
+        kd=[damping] * 12,
+        tau_ff=[0.0] * 12,
+    )
 
 
 def set_initial_state(
@@ -225,17 +357,20 @@ def pin_supported_pose(data: Any, support_qpos: np.ndarray, support_qvel: np.nda
         data.qvel[ball_qvel : ball_qvel + 6] = support_ball_qvel
 
 
-def compute_command_torques(command: LowCmd_ | None, q: list[float], dq: list[float]) -> list[float] | None:
+def compute_command_torques(command: CommandPacket | None, q: list[float], dq: list[float]) -> list[float] | None:
     if command is None:
         return None
     torques = []
     for i in range(12):
-        motor = command.motor_cmd[i]
-        torques.append(float(motor.tau) + float(motor.kp) * (float(motor.q) - q[i]) + float(motor.kd) * (float(motor.dq) - dq[i]))
+        torques.append(
+            command.tau_ff[i]
+            + command.kp[i] * (command.q_des[i] - q[i])
+            + command.kd[i] * (command.dq_des[i] - dq[i])
+        )
     return torques
 
 
-def apply_command(data: Any, command: LowCmd_ | None, qpos_addr: list[int], qvel_addr: list[int], actuator_ids: list[int], motor_strength: float) -> tuple[bool, list[float]]:
+def apply_command(data: Any, command: CommandPacket | None, qpos_addr: list[int], qvel_addr: list[int], actuator_ids: list[int], motor_strength: float) -> tuple[bool, list[float]]:
     data.ctrl[:] = 0.0
     q = [float(data.qpos[i]) for i in qpos_addr]
     dq = [float(data.qvel[i]) for i in qvel_addr]
@@ -287,9 +422,13 @@ def main() -> int:
     parser.add_argument("--ball-mass", type=float, default=None)
     parser.add_argument("--ball-inertia", type=float, default=None)
     parser.add_argument("--ball-friction", default=None)
-    parser.add_argument("--ball-drag", type=float, default=None)
+    parser.add_argument("--ball-drag", type=float, default=DEFAULT_BALL_DRAG)
     parser.add_argument("--floor-z", type=float, default=0.0)
-    parser.add_argument("--base-z", type=float, default=0.95)
+    parser.add_argument("--ground-friction", type=float, default=DEFAULT_GROUND_FRICTION)
+    parser.add_argument("--ground-mode", choices=["plane", "rough"], default="plane")
+    parser.add_argument("--ground-seed", type=int, default=ROUGH_GROUND_SEED)
+    parser.add_argument("--base-z", type=float, default=DEFAULT_BASE_Z)
+    parser.add_argument("--action-lag-steps", type=int, default=DEFAULT_ACTION_LAG_STEPS)
     parser.add_argument("--base-pos", default=None)
     parser.add_argument("--base-quat", default=None)
     parser.add_argument("--base-lin-vel", default=None)
@@ -316,10 +455,22 @@ def main() -> int:
     ball_mass = float(seed_state.get("ball_mass", args.ball_mass if args.ball_mass is not None else 1.0))
     ball_inertia = float(seed_state.get("ball_inertia", args.ball_inertia if args.ball_inertia is not None else 0.108))
     ball_friction_value = seed_state.get("ball_friction", args.ball_friction)
-    ball_drag = float(seed_state.get("ball_drag", args.ball_drag if args.ball_drag is not None else 0.0))
+    ball_drag = float(seed_state.get("ball_drag", args.ball_drag))
     ball_friction = (float(ball_friction_value), 0.02, 0.001) if ball_friction_value is not None else (1.0, 0.02, 0.001)
     floor_z = float(seed_state.get("floor_z", args.floor_z))
-    scene = write_scene(ball_radius, ball_mass=ball_mass, ball_inertia=ball_inertia, ball_friction=ball_friction, floor_z=floor_z)
+    ground_friction = float(seed_state.get("ground_friction", args.ground_friction))
+    ground_mode = str(seed_state.get("ground_mode", args.ground_mode))
+    ground_seed = int(seed_state.get("ground_seed", args.ground_seed))
+    scene, ground = write_scene(
+        ball_radius,
+        ball_mass=ball_mass,
+        ball_inertia=ball_inertia,
+        ball_friction=ball_friction,
+        ground_friction=ground_friction,
+        floor_z=floor_z,
+        ground_mode=ground_mode,
+        ground_seed=ground_seed,
+    )
     model = mujoco.MjModel.from_xml_path(str(scene))
     model.opt.timestep = args.dt
     robot_base_ipos = seed_state.get("robot_base_ipos")
@@ -354,6 +505,11 @@ def main() -> int:
     ball_pos = seed_state.get("ball_root_pos", parse_vec(args.ball_pos, 3) if args.ball_pos else [0.0, 0.0, ball_radius])
     ball_quat = seed_state.get("ball_root_quat", parse_vec(args.ball_quat, 4) if args.ball_quat else [1.0, 0.0, 0.0, 0.0])
     motor_strength = float(seed_state.get("robot_motor_strength", args.motor_strength))
+    action_lag_steps = max(0, int(seed_state.get("action_lag_steps", args.action_lag_steps)))
+    lag_queue: deque[CommandPacket] = deque(maxlen=action_lag_steps + 1)
+    default_packet = default_command_packet(Path(args.run))
+    for _ in range(action_lag_steps + 1):
+        lag_queue.append(default_packet)
     set_initial_state(
         model,
         data,
@@ -445,6 +601,7 @@ def main() -> int:
     control_active_mono: float | None = None
     first_lowstate_logged = False
     last_logged_command_count = 0
+    last_buffered_command_count = 0
     next_log_t = 0.0
     log_dt = 1.0 / args.log_hz
     sync_mono = start_mono
@@ -460,7 +617,7 @@ def main() -> int:
         while time.monotonic() - start_mono < args.duration_s:
             now = time.monotonic()
             cmd_age = None if command.last_monotonic is None else now - command.last_monotonic
-            cmd_active = command.msg is not None and cmd_age is not None and cmd_age <= args.cmd_timeout_s
+            cmd_active = command.packet is not None and cmd_age is not None and cmd_age <= args.cmd_timeout_s
             if cmd_active and control_active_mono is None:
                 control_active_mono = now
                 append_event(event_log, "FIRST_DDS_LOWCMD", start_mono, sim_time=float(data.time), support=support_active)
@@ -473,7 +630,11 @@ def main() -> int:
                 append_event(event_log, "SUPPORT_RELEASE_CONFIRMED", start_mono, sim_time=float(data.time), support=False)
                 append_event(event_log, "BALANCE_WINDOW_START", start_mono, sim_time=float(data.time), support=False)
 
-            _, raw_torques = apply_command(data, command.msg if cmd_active else None, qpos_addr, qvel_addr, actuator_ids, motor_strength)
+            if command.count > last_buffered_command_count and command.packet is not None:
+                lag_queue.append(command.packet)
+                last_buffered_command_count = command.count
+            effective_command = lag_queue[0] if cmd_active else None
+            _, raw_torques = apply_command(data, effective_command, qpos_addr, qvel_addr, actuator_ids, motor_strength)
             data.xfrc_applied[:] = 0.0
             if ball_drag != 0.0 and ball_body >= 0 and ball_qvel >= 0:
                 ball_lin_vel = np.asarray(data.qvel[ball_qvel : ball_qvel + 3], dtype=float)
@@ -499,12 +660,12 @@ def main() -> int:
                 append_event(event_log, "FIRST_DDS_LOWSTATE", start_mono, sim_time=float(data.time), support=support_active)
                 first_lowstate_logged = True
 
-            if command.count > last_logged_command_count and command.msg is not None:
+            if command.count > last_logged_command_count and command.packet is not None:
                 row = {"count": command.count, "monotonic_s": f"{time.monotonic() - start_mono:.6f}", "wall_time_s": f"{time.time():.6f}"}
                 for i in range(12):
-                    row[f"q_des_{i}"] = f"{float(command.msg.motor_cmd[i].q):.9f}"
-                    row[f"kp_{i}"] = f"{float(command.msg.motor_cmd[i].kp):.9f}"
-                    row[f"kd_{i}"] = f"{float(command.msg.motor_cmd[i].kd):.9f}"
+                    row[f"q_des_{i}"] = f"{command.packet.q_des[i]:.9f}"
+                    row[f"kp_{i}"] = f"{command.packet.kp[i]:.9f}"
+                    row[f"kd_{i}"] = f"{command.packet.kd[i]:.9f}"
                 command_writer.writerow(row)
                 commands_f.flush()
                 last_logged_command_count = command.count
@@ -600,12 +761,23 @@ def main() -> int:
         "zero_passive_joint_forces": args.zero_passive_joint_forces,
         "seed_state": args.seed_state,
         "scene_overrides": {
+            "ground_mode": ground["mode"],
+            "ground_seed": ground["seed"],
+            "rough_ground_image": ground.get("image"),
+            "rough_ground_extent": ground.get("extent"),
+            "rough_ground_height_scale": ground.get("height_scale"),
+            "rough_ground_image_size": ground.get("image_size"),
+            "rough_ground_control_points": ground.get("control_points"),
+            "rough_ground_relief_fraction": ground.get("relief_fraction"),
+            "rough_ground_geom_z_offset": ground.get("geom_z_offset"),
             "ball_radius": ball_radius,
             "ball_mass": ball_mass,
-                "ball_inertia": ball_inertia,
-                "ball_drag": ball_drag,
-                "ball_friction": ball_friction[0],
+            "ball_inertia": ball_inertia,
+            "ball_drag": ball_drag,
+            "ball_friction": ball_friction[0],
             "floor_z": floor_z,
+            "ground_friction": ground_friction,
+            "action_lag_steps": action_lag_steps,
             "robot_friction": seed_state.get("robot_friction", args.robot_friction),
             "robot_base_mass": seed_state.get("robot_base_mass", args.robot_base_mass),
             "robot_base_ipos": robot_base_ipos,

@@ -49,10 +49,10 @@ case "$cmd" in
     "$PYTHON_BIN" "$ROOT_DIR/scripts/go2_yoga_ball/runner.py" runs-before-smoke
     iterations="${ITERATIONS:-5}"
     num_envs="${TRAIN_NUM_ENVS:-64}"
-    domain_rand_profile="${TRAIN_DOMAIN_RAND_PROFILE:-repo}"
+    domain_rand_profile="${TRAIN_DOMAIN_RAND_PROFILE:-pretrained}"
     physx_profile="${TRAIN_PHYSX_PROFILE:-full}"
     docker run --rm --gpus all "${isaacgym_env[@]}" eureka-isaacgym \
-      bash -lc "set -o pipefail; git config --global --add safe.directory /workspace/eureka-workspace/thirdparties/DrEureka || true; python globe_walking/scripts/train.py --robot go2 --dr-config off --reward-config eureka --iterations '$iterations' --num-envs '$num_envs' --no-video --no-wandb --domain-rand-profile '$domain_rand_profile' --physx-profile '$physx_profile' --save-interval '${TRAIN_SAVE_INTERVAL:-1}' 2>&1 | tee /workspace/eureka-workspace/logs/go2_yoga_ball/train_smoke/train.log"
+      bash -lc "set -o pipefail; git config --global --add safe.directory /workspace/eureka-workspace/thirdparties/DrEureka || true; python globe_walking/scripts/train.py --robot go2 --dr-config eureka --reward-config eureka --iterations '$iterations' --num-envs '$num_envs' --no-video --no-wandb --domain-rand-profile '$domain_rand_profile' --physx-profile '$physx_profile' --save-interval '${TRAIN_SAVE_INTERVAL:-1}' 2>&1 | tee /workspace/eureka-workspace/logs/go2_yoga_ball/train_smoke/train.log"
     "$PYTHON_BIN" "$ROOT_DIR/scripts/go2_yoga_ball/runner.py" runs-after-smoke
     "$PYTHON_BIN" "$ROOT_DIR/scripts/go2_yoga_ball/runner.py" record-train-smoke-run
     "$PYTHON_BIN" "$ROOT_DIR/scripts/go2_yoga_ball/runner.py" phase-go2-train-report
@@ -75,7 +75,7 @@ case "$cmd" in
     container_name="eureka-go2-train-1-8-$(date +%Y%m%d-%H%M%S)"
     container_id="$(
       docker run -d --gpus all --name "$container_name" "${isaacgym_env[@]}" eureka-isaacgym \
-        bash -lc "set -o pipefail; git config --global --add safe.directory /workspace/eureka-workspace/thirdparties/DrEureka || true; python globe_walking/scripts/train.py --robot go2 --dr-config off --reward-config eureka --iterations '$iterations' --num-envs '$num_envs' --no-video --no-wandb --domain-rand-profile '$domain_rand_profile' --physx-profile '$physx_profile' --save-interval '$save_interval' 2>&1 | tee /workspace/eureka-workspace/logs/go2_yoga_ball/train_1_8_budget/train.log"
+        bash -lc "set -o pipefail; git config --global --add safe.directory /workspace/eureka-workspace/thirdparties/DrEureka || true; python globe_walking/scripts/train.py --robot go2 --dr-config eureka --reward-config eureka --iterations '$iterations' --num-envs '$num_envs' --no-video --no-wandb --domain-rand-profile '$domain_rand_profile' --physx-profile '$physx_profile' --save-interval '$save_interval' 2>&1 | tee /workspace/eureka-workspace/logs/go2_yoga_ball/train_1_8_budget/train.log"
     )"
     "$PYTHON_BIN" "$ROOT_DIR/scripts/go2_yoga_ball/runner.py" record-train-1-8-launch \
       --container-id "$container_id" \

@@ -76,6 +76,8 @@ Do not invent a custom LCM URL for normal Go2 Sim2Sim runs. The DrEureka deploym
 Useful wrapper overrides:
 
 - `BASE_Z=1.0` sets the robot release height through `go2_mujoco_dds_endpoint.py --base-z`.
+- `GROUND_MODE=rough` switches the MuJoCo ground from the default plane to a smooth, deterministic rough heightfield for Sim2Sim runs.
+- `GROUND_SEED=17` changes the deterministic rough-ground seed when `GROUND_MODE=rough`.
 - `ROBOT_FRICTION=0.7` sets whole-robot MuJoCo geom primary friction through `--robot-friction`.
 - `BALL_MASS`, `BALL_FRICTION`, `BALL_INERTIA`, and `BALL_DRAG` pass through to the endpoint when explicitly set.
 - `BALL_DRAG=3.0` applies the same horizontal quadratic ball-drag force used by DrEureka training (`-drag * v_xy^2 * sign(v_xy)`), which is the closest Sim2Sim analogue to “larger ball damping”.

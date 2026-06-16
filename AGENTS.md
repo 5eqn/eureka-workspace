@@ -41,20 +41,6 @@ When your changes create orphans:
 
 The test: Every changed line should trace directly to the user's request.
 
-## Repository Inventory
-
-Before doing repository work, read the root-level `CURRENT_INVENTORY.md` first. It is the concise map of the main-stream project state and the files that still matter.
-
-Keep `CURRENT_INVENTORY.md` and `OUTDATED_INVENTORY.md` synchronized with workspace contents whenever files are added, removed, renamed, moved, or repurposed. `CURRENT_INVENTORY.md` should contain only files directly related to the main stream of this work, with an outline that excludes failed attempts. Move failed attempts, wrong-model artifacts, abandoned goals, superseded reports, and unrelated historical logs under `outdated/`, and record them in `OUTDATED_INVENTORY.md`.
-
-Inventory maintenance must optimize for a reader who hates cognitive load. Treat every entry in `CURRENT_INVENTORY.md` as a cost paid by a future human: keep the visible file structure minimal, keep only mainstream project files in current inventory, and explain each remaining item clearly enough that the reader does not need to reverse-engineer why it exists. Ignored `artifacts/` and `logs/` files still belong in `CURRENT_INVENTORY.md` when they are mainstream evidence; ignoring them in Git is not a reason to hide them from the inventory.
-
-Inventory reasons must be specific to the file or collapsed folder. Generic filler such as "repository governance file", "active workflow source", or "retained for provenance/debugging" is banned because it does not explain why that exact item exists.
-
-## Runnable Scripts and Scenes
-
-`scripts/` and any still-current `docker/` entries must contain self-contained runnable workflows. Put scene files, caller-project files, and script-owned runtime inputs inside the relevant `scripts/...` workflow directory when they are required to run that workflow. Do not put new scenes or runnable inputs under `artifacts/`; `artifacts/` is for outputs and evidence. Some older work violates this rule, but new work must not.
-
 ## 4. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
@@ -121,3 +107,31 @@ Important: If a thirdparty dependency can be installed with conda (for example w
 When asked to maintain environment with FRESH, override previous instructions to use Docker, and use the FRESH way instead.
 
 When downloading packages, models, repositories, datasets, or installer payloads, use reachable China mirrors whenever possible for better speed. Test mirror availability before making it the default, especially for CUDA/NVIDIA-related channels.
+
+## Lessons Learned
+
+> How to use this section: if you made some mistakes in your workflow, and you want the future "you" to remember, keep general lessons learned here.
+
+- `scripts/` and any still-current `docker/` entries must contain self-contained runnable workflows. Put scene files, caller-project files, and script-owned runtime inputs inside the relevant `scripts/...` workflow directory when they are required to run that workflow. Do not put new scenes or runnable inputs under `artifacts/`; `artifacts/` is for outputs and evidence. Some older work violates this rule, but new work must not.
+- Always do the least surprise way. If you can download environment with official path, use the official path. The more you do, the more likely you trap yourself.
+- When something requires long wait, instead of constant polling and wasting token, wait for 5 minutes until it finishes.
+
+## State Tracking
+
+Use a STATE.md to track state.
+
+- A timeline, each element consists of datetime, codename and description. If no timeline exists yet, count all current work as "INIT" stage.
+- All files that you've added to this repo, each element consists of file path, timeline entry (codename) that this file is first created / updated for, and a short but unique description. Wildcard is allowed for file path, but it should cover all files directly written by you, all key markdown artifacts that you've generated, and all thirdparty files that you've directly changed. If there are no files, add all files that should be tracked and assign it to "INIT" stage. If you're not sure what a file is for, you should ask the user for background info.
+- All workflows that you're asked to do. IMPORTANT: For everything that the user asks you to do, you must imagine if another human engineer is also asked to do this, and you need to leave a comprehensive + reproducible workflow guide containing: initial environment and project state, concrete guideline steps, output and results, success criterion. Prefer encapsulating such workflow to convenient one-off scripts unless not feasible (for example tasks that requires human intervention in the middle). If no workflow exists yet, try to reverse engineer some workflow "drafts" from current file and scripts.
+
+You should read STATE.md at the start of each conversation, and utilize the information in these ways:
+
+- For user request, identify in timeline the latest "era" that is likely related
+- Identify existing files and workflows that can be used for this request
+
+STATE.md has to be updated every time you end your work with the following workflow:
+
+- Add timeline entry if needed
+- Add files if needed
+- Add workflows if needed
+- If you find any pre-existing timeline/file/workflow misleading, for example a workflow that does not run one-off but require later intervention, update it
