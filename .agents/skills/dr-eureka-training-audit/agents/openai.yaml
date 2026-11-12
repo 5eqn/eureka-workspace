@@ -1,0 +1,4 @@
+interface:
+  display_name: "DrEureka Training Audit"
+  short_description: "Audit DrEureka train parity"
+  default_prompt: "Audit a DrEureka globe_walking training run against the built-in pretrained contract using saved run artifacts first, allowed difference rules, and launch/runtime checks when needed."

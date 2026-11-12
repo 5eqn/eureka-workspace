@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import math
 from pathlib import Path
 import select
@@ -50,11 +51,42 @@ UNITREE_MOTOR_ORDER = [
 EVENT_FIELDS = ["event", "monotonic_s", "wall_time_s", "detail"]
 
 
+def percentile(values: list[float], p: float) -> float | None:
+    if not values:
+        return None
+    ordered = sorted(values)
+    if p <= 0:
+        return ordered[0]
+    if p >= 100:
+        return ordered[-1]
+    idx = (len(ordered) - 1) * (p / 100.0)
+    lo = math.floor(idx)
+    hi = math.ceil(idx)
+    if lo == hi:
+        return ordered[lo]
+    weight = idx - lo
+    return ordered[lo] * (1.0 - weight) + ordered[hi] * weight
+
+
+def summarize_series(values: list[float]) -> dict[str, float | int | None]:
+    if not values:
+        return {"count": 0, "avg": None, "min": None, "p50": None, "p95": None, "p99": None, "max": None}
+    return {
+        "count": len(values),
+        "avg": sum(values) / len(values),
+        "min": min(values),
+        "p50": percentile(values, 50.0),
+        "p95": percentile(values, 95.0),
+        "p99": percentile(values, 99.0),
+        "max": max(values),
+    }
+
+
 def append_event(path: Path | None, event: str, start_mono: float, detail: str = "") -> None:
     if path is None:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
-    write_header = not path.exists()
+    write_header = (not path.exists()) or path.stat().st_size == 0
     with path.open("a", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=EVENT_FIELDS)
         if write_header:
@@ -92,22 +124,60 @@ class Go2LcmDdsBridge:
         self.out_dir = out_dir
         self.command_count = 0
         self.lowstate_count = 0
+        self.command_intervals: list[float] = []
+        self.command_callback_durations: list[float] = []
+        self.lowcmd_write_durations: list[float] = []
+        self.lowstate_intervals: list[float] = []
+        self.lowstate_callback_durations: list[float] = []
+        self.publish_lcm_state_durations: list[float] = []
+        self.leg_publish_durations: list[float] = []
+        self.state_publish_durations: list[float] = []
+        self.rc_publish_durations: list[float] = []
         self.command_writer = None
         self.command_file = None
         self.lowstate_writer = None
         self.lowstate_file = None
+        self.summary_path = None if out_dir is None else out_dir / "bridge_diagnostics.json"
         if out_dir is not None:
             out_dir.mkdir(parents=True, exist_ok=True)
             self.command_file = (out_dir / "bridge_commands.csv").open("w", newline="", encoding="utf-8")
             self.command_writer = csv.DictWriter(
                 self.command_file,
-                fieldnames=["count", "monotonic_s", "wall_time_s", "q0", "kp0", "kd0", "tau0"],
+                fieldnames=[
+                    "count",
+                    "monotonic_s",
+                    "wall_time_s",
+                    "interval_s",
+                    "callback_s",
+                    "dds_write_s",
+                    "q0",
+                    "kp0",
+                    "kd0",
+                    "tau0",
+                ],
             )
             self.command_writer.writeheader()
             self.lowstate_file = (out_dir / "bridge_lowstate.csv").open("w", newline="", encoding="utf-8")
             self.lowstate_writer = csv.DictWriter(
                 self.lowstate_file,
-                fieldnames=["count", "monotonic_s", "wall_time_s", "q0", "dq0", "tau0", "quat_w", "quat_x", "quat_y", "quat_z"],
+                fieldnames=[
+                    "count",
+                    "monotonic_s",
+                    "wall_time_s",
+                    "interval_s",
+                    "callback_s",
+                    "publish_lcm_state_s",
+                    "leg_publish_s",
+                    "state_publish_s",
+                    "rc_publish_s",
+                    "q0",
+                    "dq0",
+                    "tau0",
+                    "quat_w",
+                    "quat_x",
+                    "quat_y",
+                    "quat_z",
+                ],
             )
             self.lowstate_writer.writeheader()
         append_event(self.event_log, "BRIDGE_START", self.start_mono, f"dds_domain={dds_domain},interface={network_interface},lcm_url={lcm_url}")
@@ -141,6 +211,8 @@ class Go2LcmDdsBridge:
 
     def on_lcm_command(self, channel: str, data: bytes) -> None:
         del channel
+        callback_start = time.monotonic()
+        interval_s = None if self.last_cmd_monotonic is None else callback_start - self.last_cmd_monotonic
         msg = pd_tau_targets_lcmt.decode(data)
         for i in range(12):
             motor = self.low_cmd.motor_cmd[i]
@@ -151,9 +223,16 @@ class Go2LcmDdsBridge:
             motor.kp = float(msg.kp[i])
             motor.kd = float(msg.kd[i])
         self.low_cmd.crc = self.crc.Crc(self.low_cmd)
+        write_start = time.monotonic()
         self.lowcmd_pub.Write(self.low_cmd)
-        self.last_cmd_monotonic = time.monotonic()
+        dds_write_s = time.monotonic() - write_start
+        callback_s = time.monotonic() - callback_start
+        self.last_cmd_monotonic = callback_start
         self.command_count += 1
+        if interval_s is not None:
+            self.command_intervals.append(interval_s)
+        self.command_callback_durations.append(callback_s)
+        self.lowcmd_write_durations.append(dds_write_s)
         if self.command_count == 1:
             append_event(self.event_log, "BRIDGE_FIRST_LCM_COMMAND", self.start_mono)
             append_event(self.event_log, "BRIDGE_FIRST_DDS_LOWCMD", self.start_mono)
@@ -163,6 +242,9 @@ class Go2LcmDdsBridge:
                     "count": self.command_count,
                     "monotonic_s": f"{time.monotonic() - self.start_mono:.6f}",
                     "wall_time_s": f"{time.time():.6f}",
+                    "interval_s": "" if interval_s is None else f"{interval_s:.9f}",
+                    "callback_s": f"{callback_s:.9f}",
+                    "dds_write_s": f"{dds_write_s:.9f}",
                     "q0": f"{float(msg.q_des[0]):.9f}",
                     "kp0": f"{float(msg.kp[0]):.9f}",
                     "kd0": f"{float(msg.kd[0]):.9f}",
@@ -172,18 +254,35 @@ class Go2LcmDdsBridge:
             self.command_file.flush()
 
     def on_lowstate(self, msg: LowState_) -> None:
+        callback_start = time.monotonic()
+        interval_s = None if self.last_lowstate_monotonic is None else callback_start - self.last_lowstate_monotonic
         self.last_lowstate = msg
-        self.last_lowstate_monotonic = time.monotonic()
+        self.last_lowstate_monotonic = callback_start
         self.lowstate_count += 1
         if self.lowstate_count == 1:
             append_event(self.event_log, "BRIDGE_FIRST_DDS_LOWSTATE", self.start_mono)
             append_event(self.event_log, "BRIDGE_FIRST_LCM_STATE", self.start_mono)
+        publish_stats = self.publish_lcm_state(msg)
+        callback_s = time.monotonic() - callback_start
+        if interval_s is not None:
+            self.lowstate_intervals.append(interval_s)
+        self.lowstate_callback_durations.append(callback_s)
+        self.publish_lcm_state_durations.append(publish_stats["publish_lcm_state_s"])
+        self.leg_publish_durations.append(publish_stats["leg_publish_s"])
+        self.state_publish_durations.append(publish_stats["state_publish_s"])
+        self.rc_publish_durations.append(publish_stats["rc_publish_s"])
         if self.lowstate_writer is not None:
             self.lowstate_writer.writerow(
                 {
                     "count": self.lowstate_count,
                     "monotonic_s": f"{time.monotonic() - self.start_mono:.6f}",
                     "wall_time_s": f"{time.time():.6f}",
+                    "interval_s": "" if interval_s is None else f"{interval_s:.9f}",
+                    "callback_s": f"{callback_s:.9f}",
+                    "publish_lcm_state_s": f"{publish_stats['publish_lcm_state_s']:.9f}",
+                    "leg_publish_s": f"{publish_stats['leg_publish_s']:.9f}",
+                    "state_publish_s": f"{publish_stats['state_publish_s']:.9f}",
+                    "rc_publish_s": f"{publish_stats['rc_publish_s']:.9f}",
                     "q0": f"{float(msg.motor_state[0].q):.9f}",
                     "dq0": f"{float(msg.motor_state[0].dq):.9f}",
                     "tau0": f"{float(msg.motor_state[0].tau_est):.9f}",
@@ -194,9 +293,9 @@ class Go2LcmDdsBridge:
                 }
             )
             self.lowstate_file.flush()
-        self.publish_lcm_state(msg)
 
-    def publish_lcm_state(self, msg: LowState_) -> None:
+    def publish_lcm_state(self, msg: LowState_) -> dict[str, float]:
+        total_start = time.monotonic()
         now_us = int(time.time() * 1e6)
         leg = leg_control_data_lcmt()
         leg.q = [float(msg.motor_state[i].q) for i in range(12)]
@@ -207,7 +306,9 @@ class Go2LcmDdsBridge:
         leg.timestamp_us = now_us
         leg.id = 0
         leg.robot_id = 1
+        leg_start = time.monotonic()
         self.lc.publish("leg_control_data", leg.encode())
+        leg_publish_s = time.monotonic() - leg_start
 
         state = state_estimator_lcmt()
         state.p = [0.0, 0.0, 0.0]
@@ -227,7 +328,9 @@ class Go2LcmDdsBridge:
         state.timestamp_us = now_us
         state.id = 0
         state.robot_id = 1
+        state_start = time.monotonic()
         self.lc.publish("state_estimator_data", state.encode())
+        state_publish_s = time.monotonic() - state_start
 
         rc = rc_command_lcmt()
         rc.mode = 0
@@ -240,7 +343,15 @@ class Go2LcmDdsBridge:
         rc.right_upper_switch = 0
         rc.right_lower_left_switch = 0
         rc.right_lower_right_switch = 0
+        rc_start = time.monotonic()
         self.lc.publish("rc_command", rc.encode())
+        rc_publish_s = time.monotonic() - rc_start
+        return {
+            "publish_lcm_state_s": time.monotonic() - total_start,
+            "leg_publish_s": leg_publish_s,
+            "state_publish_s": state_publish_s,
+            "rc_publish_s": rc_publish_s,
+        }
 
     def spin(self, duration_s: float | None) -> int:
         start = time.monotonic()
@@ -250,6 +361,28 @@ class Go2LcmDdsBridge:
                 self.lc.handle()
             time.sleep(0.001)
         append_event(self.event_log, "BRIDGE_STOP", self.start_mono, f"commands={self.command_count},lowstates={self.lowstate_count}")
+        if self.summary_path is not None:
+            self.summary_path.write_text(
+                json.dumps(
+                    {
+                        "command_count": self.command_count,
+                        "lowstate_count": self.lowstate_count,
+                        "command_interval_s": summarize_series(self.command_intervals),
+                        "command_callback_s": summarize_series(self.command_callback_durations),
+                        "lowcmd_write_s": summarize_series(self.lowcmd_write_durations),
+                        "lowstate_interval_s": summarize_series(self.lowstate_intervals),
+                        "lowstate_callback_s": summarize_series(self.lowstate_callback_durations),
+                        "publish_lcm_state_s": summarize_series(self.publish_lcm_state_durations),
+                        "leg_publish_s": summarize_series(self.leg_publish_durations),
+                        "state_publish_s": summarize_series(self.state_publish_durations),
+                        "rc_publish_s": summarize_series(self.rc_publish_durations),
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
         if self.command_file is not None:
             self.command_file.close()
         if self.lowstate_file is not None:

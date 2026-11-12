@@ -22,6 +22,7 @@ DURATION=12 \
 ```
 
 The wrapper runs Docker with `-v /home/seqn/eureka-workspace:/workspace`, `--network host`, `eureka-isaacgym`, `--use-saved-contract`, and `--preserve-domain-rand`.
+It first writes a deterministic no-video probe under `OUT/probe`, then records the lowest surviving env to `OUT/isaacgym_playback.mp4` when any env survives, and also exports up to three failed-env videos under `OUT/failed_env*_video/` with `OUT/auto_export_manifest.json` describing the selection.
 
 Do not use `globe_walking/scripts/play.py` for these Go2 PD checkpoints. The generic play script forces the wrong actuator-net control path.
 
@@ -73,11 +74,13 @@ udpm://239.255.76.67:7667?ttl=255
 
 Do not invent a custom LCM URL for normal Go2 Sim2Sim runs. The DrEureka deployment stack includes a module-level LCM handle using the default URL, so changing only part of the command path can result in zero or stale commands.
 
+The current wrapper default uses the deterministic rough-ground scene (`GROUND_MODE=rough`) with seed `17`, the historical `12m` extent, `0.06` height scale, and `0.38` relief fraction.
+
 Useful wrapper overrides:
 
 - `BASE_Z=1.0` sets the robot release height through `go2_mujoco_dds_endpoint.py --base-z`.
-- `GROUND_MODE=rough` switches the MuJoCo ground from the default plane to a smooth, deterministic rough heightfield for Sim2Sim runs.
-- `GROUND_SEED=17` changes the deterministic rough-ground seed when `GROUND_MODE=rough`.
+- `GROUND_MODE=plane` switches the MuJoCo ground back to the flat plane used by older historical reruns.
+- `GROUND_SEED=17` changes the deterministic rough-ground seed used by the default rough scene.
 - `ROBOT_FRICTION=0.7` sets whole-robot MuJoCo geom primary friction through `--robot-friction`.
 - `BALL_MASS`, `BALL_FRICTION`, `BALL_INERTIA`, and `BALL_DRAG` pass through to the endpoint when explicitly set.
 - `BALL_DRAG=3.0` applies the same horizontal quadratic ball-drag force used by DrEureka training (`-drag * v_xy^2 * sign(v_xy)`), which is the closest Sim2Sim analogue to “larger ball damping”.

@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 #
 # Run the DrEureka globe_walking Go2 faithful training with our designed reward
-# inlined on top of the original four-term Eureka reward:
-#   1. steep joint-limit proximity penalty
-#   2. joint-limit violation indicator penalty
-#   3. low ball-speed reward below 0.4 m/s
-#   4. stronger jerk penalty
+# inlined as the first four terms plus only these extra terms:
+#   1. low ball-speed reward below 0.4 m/s
+#   2. low ball angular-velocity reward below 1 rad/s
+#   3. stronger jerk penalty
 
 set -euo pipefail
 
@@ -93,26 +92,6 @@ class EurekaReward():
         large_action_penalty = -torch.mean(torch.abs(env.actions), dim=-1)
         return 0.3 * large_action_penalty
 
-    def _reward_joint_limit_proximity(self):
-        env = self.env
-        lower = env.dof_pos_limits[:, 0].unsqueeze(0)
-        upper = env.dof_pos_limits[:, 1].unsqueeze(0)
-        span = torch.clamp(upper - lower, min=1e-3)
-        clearance = torch.minimum(env.dof_pos - lower, upper - env.dof_pos) / span
-
-        margin = 0.15
-        d = torch.clamp(clearance, max=margin)
-        proximity_penalty = -4.0 * torch.square((margin - d) / margin)
-        proximity_penalty = torch.where(d < margin, proximity_penalty, torch.zeros_like(proximity_penalty))
-        return torch.mean(proximity_penalty, dim=-1)
-
-    def _reward_joint_limit_violate(self):
-        env = self.env
-        lower = env.dof_pos_limits[:, 0].unsqueeze(0)
-        upper = env.dof_pos_limits[:, 1].unsqueeze(0)
-        violated = torch.logical_or(env.dof_pos < lower, env.dof_pos > upper)
-        return -violated.any(dim=-1).float()
-
     def _reward_low_ball_speed(self):
         env = self.env
         threshold = 0.4
@@ -120,10 +99,21 @@ class EurekaReward():
         low_speed_reward = torch.square((threshold - ball_speed) / threshold)
         return torch.where(ball_speed < threshold, low_speed_reward, torch.zeros_like(ball_speed))
 
+    def _reward_low_ball_angular_velocity(self):
+        env = self.env
+        threshold = 1.0
+        ball_angular_speed = torch.norm(env.object_ang_vel, dim=-1)
+        low_angular_speed_reward = torch.square((threshold - ball_angular_speed) / threshold)
+        return torch.where(
+            ball_angular_speed < threshold,
+            low_angular_speed_reward,
+            torch.zeros_like(ball_angular_speed),
+        )
+
     def _reward_penalize_action_jerk(self):
         env = self.env
         jerk = env.actions - 2.0 * env.last_actions + env.last_last_actions
-        return -0.3 * torch.mean(torch.abs(jerk), dim=-1)
+        return -1.0 * torch.mean(torch.abs(jerk), dim=-1)
 
     def compute_success(self):
         return torch.ones_like(self.env.base_pos[:, 2])

@@ -42,7 +42,7 @@ def main() -> int:
     parser.add_argument("--run", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--artifact", required=True)
-    parser.add_argument("--ground-mode", choices=["plane", "rough"], default="plane")
+    parser.add_argument("--ground-mode", choices=["plane", "rough"], default=endpoint.DEFAULT_GROUND_MODE)
     parser.add_argument("--ground-seed", type=int, default=endpoint.ROUGH_GROUND_SEED)
     parser.add_argument("--ball-radius", type=float, default=0.45)
     parser.add_argument("--base-z", type=float, default=1.2)

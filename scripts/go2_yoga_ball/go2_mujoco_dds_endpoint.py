@@ -36,7 +36,8 @@ ROUGH_GROUND_SEED = 17
 DEFAULT_GROUND_FRICTION = 0.5
 DEFAULT_BALL_DRAG = 0.3
 DEFAULT_BASE_Z = 1.2
-DEFAULT_ACTION_LAG_STEPS = 6
+DEFAULT_GROUND_MODE = "rough"
+DEFAULT_ACTION_LAG_STEPS = 0
 
 UNITREE_MOTOR_ORDER = [
     "FR_hip_joint",
@@ -95,7 +96,7 @@ class Command:
 
 def append_event(path: Path, event: str, start_mono: float, *, sim_time: float, support: bool, detail: str = "") -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    write_header = not path.exists()
+    write_header = (not path.exists()) or path.stat().st_size == 0
     with path.open("a", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=EVENT_FIELDS)
         if write_header:
@@ -189,7 +190,7 @@ def write_scene(
     ball_friction: tuple[float, float, float] = (1.0, 0.02, 0.001),
     ground_friction: float = DEFAULT_GROUND_FRICTION,
     floor_z: float = 0.0,
-    ground_mode: str = "plane",
+    ground_mode: str = DEFAULT_GROUND_MODE,
     ground_seed: int = ROUGH_GROUND_SEED,
 ) -> tuple[Path, dict[str, Any]]:
     BUILD_ROOT.mkdir(parents=True, exist_ok=True)
@@ -425,7 +426,7 @@ def main() -> int:
     parser.add_argument("--ball-drag", type=float, default=DEFAULT_BALL_DRAG)
     parser.add_argument("--floor-z", type=float, default=0.0)
     parser.add_argument("--ground-friction", type=float, default=DEFAULT_GROUND_FRICTION)
-    parser.add_argument("--ground-mode", choices=["plane", "rough"], default="plane")
+    parser.add_argument("--ground-mode", choices=["plane", "rough"], default=DEFAULT_GROUND_MODE)
     parser.add_argument("--ground-seed", type=int, default=ROUGH_GROUND_SEED)
     parser.add_argument("--base-z", type=float, default=DEFAULT_BASE_Z)
     parser.add_argument("--action-lag-steps", type=int, default=DEFAULT_ACTION_LAG_STEPS)
